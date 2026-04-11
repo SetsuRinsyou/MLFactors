@@ -3,7 +3,7 @@
 data:
   cache_dir: "/home/setsu/workspace/MLFactors/cache"
   # 最多加载多少只股票（null = 不限制）
-  max_stocks: 50
+  max_stocks: 300
   # 列名映射（source_col -> schema_col），留空则使用默认名
   column_mapping: {}
 

@@ -31,20 +31,9 @@ def layered_backtest(
     returns_df: pd.DataFrame | pd.Series,
     n_groups: int = 5,
     annual_trading_days: int = 252,
+    period: int = 1,  # <==== 【新增参数】传入前向收益的周期天数
 ) -> LayeredResult:
-    """按因子值分 N 组，计算各组收益表现。
-
-    Parameters
-    ----------
-    factor_df : 因子值, MultiIndex(date, symbol)
-    returns_df : 前向收益, 相同索引
-    n_groups : 分组数
-    annual_trading_days : 年化换算天数
-
-    Returns
-    -------
-    LayeredResult
-    """
+    """按因子值分 N 组，计算各组收益表现。"""
     if isinstance(factor_df, pd.DataFrame):
         factor_df = factor_df.iloc[:, 0]
     if isinstance(returns_df, pd.DataFrame):
@@ -84,41 +73,46 @@ def layered_backtest(
         )
 
     ret_df = pd.DataFrame(group_ret_records)
-    group_returns = ret_df.pivot(index="date", columns="group", values="returns").sort_index()
+    raw_group_returns = ret_df.pivot(index="date", columns="group", values="returns").sort_index()
 
+    daily_group_returns = raw_group_returns / period
+    
     # 累计收益
-    cumulative = (1 + group_returns).cumprod() - 1
+    cumulative = (1 + daily_group_returns).cumprod() - 1
 
     # 年化收益
-    n_periods = len(group_returns)
-    total_ret = (1 + group_returns).prod()
+    n_periods = len(daily_group_returns)
+    total_ret = (1 + daily_group_returns).prod()
     annual_ret = total_ret ** (annual_trading_days / max(n_periods, 1)) - 1
     annual_ret.name = "annual_return"
 
     # 夏普比率
-    sharpe = (group_returns.mean() / group_returns.std()) * np.sqrt(annual_trading_days)
+    sharpe = (daily_group_returns.mean() / daily_group_returns.std()) * np.sqrt(annual_trading_days)
+    sharpe = sharpe / np.sqrt(period)  # 加入惩罚
     sharpe.name = "sharpe_ratio"
 
     # 多空对冲 (top - bottom)
     top_group = n_groups
     bottom_group = 1
-    ls_returns = group_returns[top_group] - group_returns[bottom_group]
+    ls_returns = daily_group_returns[top_group] - daily_group_returns[bottom_group]
     ls_returns.name = "long_short"
+    
     ls_cumulative = (1 + ls_returns).cumprod() - 1
     ls_total = (1 + ls_returns).prod()
     ls_annual = float(ls_total ** (annual_trading_days / max(n_periods, 1)) - 1)
     ls_std = ls_returns.std()
     ls_sharpe = float((ls_returns.mean() / ls_std) * np.sqrt(annual_trading_days)) if ls_std > 0 else 0.0
+    ls_sharpe = ls_sharpe / np.sqrt(period)  # 加入惩罚
     
     # 多空最大回撤 (Max Drawdown)
     ls_wealth = 1 + ls_cumulative
-    ls_peak = ls_wealth.cummax()  # 历史最高点序列
+    ls_peak = ls_wealth.cummax()  
     ls_drawdown = (ls_wealth - ls_peak) / ls_peak
     ls_max_drawdown = float(ls_drawdown.min()) if not ls_drawdown.empty else 0.0
 
     # 多头相对全市场的超额年化 (Top Group Excess Return)
-    benchmark_returns = group_returns.mean(axis=1)
-    top_excess_returns = group_returns[top_group] - benchmark_returns
+    benchmark_returns = daily_group_returns.mean(axis=1)
+    top_excess_returns = daily_group_returns[top_group] - benchmark_returns
     
     top_excess_total = (1 + top_excess_returns).prod()
     top_excess_annual = float(top_excess_total ** (annual_trading_days / max(n_periods, 1)) - 1)
@@ -128,13 +122,14 @@ def layered_backtest(
     top_excess_peak = top_excess_wealth.cummax()
     top_excess_drawdown = (top_excess_wealth - top_excess_peak) / top_excess_peak
     top_excess_max_drawdown = float(top_excess_drawdown.min()) if not top_excess_drawdown.empty else 0.0
+    
     if top_excess_max_drawdown < 0:
         top_excess_calmar = float(top_excess_annual / abs(top_excess_max_drawdown))
     else:
-        top_excess_calmar = 0.0  # 如果没有回撤（极少见），设为0或无穷大
+        top_excess_calmar = 0.0  
     
     return LayeredResult(
-        group_returns=group_returns,
+        group_returns=daily_group_returns,  # 返回平摊后的收益，画图才会正确
         cumulative_returns=cumulative,
         annual_returns=annual_ret,
         sharpe_ratios=sharpe,

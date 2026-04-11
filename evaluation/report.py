@@ -14,6 +14,8 @@ from evaluation.ic import (
     calc_ic_decay,
 )
 from evaluation.layered import LayeredResult, layered_backtest
+import numpy as np
+from scipy import stats
 
 
 class FactorReport:
@@ -90,7 +92,7 @@ class FactorReport:
     def layered(self, period: int = 5) -> LayeredResult:
         if period not in self._layered:
             self._layered[period] = layered_backtest(
-                self.factor_values, self._fwd_returns[period], self.n_groups
+                self.factor_values, self._fwd_returns[period], self.n_groups, period=period
             )
         return self._layered[period]
 
@@ -110,8 +112,18 @@ class FactorReport:
             ic_s = self.ic_series(p)
             ic_mean = ic_s.mean()
             ic_std = ic_s.std()
-            icir = calc_icir(ic_s)
+
+            discount_factor = np.sqrt(p)
+            
+            # 使用折现惩罚修复 ICIR 和 t_stat 虚高
+            icir = calc_icir(ic_s) / discount_factor
             t, pval = calc_t_stat(ic_s)
+            t = t / discount_factor
+            df = len(ic_s.dropna()) - 1
+            if df > 0:
+                pval = stats.t.sf(np.abs(t), df) * 2
+            else:
+                pval = np.nan 
             ic_positive_ratio = (ic_s > 0).mean()
 
             lr = self.layered(p)
