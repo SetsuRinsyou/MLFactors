@@ -9,16 +9,16 @@ from loguru import logger
 
 from config import get_config
 from data.base import DataLoader
-from evaluation.ic import calc_forward_returns, calc_ic_series, calc_icir
-from evaluation.layered import layered_backtest, LayeredResult
-from evaluation.report import FactorReport
+from evaluation.selection.ic import calc_forward_returns, calc_ic_series, calc_icir
+from evaluation.selection.layered import layered_backtest, LayeredResult
+from evaluation.selection.report import FactorReport
 from evaluation.plot import plot_factor_report
 from factors.base import BaseFactor
 from factors.registry import FactorRegistry
 from models.base import BaseModel
 
 
-class FactorPipeline:
+class SelectionPipeline:
     """端到端因子挖掘流水线。
 
     支持两种模式:
@@ -54,14 +54,14 @@ class FactorPipeline:
     #  配置方法（链式调用）
     # ------------------------------------------------------------------ #
 
-    def set_data_loader(self, loader: DataLoader) -> FactorPipeline:
+    def set_data_loader(self, loader: DataLoader) -> SelectionPipeline:
         self._loader = loader
         return self
 
     def add_factors(
         self,
         factors: list[str | Type[BaseFactor] | BaseFactor],
-    ) -> FactorPipeline:
+    ) -> SelectionPipeline:
         """添加因子。
 
         Parameters
@@ -79,7 +79,7 @@ class FactorPipeline:
                 raise TypeError(f"不支持的因子类型: {type(f)}")
         return self
 
-    def set_model(self, model: BaseModel) -> FactorPipeline:
+    def set_model(self, model: BaseModel) -> SelectionPipeline:
         self._model = model
         return self
 
@@ -89,7 +89,7 @@ class FactorPipeline:
         start: str | None = None,
         end: str | None = None,
         load_fundamental: bool = False,
-    ) -> FactorPipeline:
+    ) -> SelectionPipeline:
         """手动加载数据（也可由 run() 自动调用）。"""
         if self._loader is None:
             raise RuntimeError("请先调用 set_data_loader()")

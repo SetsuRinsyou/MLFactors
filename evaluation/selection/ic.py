@@ -68,25 +68,36 @@ def calc_ic_series(
 
 def calc_icir(
     ic_series: pd.Series, 
-    annualize: bool = True, 
+    period: int = 1, 
+    annualize: bool = False, 
     periods_per_year: int = 252
 ) -> float:
-    """计算信息比率 ICIR。
+    """计算信息比率 ICIR，并自动处理多期重叠的统计惩罚。
     
     Parameters
     ----------
-    annualize : 是否年化（默认 True）
-    periods_per_year : 年化周期数（日频默认 252）
+    ic_series : pd.Series，IC 时间序列
+    period : int，前向收益的周期数（用于消除重叠自相关造成的虚高）
+    annualize : bool，是否年化（默认 True）
+    periods_per_year : int，一年包含的交易日数（日频默认 252）
     """
     ic_clean = ic_series.dropna()
-    if len(ic_clean) < 2:
+    if len(ic_clean) < 2 or ic_clean.std() == 0:
         return np.nan
         
-    icir = ic_clean.mean() / ic_clean.std()
+    # 1. 计算原始的、带有重叠虚高水分的基础 ICIR
+    base_icir = ic_clean.mean() / ic_clean.std()
     
+    # 2. 消除多期重叠导致的自相关虚高
+    adjusted_icir = base_icir / np.sqrt(period)
+    
+    # 3. 年化处理
     if annualize:
-        return icir * np.sqrt(periods_per_year)
-    return icir
+        # 乘以 sqrt(252) 完成年化。
+        # 最终数学等价于：base_icir * sqrt(252 / period)
+        return adjusted_icir * np.sqrt(periods_per_year)
+    else:
+        return adjusted_icir
 
 
 def calc_ic_decay(

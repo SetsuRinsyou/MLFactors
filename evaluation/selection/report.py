@@ -5,7 +5,7 @@ from __future__ import annotations
 import pandas as pd
 from loguru import logger
 
-from evaluation.ic import (
+from evaluation.selection.ic import (
     calc_forward_returns,
     calc_ic_series,
     calc_icir,
@@ -13,7 +13,7 @@ from evaluation.ic import (
     calc_turnover,
     calc_ic_decay,
 )
-from evaluation.layered import LayeredResult, layered_backtest
+from evaluation.selection.layered import LayeredResult, layered_backtest
 import numpy as np
 from scipy import stats
 
@@ -69,7 +69,11 @@ class FactorReport:
         return self._ic_series[period]
 
     def icir(self, period: int = 5) -> float:
-        return calc_icir(self.ic_series(period))
+        return calc_icir(
+            self.ic_series(period),
+            period=period,
+            annualize=True
+        )
 
     def t_stat(self, period: int = 5) -> tuple[float, float]:
         return calc_t_stat(self.ic_series(period))
@@ -112,11 +116,11 @@ class FactorReport:
             ic_s = self.ic_series(p)
             ic_mean = ic_s.mean()
             ic_std = ic_s.std()
-
-            discount_factor = np.sqrt(p)
             
             # 使用折现惩罚修复 ICIR 和 t_stat 虚高
-            icir = calc_icir(ic_s) / discount_factor
+            icir = calc_icir(ic_s, p, annualize=True)
+
+            discount_factor = np.sqrt(p)
             t, pval = calc_t_stat(ic_s)
             t = t / discount_factor
             df = len(ic_s.dropna()) - 1

@@ -57,12 +57,16 @@ class DataLoader(ABC):
 
     @staticmethod
     def _standardize(df: pd.DataFrame, column_mapping: dict[str, str] | None = None) -> pd.DataFrame:
-        """列名映射 + 日期解析。"""
+        """列名映射 + 日期解析 + 标准化 symbol 列为字符串。"""
         if column_mapping:
             df = df.rename(columns=column_mapping)
 
         if Col.DATE in df.columns:
             df[Col.DATE] = pd.to_datetime(df[Col.DATE])
+
+        # 确保 symbol 列始终为字符串类型（CSV 读取时数字代码会被解析为 int）
+        if Col.SYMBOL in df.columns:
+            df[Col.SYMBOL] = df[Col.SYMBOL].astype(str)
 
         return df
 

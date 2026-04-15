@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 if TYPE_CHECKING:
-    from evaluation.layered import LayeredResult
+    from evaluation.selection.layered import LayeredResult
 
 
 def plot_ic_series(

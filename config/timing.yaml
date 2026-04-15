@@ -1,4 +1,5 @@
-# MLFactors 默认配置
+# MLFactors — 择时类因子测试默认配置
+# 对应测试管线: pipeline.timing_runner.TimingPipeline
 
 data:
   cache_dir: "/home/setsu/workspace/MLFactors/cache"
@@ -12,21 +13,18 @@ factors:
   extra_paths: []
 
 evaluation:
-  # 前向收益计算周期（交易日）
-  forward_periods: [1, 5, 10, 20]
-  # IC 计算方法: rank (Spearman) 或 pearson
-  ic_method: "rank"
-  # 分层回测分组数
-  n_groups: 5
-  # IC 衰减最大滞后期
-  ic_decay_max_lag: 20
-  # 图表展示使用的前向预测周期（须在 forward_periods 中）
-  plot_period: 5
+  # 计算收益使用的价格列（close / open / adj_close）
+  timing_price_col: "close"
+  # 年化交易日数
+  timing_trading_days: 252
+  # 无风险利率（年化，用于夏普计算）
+  timing_risk_free: 0.0
 
 backtest:
   # 回测起止日期（留空则使用数据全量）
   start_date: "20240101"
   end_date: "20260101"
+  # 基准股票/指数代码（null = 无基准，超额指标以 0 为基准）
   benchmark: null
 
 output:
@@ -34,9 +32,3 @@ output:
   dir: "outputs"
   # 是否保存图表
   save_plots: true
-
-model:
-  # 交叉验证折数
-  cv_splits: 5
-  # 随机种子
-  seed: 42

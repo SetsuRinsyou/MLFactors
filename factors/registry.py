@@ -10,7 +10,7 @@ from typing import Type
 import pandas as pd
 from loguru import logger
 
-from factors.base import BaseFactor
+from factors.base import BaseFactor, BaseTimingFactor
 
 
 class FactorRegistry:
@@ -38,15 +38,30 @@ class FactorRegistry:
 
     @classmethod
     def list(cls) -> list[str]:
+        """列出所有已注册的选股类因子名称（不含择时因子）。"""
         cls._ensure_loaded()
-        return sorted(cls._registry.keys())
+        return sorted(
+            name for name, fcls in cls._registry.items()
+            if not issubclass(fcls, BaseTimingFactor)
+        )
+
+    @classmethod
+    def list_timing(cls) -> list[str]:
+        """列出所有已注册的择时类因子名称。"""
+        cls._ensure_loaded()
+        return sorted(
+            name for name, fcls in cls._registry.items()
+            if issubclass(fcls, BaseTimingFactor)
+        )
 
     @classmethod
     def list_detail(cls) -> list[dict]:
+        """返回所有选股类因子的详细信息列表（不含择时因子）。"""
         cls._ensure_loaded()
         return [
             {"name": n, "category": c.category, "description": c.description}
             for n, c in sorted(cls._registry.items())
+            if not issubclass(c, BaseTimingFactor)
         ]
 
     @classmethod
@@ -90,8 +105,9 @@ class FactorRegistry:
         import sys
         import factors.library as lib_pkg
 
-        for importer, modname, ispkg in pkgutil.iter_modules(lib_pkg.__path__):
-            full_name = f"factors.library.{modname}"
+        for importer, full_name, ispkg in pkgutil.walk_packages(
+            lib_pkg.__path__, prefix="factors.library."
+        ):
             try:
                 if full_name in sys.modules:
                     importlib.reload(sys.modules[full_name])

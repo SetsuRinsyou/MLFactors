@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 from data.schema import Col
-from evaluation.ic import (
+from evaluation.selection.ic import (
     calc_ic,
     calc_ic_series,
     calc_icir,
@@ -16,7 +16,7 @@ from evaluation.ic import (
     calc_t_stat,
     calc_forward_returns,
 )
-from evaluation.layered import layered_backtest
+from evaluation.selection.layered import layered_backtest
 
 
 # ── 辅助函数 ──────────────────────────────────────────────────────────────────
@@ -254,7 +254,7 @@ class TestCalcForwardReturns:
 class TestLayeredBacktest:
     def test_returns_layered_result(self):
         factor, returns = make_panel(n_dates=40, n_symbols=30)
-        from evaluation.layered import LayeredResult
+        from evaluation.selection.layered import LayeredResult
         result = layered_backtest(factor, returns, n_groups=5)
         assert isinstance(result, LayeredResult)
 
@@ -305,7 +305,7 @@ class TestLayeredBacktest:
 
 class TestFactorReport:
     def test_summary_returns_dataframe(self):
-        from evaluation.report import FactorReport
+        from evaluation.selection.report import FactorReport
         from factors.registry import FactorRegistry
         FactorRegistry.reset()
 
@@ -326,7 +326,7 @@ class TestFactorReport:
         assert "ICIR" in summary.columns
 
     def test_to_dict(self):
-        from evaluation.report import FactorReport
+        from evaluation.selection.report import FactorReport
         from factors.registry import FactorRegistry
         FactorRegistry.reset()
 

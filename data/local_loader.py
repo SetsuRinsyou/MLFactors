@@ -47,7 +47,13 @@ class LocalLoader(DataLoader):
         suffix = path.suffix.lower()
         if suffix == ".csv":
             logger.info("读取 CSV: {}", path)
-            df = pd.read_csv(path)
+            # 强制将 symbol 列（及 column_mapping 中对应的源列）读为字符串，
+            # 防止 A 股代码（如 000001）的前导零在 CSV 解析时丢失
+            sym_col = Col.SYMBOL
+            if self.column_mapping:
+                rev = {v: k for k, v in self.column_mapping.items()}
+                sym_col = rev.get(Col.SYMBOL, Col.SYMBOL)
+            df = pd.read_csv(path, dtype={sym_col: str})
         elif suffix in (".parquet", ".pq"):
             logger.info("读取 Parquet: {}", path)
             df = pd.read_parquet(path)

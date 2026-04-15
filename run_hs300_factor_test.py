@@ -34,7 +34,7 @@ from loguru import logger
 from config import get_config
 from data.akshare_loader import AKShareLoader
 from evaluation.plot import plot_factor_report
-from pipeline.runner import FactorPipeline
+from pipeline.selection_runner import SelectionPipeline
 
 # 从配置文件读取运行参数
 _cfg        = get_config()
@@ -75,7 +75,7 @@ def main():
 
     # 构建流水线：AKShareLoader 负责下载 + 缓存，FactorPipeline 负责评估
     pipeline = (
-        FactorPipeline()
+        SelectionPipeline()
         .set_data_loader(AKShareLoader())
         .add_factors(factors)
     )
