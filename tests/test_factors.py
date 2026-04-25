@@ -41,7 +41,7 @@ class TestBaseFactor:
         with pytest.raises(TypeError):
             BaseFactor()
 
-    def test_subclass_requires_compute(self):
+    def test_subclass_requires_generate_signals(self):
         class Incomplete(BaseFactor):
             name = "incomplete"
 
@@ -52,8 +52,8 @@ class TestBaseFactor:
         class SimpleFactor(BaseFactor):
             name = "simple"
 
-            def compute(self, market_data, fundamental_data=None):
-                return market_data[Col.CLOSE].rename(self.name)
+            def generate_signals(self, market_data, fundamental_data=None):
+                return market_data[Col.CLOSE].unstack(Col.SYMBOL)
 
         f = SimpleFactor()
         assert f.name == "simple"
@@ -63,8 +63,8 @@ class TestBaseFactor:
             name = "simple"
             category = "test"
 
-            def compute(self, market_data, fundamental_data=None):
-                return market_data[Col.CLOSE]
+            def generate_signals(self, market_data, fundamental_data=None):
+                return market_data[Col.CLOSE].unstack(Col.SYMBOL)
 
         assert "simple" in repr(SimpleFactor())
 
@@ -88,8 +88,8 @@ class TestFactorRegistry:
         class Dummy(BaseFactor):
             name = "dummy_test"
 
-            def compute(self, market_data, fundamental_data=None):
-                return market_data[Col.CLOSE]
+            def generate_signals(self, market_data, fundamental_data=None):
+                return market_data[Col.CLOSE].unstack(Col.SYMBOL)
 
         assert FactorRegistry.get("dummy_test") is Dummy
 
@@ -98,15 +98,15 @@ class TestFactorRegistry:
         class B(BaseFactor):
             name = "b_factor"
 
-            def compute(self, market_data, fundamental_data=None):
-                return market_data[Col.CLOSE]
+            def generate_signals(self, market_data, fundamental_data=None):
+                return market_data[Col.CLOSE].unstack(Col.SYMBOL)
 
         @register_factor
         class A(BaseFactor):
             name = "a_factor"
 
-            def compute(self, market_data, fundamental_data=None):
-                return market_data[Col.CLOSE]
+            def generate_signals(self, market_data, fundamental_data=None):
+                return market_data[Col.CLOSE].unstack(Col.SYMBOL)
 
         names = FactorRegistry.list()
         assert names == sorted(names)
@@ -121,26 +121,26 @@ class TestFactorRegistry:
             class NoName(BaseFactor):
                 name = ""
 
-                def compute(self, market_data, fundamental_data=None):
-                    return market_data[Col.CLOSE]
+                def generate_signals(self, market_data, fundamental_data=None):
+                    return market_data[Col.CLOSE].unstack(Col.SYMBOL)
 
-    def test_compute_all_returns_dataframe(self):
+    def test_generate_all_returns_dataframe(self):
         @register_factor
         class F1(BaseFactor):
             name = "f1_test"
 
-            def compute(self, market_data, fundamental_data=None):
-                return market_data[Col.CLOSE].rename(self.name)
+            def generate_signals(self, market_data, fundamental_data=None):
+                return market_data[Col.CLOSE].unstack(Col.SYMBOL)
 
         @register_factor
         class F2(BaseFactor):
             name = "f2_test"
 
-            def compute(self, market_data, fundamental_data=None):
-                return (market_data[Col.CLOSE] * 2).rename(self.name)
+            def generate_signals(self, market_data, fundamental_data=None):
+                return (market_data[Col.CLOSE] * 2).unstack(Col.SYMBOL)
 
         mkt = make_market_df()
-        result = FactorRegistry.compute_all(mkt, factor_names=["f1_test", "f2_test"])
+        result = FactorRegistry.generate_all(mkt, factor_names=["f1_test", "f2_test"])
         assert isinstance(result, pd.DataFrame)
         assert set(result.columns) == {"f1_test", "f2_test"}
 
@@ -151,8 +151,8 @@ class TestFactorRegistry:
             description = "test desc"
             category = "test_cat"
 
-            def compute(self, market_data, fundamental_data=None):
-                return market_data[Col.CLOSE]
+            def generate_signals(self, market_data, fundamental_data=None):
+                return market_data[Col.CLOSE].unstack(Col.SYMBOL)
 
         details = FactorRegistry.list_detail()
         entry = next(d for d in details if d["name"] == "detail_test")
@@ -183,25 +183,26 @@ class TestBuiltinFactors:
     def test_momentum5_output_shape(self):
         mkt = self._mkt()
         cls = FactorRegistry.get("momentum_5")
-        result = cls().compute(mkt)
-        assert isinstance(result, pd.Series)
+        result = cls().generate_signals(mkt)
+        assert isinstance(result, pd.DataFrame)
         # 因 pct_change(5) 前5行为 NaN，应有非空值
-        assert result.dropna().__len__() > 0
+        assert result.stack().dropna().__len__() > 0
 
     def test_momentum5_output_index(self):
         mkt = self._mkt()
         cls = FactorRegistry.get("momentum_5")
-        result = cls().compute(mkt)
-        assert result.index.names == [Col.DATE, Col.SYMBOL]
+        result = cls().generate_signals(mkt)
+        assert result.index.name == Col.DATE
+        assert result.columns.name == Col.SYMBOL
 
     def test_volatility20_nonnegative(self):
         mkt = self._mkt()
         cls = FactorRegistry.get("volatility_20")
-        result = cls().compute(mkt).dropna()
+        result = cls().generate_signals(mkt).stack().dropna()
         assert (result >= 0).all()
 
     def test_highlow_spread_nonnegative(self):
         mkt = self._mkt()
         cls = FactorRegistry.get("highlow_spread_20")
-        result = cls().compute(mkt).dropna()
+        result = cls().generate_signals(mkt).stack().dropna()
         assert (result >= 0).all()

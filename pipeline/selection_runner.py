@@ -147,7 +147,7 @@ class SelectionPipeline:
         factor_values: dict[str, pd.Series] = {}
         for f in all_factors:
             logger.info("  计算 {} ...", f.name)
-            factor_values[f.name] = f.compute(market, fundamental)
+            factor_values[f.name] = f.generate_signals(market, fundamental).stack().rename(f.name)
 
         factor_df = pd.DataFrame(factor_values)
 

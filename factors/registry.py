@@ -65,13 +65,13 @@ class FactorRegistry:
         ]
 
     @classmethod
-    def compute_all(
+    def generate_all(
         cls,
         market_data: pd.DataFrame,
         fundamental_data: pd.DataFrame | None = None,
         factor_names: list[str] | None = None,
     ) -> pd.DataFrame:
-        """批量计算因子，返回 DataFrame（列名=因子名）。"""
+        """批量生成因子信号，返回 MultiIndex DataFrame（列名=因子名）。"""
         cls._ensure_loaded()
 
         names = factor_names or cls.list()
@@ -79,8 +79,8 @@ class FactorRegistry:
         for name in names:
             factor_cls = cls.get(name)
             factor = factor_cls()
-            logger.info("计算因子: {}", name)
-            results[name] = factor.compute(market_data, fundamental_data)
+            logger.info("生成因子信号: {}", name)
+            results[name] = factor.generate_signals(market_data, fundamental_data).stack().rename(name)
 
         return pd.DataFrame(results)
 
@@ -156,7 +156,7 @@ def register_factor(cls: Type[BaseFactor]) -> Type[BaseFactor]:
         @register_factor
         class MyFactor(BaseFactor):
             name = "my_factor"
-            def compute(self, market_data, fundamental_data=None):
+            def generate_signals(self, market_data, fundamental_data=None):
                 ...
     """
     return FactorRegistry.register(cls)

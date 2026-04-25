@@ -15,10 +15,16 @@ class Momentum5(BaseFactor):
     description = "5日动量（过去5日涨跌幅）"
     category = "momentum"
 
-    def compute(self, market_data: pd.DataFrame, fundamental_data=None) -> pd.Series:
-        close = market_data[Col.CLOSE].unstack(Col.SYMBOL)
-        mom = close.pct_change(5)
-        return mom.stack().rename(self.name)
+    def generate_signals(
+        self,
+        market_data: pd.DataFrame,
+        fundamental_data: pd.DataFrame | None = None,
+    ) -> pd.DataFrame:
+        prices = market_data[Col.CLOSE].unstack(Col.SYMBOL)
+        signals = prices.pct_change(5)
+        signals.index.name = Col.DATE
+        signals.columns.name = Col.SYMBOL
+        return signals
 
 
 @register_factor
@@ -27,10 +33,16 @@ class Momentum10(BaseFactor):
     description = "10日动量"
     category = "momentum"
 
-    def compute(self, market_data: pd.DataFrame, fundamental_data=None) -> pd.Series:
-        close = market_data[Col.CLOSE].unstack(Col.SYMBOL)
-        mom = close.pct_change(10)
-        return mom.stack().rename(self.name)
+    def generate_signals(
+        self,
+        market_data: pd.DataFrame,
+        fundamental_data: pd.DataFrame | None = None,
+    ) -> pd.DataFrame:
+        prices = market_data[Col.CLOSE].unstack(Col.SYMBOL)
+        signals = prices.pct_change(10)
+        signals.index.name = Col.DATE
+        signals.columns.name = Col.SYMBOL
+        return signals
 
 
 @register_factor
@@ -39,7 +51,13 @@ class Momentum20(BaseFactor):
     description = "20日动量"
     category = "momentum"
 
-    def compute(self, market_data: pd.DataFrame, fundamental_data=None) -> pd.Series:
-        close = market_data[Col.CLOSE].unstack(Col.SYMBOL)
-        mom = close.pct_change(20)
-        return mom.stack().rename(self.name)
+    def generate_signals(
+        self,
+        market_data: pd.DataFrame,
+        fundamental_data: pd.DataFrame | None = None,
+    ) -> pd.DataFrame:
+        prices = market_data[Col.CLOSE].unstack(Col.SYMBOL)
+        signals = prices.pct_change(20)
+        signals.index.name = Col.DATE
+        signals.columns.name = Col.SYMBOL
+        return signals

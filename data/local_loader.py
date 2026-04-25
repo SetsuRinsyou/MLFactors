@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sqlite3
+from contextlib import contextmanager
 from datetime import date
 from pathlib import Path
 
@@ -282,3 +283,168 @@ class AStockLocalLoader(DataLoader):
             "财报加载接口尚未实现。数据存储于 fundamentals.duckdb → "
             "financial_reports 表，可直接用 duckdb.connect() 查询。"
         )
+
+
+# ====================================================================
+#  USStockLocalLoader — 从本地 SQLite（cta_orange.db）加载美股数据
+# ====================================================================
+
+class USStockLocalLoader(DataLoader):
+    """从本地 SQLite 数据库（cta_orange.db）加载美股行情和基本面数据。
+
+    数据库结构
+    ----------
+    - ``bars``        : 日线 OHLCV，字段 symbol/market/frequency/dt/open/high/low/close/volume/turnover/adjust_factor
+    - ``fundamentals``: 估值快照，字段 symbol/market/dt/pe_ratio/pb_ratio/ps_ratio/market_cap/roe/roa/...
+
+    Parameters
+    ----------
+    db_path : SQLite 数据库文件路径。
+    market  : 市场过滤值，默认 ``"US"``，与 bars.market 列匹配。
+    """
+
+    # bars 列名 → Col 标准列名
+    _BARS_COL_MAP: dict[str, str] = {
+        "dt":       Col.DATE,
+        "turnover": Col.AMOUNT,
+    }
+
+    # fundamentals 列名 → FundamentalCol 标准列名
+    _FUND_COL_MAP: dict[str, str] = {
+        "dt":                  FundamentalCol.DATE,
+        "pe_ratio":            FundamentalCol.PE,
+        "pb_ratio":            FundamentalCol.PB,
+        "ps_ratio":            FundamentalCol.PS,
+        "roe":                 FundamentalCol.ROE,
+        "roa":                 FundamentalCol.ROA,
+        "gross_profit_margin": FundamentalCol.GROSS_MARGIN,
+        "profit_growth_rate":  FundamentalCol.PROFIT_GROWTH,
+        "debt_to_asset":       FundamentalCol.DEBT_RATIO,
+        "current_ratio":       FundamentalCol.CURRENT_RATIO,
+    }
+
+    def __init__(self, db_path: str | Path, market: str = "US") -> None:
+        self.db_path = Path(db_path).expanduser().resolve()
+        self.market = market
+        if not self.db_path.exists():
+            raise FileNotFoundError(f"数据库文件不存在: {self.db_path}")
+
+    @contextmanager
+    def _connect(self):
+        conn = sqlite3.connect(str(self.db_path))
+        conn.row_factory = sqlite3.Row
+        try:
+            yield conn
+        finally:
+            conn.close()
+
+    # ------------------------------------------------------------------ #
+    #  行情数据
+    # ------------------------------------------------------------------ #
+
+    def load_market_data(
+        self,
+        symbols: list[str] | None = None,
+        start: str | date | None = None,
+        end: str | date | None = None,
+    ) -> pd.DataFrame:
+        """从 ``bars`` 表加载日线行情（OHLCV）。
+
+        Returns
+        -------
+        DataFrame，以 ``(date, symbol)`` 为 MultiIndex，包含
+        open / high / low / close / volume / amount / adj_close 列。
+        """
+        # dt 存储为 ISO 8601 字符串，使用 SQLite date() 函数做日期比较
+        conditions = ["market = ?", "frequency = '1d'"]
+        params: list = [self.market]
+
+        if symbols:
+            placeholders = ",".join("?" * len(symbols))
+            conditions.append(f"symbol IN ({placeholders})")
+            params.extend(symbols)
+        if start is not None:
+            conditions.append("date(dt) >= ?")
+            params.append(str(pd.Timestamp(start).date()))
+        if end is not None:
+            conditions.append("date(dt) <= ?")
+            params.append(str(pd.Timestamp(end).date()))
+
+        where = " WHERE " + " AND ".join(conditions)
+        query = (
+            "SELECT symbol, dt, open, high, low, close, volume, turnover, adjust_factor"
+            f" FROM bars{where} ORDER BY dt, symbol"
+        )
+
+        logger.debug("USStockLocalLoader.load_market_data query: {}", query)
+        with self._connect() as conn:
+            df = pd.read_sql_query(query, conn, params=params)
+
+        if df.empty:
+            return pd.DataFrame()
+
+        df = df.rename(columns=self._BARS_COL_MAP)
+        df[Col.DATE]   = pd.to_datetime(df[Col.DATE])
+        df[Col.SYMBOL] = df[Col.SYMBOL].astype(str)
+
+        # 计算复权收盘价
+        if "adjust_factor" in df.columns:
+            df[Col.ADJ_CLOSE] = (df[Col.CLOSE] * df["adjust_factor"]).round(6)
+            df = df.drop(columns=["adjust_factor"])
+
+        df = self._set_index(df)
+        return df
+
+    # ------------------------------------------------------------------ #
+    #  基本面数据
+    # ------------------------------------------------------------------ #
+
+    def load_fundamental_data(
+        self,
+        symbols: list[str] | None = None,
+        start: str | date | None = None,
+        end: str | date | None = None,
+    ) -> pd.DataFrame:
+        """从 ``fundamentals`` 表加载估值快照数据。
+
+        Returns
+        -------
+        DataFrame，以 ``(date, symbol)`` 为 MultiIndex，包含
+        pe / pb / ps / roe / roa / gross_margin / profit_growth /
+        debt_ratio / current_ratio / market_cap 列。
+        """
+        conditions = ["market = ?"]
+        params: list = [self.market]
+
+        if symbols:
+            placeholders = ",".join("?" * len(symbols))
+            conditions.append(f"symbol IN ({placeholders})")
+            params.extend(symbols)
+        if start is not None:
+            conditions.append("dt >= ?")
+            params.append(str(pd.Timestamp(start).date()))
+        if end is not None:
+            conditions.append("dt <= ?")
+            params.append(str(pd.Timestamp(end).date()))
+
+        where = " WHERE " + " AND ".join(conditions)
+        query = (
+            "SELECT symbol, dt, pe_ratio, pb_ratio, ps_ratio, market_cap,"
+            " roe, roa, gross_profit_margin, profit_growth_rate,"
+            " debt_to_asset, current_ratio"
+            f" FROM fundamentals{where} ORDER BY dt, symbol"
+        )
+
+        logger.debug("USStockLocalLoader.load_fundamental_data query: {}", query)
+        with self._connect() as conn:
+            df = pd.read_sql_query(query, conn, params=params)
+
+        if df.empty:
+            return pd.DataFrame()
+
+        df = df.rename(columns=self._FUND_COL_MAP)
+        df[FundamentalCol.DATE]   = pd.to_datetime(df[FundamentalCol.DATE])
+        df[FundamentalCol.SYMBOL] = df[FundamentalCol.SYMBOL].astype(str)
+
+        df = self._set_index(df)
+        return df

@@ -311,7 +311,7 @@ class TestFactorReport:
 
         mkt = make_market_df(n_dates=60, n_symbols=20)
         cls = FactorRegistry.get("momentum_5")
-        factor_vals = cls().compute(mkt).dropna()
+        factor_vals = cls().generate_signals(mkt).stack().dropna()
 
         report = FactorReport(
             factor_values=factor_vals,
@@ -332,7 +332,7 @@ class TestFactorReport:
 
         mkt = make_market_df(n_dates=60, n_symbols=20)
         cls = FactorRegistry.get("momentum_5")
-        factor_vals = cls().compute(mkt).dropna()
+        factor_vals = cls().generate_signals(mkt).stack().dropna()
 
         report = FactorReport(factor_values=factor_vals, market_data=mkt,
                               forward_periods=[1], n_groups=5)

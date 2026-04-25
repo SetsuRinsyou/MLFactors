@@ -1,90 +1,216 @@
-# MLFactors — 机器学习因子挖掘框架
+# MLFactors
 
-通用 ML 因子挖掘框架，支持多数据源加载、插件式因子定义、全流程评估（IC/ICIR/分层回测）、通过 qlib 接入组合回测。
+MLFactors 当前已经不只是“因子挖掘骨架”，而是一个同时覆盖三类研究路径的本地研究仓库：
 
-## 环境依赖
+- A 股选股因子评估：`SelectionPipeline`
+- 择时因子评估：`TimingPipeline`
+- 美股最小策略回测与报告：`StrategyPipeline`
+
+现在最稳定、最完整的一条链路是美股本地 SQLite 回测示例：
+
+`USStockLocalLoader -> Momentum20 -> SimpleTopKPortfolioManager -> SimpleBacktestExecutionEngine -> SimpleStrategyAnalyzer`
+
+## 当前仓库重点
+
+- `data/local_loader.py` 同时提供 A 股本地目录加载器 `AStockLocalLoader` 和美股 SQLite 加载器 `USStockLocalLoader`
+- `pipeline/strategy_runner.py` 串起信号、组合、撮合、分析四段最小可运行策略回测链路
+- `run_us_strategy_backtest.py` 可以直接基于 `/home/setsu/workspace/data/cta_orange.db` 跑出 CSV + `report.html`
+- `tests/test_strategy_pipeline.py` 覆盖了当前策略链路的端到端测试
+
+## 环境准备
+
+优先使用项目根目录虚拟环境。
 
 ```bash
-# 推荐使用 uv 创建虚拟环境
-uv venv && source .venv/bin/activate
+uv venv
+source .venv/bin/activate
 
-# 核心依赖
-uv pip install pandas numpy scipy scikit-learn matplotlib pyyaml loguru
-
-# AKShare 数据源（可选）
-uv pip install akshare
-
-# 树模型 LightGBM / XGBoost（可选）
-uv pip install lightgbm xgboost
-
-# PyTorch 神经网络（可选）
-uv pip install torch
-
-# qlib 组合回测（可选）
-uv pip install pyqlib
+uv pip install pandas numpy scipy scikit-learn matplotlib pyyaml loguru duckdb pyarrow plotly vectorbt pytest
 ```
 
-所有代码平铺在项目根目录，直接 `cd` 到项目根目录后运行即可，**无需安装为 Python 包**。
+确认解释器：
+
+```bash
+./.venv/bin/python -c "import sys; print(sys.executable)"
+```
+
+本仓库默认直接在项目根目录运行脚本，不要求安装成 Python 包。
 
 ## 项目结构
 
-```
+```text
 MLFactors/
-├── config.py                   # YAML 配置加载（load_config / get_config）
-├── config/
-│   └── default.yaml            # 默认配置：数据路径、评估参数等
-├── data/
-│   ├── schema.py               # 统一列名枚举（Col / FundamentalCol）
-│   ├── base.py                 # DataLoader 抽象基类
-│   ├── local_loader.py         # 本地文件加载（CSV / Parquet / SQLite）
-│   └── akshare_loader.py       # AKShare 数据源（含本地缓存）
-├── factors/
-│   ├── base.py                 # BaseFactor 抽象基类
-│   ├── registry.py             # FactorRegistry + @register_factor 装饰器
-│   └── library/                # 内置因子
-│       ├── momentum.py         # momentum_5 / momentum_10 / momentum_20
-│       └── volatility.py       # volatility_5 / volatility_20 / highlow_spread_20
-├── models/
-│   ├── base.py                 # BaseModel 抽象基类（含 TimeSeriesSplit 交叉验证）
-│   ├── tree.py                 # TreeModel — LightGBM / XGBoost
-│   ├── linear.py               # LinearModel — Ridge / Lasso
-│   └── nn.py                   # NNModel — PyTorch MLP（含 early stopping）
-├── evaluation/
-│   ├── ic.py                   # calc_ic / calc_ic_series / calc_icir / calc_ic_decay / calc_turnover / calc_t_stat
-│   ├── layered.py              # layered_backtest — 分 N 组回测 + 多空对冲
-│   ├── plot.py                 # IC 序列图 / 分布图 / 分层净值曲线 / IC 衰减图
-│   └── report.py               # FactorReport — 汇总全部指标
 ├── backtest/
-│   └── qlib_adapter.py         # QlibAdapter — qlib TopkDropout 策略回测
+│   ├── execution.py              # 撮合执行器与 SimulationResult
+│   ├── portfolio.py              # 仓位管理器
+│   └── qlib_adapter.py           # qlib 适配层（保留）
+├── config/
+│   ├── selection.yaml
+│   └── timing.yaml
+├── data/
+│   ├── base.py                   # DataLoader 抽象基类
+│   ├── local_loader.py           # A 股目录 / 美股 SQLite 加载器
+│   └── schema.py                 # 统一字段枚举
+├── evaluation/
+│   ├── selection/                # IC / 分层回测 / 因子报告
+│   ├── timimg/                   # 择时评估报告
+│   ├── plot.py                   # 选股因子图表
+│   └── strategy_analyzer.py      # vectorbt 策略分析与 HTML 报告
+├── factors/
+│   ├── base.py                   # BaseFactor / BaseTimingFactor
+│   ├── registry.py               # 因子注册中心
+│   └── library/
+│       ├── selection/            # 选股因子
+│       └── timing/               # MA Cross、RSI 等择时因子
+├── models/                       # 机器学习模型封装
 ├── pipeline/
-│   └── runner.py               # FactorPipeline — 端到端流水线
+│   ├── selection_runner.py       # 选股因子评估流水线
+│   ├── timing_runner.py          # 择时流水线
+│   └── strategy_runner.py        # 策略回测流水线
+├── outputs/
+│   ├── strategy/                 # 当前最小美股策略输出
+│   ├── strategy_all_universe/    # 全市场候选池示例输出
+│   └── timing/                   # 择时报告输出
+├── run_hs300_factor_test.py      # A 股本地因子测试脚本
+├── run_us_factor_test.py         # 美股本地因子测试脚本
+├── run_timing_factor_test.py     # 择时因子测试脚本
+├── run_us_strategy_backtest.py   # 美股策略回测脚本
 └── tests/
-    ├── test_data_loader.py
-    ├── test_factors.py
-    └── test_evaluation.py
 ```
 
-## 快速上手
+## 快速开始
 
-所有示例均在项目根目录下运行（保证 `import data`, `import factors` 等可以找到模块）。
+### 1. 跑通当前最完整的美股策略回测
 
-### 1. 使用本地数据 + 内置因子评估
+默认参数会读取本地 SQLite 数据库 `/home/setsu/workspace/data/cta_orange.db`，使用：
+
+- 信号：20 日动量
+- 选股：Top 3 等权
+- 调仓：每周五 `W-FRI`
+- 执行：整数股、现金账户、佣金和滑点各 `0.0005`
+- 基准：`SPY`、`QQQ`
+
+命令：
+
+```bash
+./.venv/bin/python run_us_strategy_backtest.py \
+  --db-path /home/setsu/workspace/data/cta_orange.db \
+  --output-dir outputs/strategy
+```
+
+主要输出：
+
+- `outputs/strategy/stats.csv`
+- `outputs/strategy/equity_curve.csv`
+- `outputs/strategy/returns.csv`
+- `outputs/strategy/positions.csv`
+- `outputs/strategy/trades.csv`
+- `outputs/strategy/report/report.html`
+- `outputs/strategy/report/summary_stats.csv`
+- `outputs/strategy/report/vectorbt_stats.csv`
+
+### 2. 在代码中直接调用策略流水线
 
 ```python
-from data import LocalLoader
-from pipeline.runner import FactorPipeline
+from backtest import SimpleBacktestExecutionEngine, SimpleTopKPortfolioManager
+from data import USStockLocalLoader
+from evaluation import SimpleStrategyAnalyzer
+from factors.library.selection.momentum import Momentum20
+from pipeline import StrategyPipeline
 
-loader = LocalLoader(market_path="path/to/market.csv")
+loader = USStockLocalLoader("/home/setsu/workspace/data/cta_orange.db")
+market = loader.load_market_data(
+    symbols=["AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "META", "TSLA", "SPY", "QQQ"],
+    start="2020-01-01",
+    end="2026-01-01",
+)
 
-pipeline = FactorPipeline()
-pipeline.set_data_loader(loader)
-pipeline.add_factors(["momentum_5", "momentum_20", "volatility_20"])
+pipeline = StrategyPipeline(
+    alpha_model=Momentum20(),
+    portfolio_manager=SimpleTopKPortfolioManager(top_k=3, rebalance_frequency="W-FRI"),
+    execution_engine=SimpleBacktestExecutionEngine(
+        commission=0.0005,
+        slippage=0.0005,
+        initial_capital=1_000_000.0,
+    ),
+    analyzer_cls=SimpleStrategyAnalyzer,
+)
 
-reports = pipeline.run()           # 返回 dict[factor_name, FactorReport]
-reports["momentum_5"].summary()    # 各周期 IC/ICIR/分层指标汇总表
+result = pipeline.run(market_data=market)
+print(result["stats"])
 ```
 
-### 2. 自定义因子（Plugin 式）
+### 3. A 股选股因子评估
+
+```python
+from data import AStockLocalLoader
+from pipeline import SelectionPipeline
+
+pipeline = (
+    SelectionPipeline()
+    .set_data_loader(AStockLocalLoader(data_root="./cache"))
+    .add_factors(["momentum_5", "momentum_20", "volatility_20"])
+)
+
+reports = pipeline.run(
+    symbols=["600036", "600519", "000001"],
+    start="2024-01-01",
+    end="2024-12-31",
+    show_plot=False,
+)
+
+print(reports["momentum_5"].summary())
+```
+
+如果本地 A 股目录结构已经准备好，也可以直接运行：
+
+```bash
+./.venv/bin/python run_hs300_factor_test.py
+```
+
+### 4. 美股选股因子评估
+
+默认读取 `/home/setsu/workspace/data/cta_orange.db`，从 SQLite `bars` 表筛选区间内有足够日线数据的美股，并输出因子汇总与图表：
+
+```bash
+./.venv/bin/python run_us_factor_test.py \
+  --output-dir outputs/us_factor
+```
+
+主要输出：
+
+- `outputs/us_factor/selected_symbols.csv`
+- `outputs/us_factor/factor_summary.csv`
+- `outputs/us_factor/*_report.png`
+
+### 5. 择时因子测试
+
+`run_timing_factor_test.py` 当前默认用合成数据快速跑通，也可以替换成你自己的 `DataLoader`。
+
+```bash
+./.venv/bin/python run_timing_factor_test.py
+```
+
+## 数据约定
+
+所有数据加载器统一输出 `MultiIndex(date, symbol)` 的 `DataFrame`，字段名使用 `data.schema.Col` / `FundamentalCol`。
+
+常用行情列：
+
+| 字段 | 说明 |
+|---|---|
+| `date` | 交易日 |
+| `symbol` | 证券代码 |
+| `open` / `high` / `low` / `close` | OHLC |
+| `adj_close` | 复权收盘价（若数据源可提供） |
+| `volume` | 成交量 |
+| `amount` | 成交额 |
+
+`USStockLocalLoader` 当前从 SQLite `bars` 表读取日线数据，并在存在 `adjust_factor` 时生成 `adj_close`。
+
+## 自定义扩展
+
+### 自定义选股因子
 
 ```python
 from data.schema import Col
@@ -96,139 +222,54 @@ class MyAlphaFactor(BaseFactor):
     description = "量价背离因子"
     category = "custom"
 
-    def compute(self, market_data, fundamental_data=None):
+    def generate_signals(self, market_data, fundamental_data=None):
         close = market_data[Col.CLOSE].unstack(Col.SYMBOL)
         volume = market_data[Col.VOLUME].unstack(Col.SYMBOL)
-        ret = close.pct_change(5)
-        vol_chg = volume.pct_change(5)
-        factor = ret.rolling(20).corr(vol_chg)
-        return factor.stack().rename(self.name)
-
-# 注册后即可在 pipeline 中使用
-pipeline.add_factors(["my_alpha"])
+        signals = close.pct_change(5).rolling(20).corr(volume.pct_change(5))
+        signals.index.name = Col.DATE
+        signals.columns.name = Col.SYMBOL
+        return signals
 ```
 
-### 3. ML 模型模式
-
-```python
-from data import LocalLoader
-from models.tree import TreeModel
-from pipeline.runner import FactorPipeline
-
-pipeline = FactorPipeline()
-pipeline.set_data_loader(LocalLoader(market_path="path/to/market.csv"))
-pipeline.add_factors(["momentum_5", "momentum_10", "momentum_20",
-                       "volatility_5", "volatility_20", "highlow_spread_20"])
-pipeline.set_model(TreeModel(engine="lgbm"))
-
-result = pipeline.run()
-# result["model_report"]       — 模型预测值的 FactorReport
-# result["cv_result"]          — TimeSeriesSplit 交叉验证 IC
-# result["feature_importance"] — 特征重要性 pd.Series
-```
-
-### 4. 查看所有内置因子
+### 查看已注册因子
 
 ```python
 from factors.registry import FactorRegistry
 
 print(FactorRegistry.list())
-# ['highlow_spread_20', 'momentum_10', 'momentum_20', 'momentum_5',
-#  'volatility_20', 'volatility_5']
-
-for d in FactorRegistry.list_detail():
-    print(d["name"], d["category"], d["description"])
+print(FactorRegistry.list_detail())
 ```
 
-### 5. 单独使用评估模块
+### 将选股因子直接接入策略回测
+
+策略回测直接复用 `selection` 目录下的因子实现：
 
 ```python
-from evaluation.ic import calc_ic_series, calc_icir, calc_forward_returns
-from evaluation.layered import layered_backtest
-from evaluation.plot import plot_factor_report
+from factors.library.selection.momentum import Momentum5
 
-fwd = calc_forward_returns(market_data, periods=[1, 5, 20])
-ic_s = calc_ic_series(factor_values, fwd[5])
-print("ICIR:", calc_icir(ic_s))
-
-result = layered_backtest(factor_values, fwd[5], n_groups=5)
-print("多空年化:", result.long_short_annual)
-
-plot_factor_report(ic_s, result, factor_name="momentum_5")
+signals = Momentum5().generate_signals(market_data)
 ```
 
-## 数据格式
+这样独立因子测试和 `StrategyPipeline` 的信号生成可以共享同一套 `generate_signals()` 逻辑。
 
-所有数据加载器输出 `MultiIndex(date, symbol)` 格式的 DataFrame，列名使用 `data.schema.Col` 枚举。
+## 测试
 
-**行情数据必填列：**
-
-| `Col` 属性 | 列名 | 说明 |
-|---|---|---|
-| `Col.DATE` | `date` | 日期 |
-| `Col.SYMBOL` | `symbol` | 股票代码 |
-| `Col.OPEN` | `open` | 开盘价 |
-| `Col.HIGH` | `high` | 最高价 |
-| `Col.LOW` | `low` | 最低价 |
-| `Col.CLOSE` | `close` | 收盘价 |
-| `Col.VOLUME` | `volume` | 成交量 |
-
-**列名不匹配时通过 `column_mapping` 映射：**
-
-```python
-loader = LocalLoader(
-    market_path="data.csv",
-    column_mapping={"Date": "date", "Code": "symbol", "Close": "close"},
-)
-```
-
-**自定义数据源：** 继承 `DataLoader`，实现 `load_market_data()` 方法即可。
-
-## 因子开发规范
-
-| 要素 | 说明 |
-|---|---|
-| 继承 | `BaseFactor` |
-| 装饰器 | `@register_factor` |
-| `name` | 唯一字符串，不可重复 |
-| `compute()` 输入 | `market_data: pd.DataFrame`（MultiIndex） |
-| `compute()` 输出 | `pd.Series`，索引为 `MultiIndex(date, symbol)` |
-
-## 评估指标说明
-
-| 指标 | 函数 | 说明 |
-|---|---|---|
-| IC | `calc_ic` | 单期截面 Spearman / Pearson 相关系数 |
-| IC 序列 | `calc_ic_series` | 逐期 IC 时间序列 |
-| ICIR | `calc_icir` | IC 均值 / IC 标准差 |
-| IC 衰减 | `calc_ic_decay` | 不同滞后期的均值 IC |
-| t 统计量 | `calc_t_stat` | IC 序列对零的单样本 t 检验 |
-| 换手率 | `calc_turnover` | 相邻期因子排名变化比例 |
-| 分层回测 | `layered_backtest` | 分 N 组年化收益 / 夏普 / 多空对冲 |
-
-## 配置
-
-修改 `config/default.yaml` 或传入自定义配置文件：
-
-```python
-from config import load_config
-cfg = load_config("my_config.yaml")   # 会与默认配置深度合并
-```
-
-可配置项：数据缓存路径、额外因子搜索目录、前向收益周期、IC 计算方法、分组数、回测日期范围等。
-
-## 运行测试
+当前和新增策略链路一致的测试是：
 
 ```bash
-# 安装测试依赖
-uv pip install pytest pytest-cov
-
-# 运行全部测试
-pytest tests/ -v
-
-# 带覆盖率
-pytest tests/ -v --cov=. --cov-report=term-missing
+./.venv/bin/python -m pytest tests/test_strategy_pipeline.py -q
 ```
+
+说明：
+
+- 该测试当前通过，已覆盖信号、选股、撮合、分析器和报告导出
+- `tests/` 全量测试目前仍有旧用例引用已移除的 `LocalLoader`，在文档与 API 完全同步前不应把 `pytest tests/` 当作绿灯标准
+
+## 注意事项
+
+- 当前执行引擎会把 `T` 日目标权重整体 `shift(1)` 后在 `T+1` 日执行，避免同日信号直接同日成交
+- 当前选股动量因子使用 `close` 计算信号；如果改用复权价，需要自行审查是否存在前视偏差
+- `Momentum5/10/20`、`SimpleTopKPortfolioManager`、`SimpleBacktestExecutionEngine` 都是“最小可运行实现”，更适合快速验证链路，而不是直接用于生产交易
 
 ## License
 

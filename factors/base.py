@@ -10,10 +10,10 @@ from data.schema import Col
 
 
 class BaseFactor(ABC):
-    """所有因子的基类。
+    """选股因子基类。
 
-    子类必须定义 ``name`` 属性并实现 ``compute`` 方法。
-    因子输出统一为 ``pd.Series``，索引为 ``MultiIndex(date, symbol)``。
+    子类必须定义 ``name`` 属性并实现 ``generate_signals`` 方法。
+    因子输出统一为 ``pd.DataFrame``，索引为 ``date``，列为 ``symbol``。
 
     Attributes
     ----------
@@ -27,12 +27,12 @@ class BaseFactor(ABC):
     category: str = "custom"
 
     @abstractmethod
-    def compute(
+    def generate_signals(
         self,
         market_data: pd.DataFrame,
         fundamental_data: pd.DataFrame | None = None,
-    ) -> pd.Series:
-        """计算因子值。
+    ) -> pd.DataFrame:
+        """生成选股信号矩阵。
 
         Parameters
         ----------
@@ -41,7 +41,7 @@ class BaseFactor(ABC):
 
         Returns
         -------
-        pd.Series，索引为 MultiIndex(date, symbol)，值为因子值
+        pd.DataFrame，索引为 date，列为 symbol，值为因子信号
         """
         ...
 
@@ -56,7 +56,7 @@ class BaseTimingFactor(BaseFactor):
     - 面向单只股票的时序信号，而非多股票截面排序
     - 实现 ``compute_timing(market_data, symbol)``，返回按日期索引的信号序列
     - 信号约定：正值 = 多头方向，负值 = 空头方向，0 = 空仓
-    - ``compute()`` 被禁用，调用将抛出 ``NotImplementedError``
+    - ``generate_signals()`` 被禁用，调用将抛出 ``NotImplementedError``
 
     Attributes
     ----------
@@ -85,11 +85,11 @@ class BaseTimingFactor(BaseFactor):
         """
         ...
 
-    def compute(
+    def generate_signals(
         self,
         market_data: pd.DataFrame,
         fundamental_data: pd.DataFrame | None = None,
-    ) -> pd.Series:
+    ) -> pd.DataFrame:
         """择时因子不支持截面调用，请使用 ``compute_timing()``。"""
         raise NotImplementedError(
             f"择时因子 '{self.name}' 不支持截面调用，请使用 compute_timing(market_data, symbol)"

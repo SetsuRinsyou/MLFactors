@@ -6,6 +6,7 @@ from evaluation.timimg.metrics import (
     calc_excess_returns,
 )
 from evaluation.timimg.report import TimingReport
+from evaluation.strategy_analyzer import BaseStrategyAnalyzer, SimpleStrategyAnalyzer
 
 __all__ = [
     # 选股因子评估
@@ -13,4 +14,6 @@ __all__ = [
     "calc_turnover", "calc_t_stat", "layered_backtest", "FactorReport",
     # 择时因子评估
     "calc_direction_win_rate", "calc_excess_returns", "TimingReport",
+    # 策略绩效分析
+    "BaseStrategyAnalyzer", "SimpleStrategyAnalyzer",
 ]
