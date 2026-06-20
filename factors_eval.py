@@ -590,12 +590,13 @@ def eval(
         n_groups=n_groups,
         period=forward_period,
     )
-    ic_decay = calc_ic_decay(
-        factor,
-        forward_returns,
-        max_lag=max_lag,
-        method=ic_method,
-    )
+    # 暂不计算 IC 衰减，避免为每个 lag 构造完整收益面板。
+    # ic_decay = calc_ic_decay(
+    #     factor,
+    #     forward_returns,
+    #     max_lag=max_lag,
+    #     method=ic_method,
+    # )
 
     t_stat, p_value = calc_t_stat(ic_series)
     long_sharpe = 0.0
@@ -627,5 +628,5 @@ def eval(
         turnover=turnover,
         forward_returns=forward_returns,
         layered=layered,
-        ic_decay=ic_decay,
+        ic_decay=pd.Series(dtype=float, name="IC_decay"),
     )

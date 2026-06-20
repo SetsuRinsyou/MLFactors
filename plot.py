@@ -48,18 +48,6 @@ class FactorPlotter:
         ax.set_ylabel("IC")
         ax.legend(fontsize=8)
 
-    def plot_ic_histogram(self, ax: plt.Axes, bins: int = 50) -> None:
-        """绘制 IC 分布直方图。"""
-        ic = self.result.ic_series.dropna()
-        ax.set_title("IC Distribution")
-        if ic.empty:
-            return
-        ax.hist(ic, bins=bins, color="steelblue", alpha=0.75, edgecolor="white")
-        ax.axvline(ic.mean(), color="red", linestyle="--", label=f"Mean={ic.mean():.4f}")
-        ax.set_xlabel("IC")
-        ax.set_ylabel("Frequency")
-        ax.legend(fontsize=8)
-
     def plot_layered_returns(self, ax: plt.Axes) -> None:
         """绘制各因子分组的累计收益。"""
         cumulative = self.result.layered.cumulative_returns
@@ -83,17 +71,6 @@ class FactorPlotter:
         ax.axhline(0, color="gray", linewidth=0.8, linestyle="--")
         ax.set_ylabel("Cumulative Return")
         ax.legend(fontsize=8)
-
-    def plot_ic_decay(self, ax: plt.Axes) -> None:
-        """绘制不同滞后期的平均 IC。"""
-        decay = self.result.ic_decay.dropna()
-        ax.set_title("IC Decay")
-        if decay.empty:
-            return
-        ax.bar(decay.index, decay.values, color="steelblue", alpha=0.75)
-        ax.axhline(0, color="gray", linewidth=0.8)
-        ax.set_xlabel("Lag")
-        ax.set_ylabel("Mean IC")
 
     def plot_turnover(self, ax: plt.Axes) -> None:
         """绘制最高因子分组组合的换手率。"""
@@ -128,9 +105,9 @@ class FactorPlotter:
         table.set_fontsize(8)
         table.scale(1.0, 1.2)
 
-    def plot(self, figsize: tuple[float, float] = (16, 14)) -> plt.Figure:
+    def plot(self, figsize: tuple[float, float] = (16, 10)) -> plt.Figure:
         """生成包含全部评估图表的综合报告图。"""
-        fig, axes = plt.subplots(3, 2, figsize=figsize)
+        fig, axes = plt.subplots(2, 2, figsize=figsize)
         period = self.result.summary.index[0]
         fig.suptitle(
             f"Factor Report: {self.factor_name} | Forward Period: {period}d",
@@ -138,11 +115,9 @@ class FactorPlotter:
             fontweight="bold",
         )
         self.plot_ic_series(axes[0, 0])
-        self.plot_ic_histogram(axes[0, 1])
-        self.plot_layered_returns(axes[1, 0])
-        self.plot_ic_decay(axes[1, 1])
-        self.plot_turnover(axes[2, 0])
-        self.plot_summary(axes[2, 1])
+        self.plot_layered_returns(axes[0, 1])
+        self.plot_turnover(axes[1, 0])
+        self.plot_summary(axes[1, 1])
         fig.tight_layout(rect=[0, 0, 1, 0.97])
         return fig
 
