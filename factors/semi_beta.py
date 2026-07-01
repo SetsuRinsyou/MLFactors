@@ -14,9 +14,9 @@ class SemiBeta(BaseFactor):
 
     def __init__(
         self,
-        window: int = 60,
-        min_obs: int | None = None,
-        min_market_obs: int = 2,
+        window: int = 252,
+        min_obs: int | None = 120,
+        min_market_obs: int = 100,
     ) -> None:
         if min_obs is None:
             min_obs = window
@@ -99,7 +99,7 @@ class SemiBeta(BaseFactor):
 class BetaN(SemiBeta):
     """市场下跌、个股下跌时的 SemiBeta。"""
 
-    name = "beta_n"
+    name = "beta_n_252d"
     description = "SemiBeta：市场跌、股票跌"
     component = "N"
 
@@ -108,7 +108,7 @@ class BetaN(SemiBeta):
 class BetaP(SemiBeta):
     """市场上涨、个股上涨时的 SemiBeta。"""
 
-    name = "beta_p"
+    name = "beta_p_252d"
     description = "SemiBeta：市场涨、股票涨"
     component = "P"
 
@@ -117,7 +117,7 @@ class BetaP(SemiBeta):
 class BetaMN(SemiBeta):
     """市场下跌、个股上涨时的 SemiBeta。"""
 
-    name = "beta_mn"
+    name = "beta_mn_252d"
     description = "SemiBeta：市场跌、股票涨"
     component = "MN"
 
@@ -126,6 +126,6 @@ class BetaMN(SemiBeta):
 class BetaMP(SemiBeta):
     """市场上涨、个股下跌时的 SemiBeta。"""
 
-    name = "beta_mp"
+    name = "beta_mp_252d"
     description = "SemiBeta：市场涨、股票跌"
     component = "MP"

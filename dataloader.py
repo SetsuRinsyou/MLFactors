@@ -7,10 +7,10 @@ import pandas as pd
 
 
 def load_data(
+    data_dir: str | Path,
     symbols: list[str] | None = None,
     start: str | date | None = None,
     end: str | date | None = None,
-    data_dir: str | Path = Path(__file__).resolve().parent / "cache" / "csv",
     constituents_path: str | Path | None = None,
     columns: list[str] | None = None,
 ) -> tuple[pd.DataFrame, dict[str, set[str]]]:

@@ -46,8 +46,8 @@ class Volume3M(BaseFactor):
 
 @register_factor
 class TradingAmount(BaseFactor):
-    name = "trading_amount"
-    description = "成交金额均值"
+    name = "trading_amount_20d"
+    description = "20日成交金额均值"
 
     def generate_signals(self, data: pd.DataFrame, constituents: dict[str, set[str]] | None = None) -> pd.DataFrame:
         close = data["close"].unstack("symbol").astype(float).sort_index()

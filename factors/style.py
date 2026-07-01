@@ -10,7 +10,7 @@ from factors.registry import register_factor
 
 @register_factor
 class SizeFactor(BaseFactor):
-    name = "size_factor"
+    name = "size_factor_1d"
     description = "市值因子 (ln(MarketCap))"
 
     def generate_signals(self, data: pd.DataFrame, constituents: dict[str, set[str]] | None = None) -> pd.DataFrame:
@@ -20,7 +20,7 @@ class SizeFactor(BaseFactor):
 
 @register_factor
 class SizeSquaredFactor(BaseFactor):
-    name = "size_squared"
+    name = "size_squared_1d"
     description = "市值平方因子 (ln(MarketCap)^2)"
 
     def generate_signals(self, data: pd.DataFrame, constituents: dict[str, set[str]] | None = None) -> pd.DataFrame:
@@ -30,7 +30,7 @@ class SizeSquaredFactor(BaseFactor):
 
 @register_factor
 class IndustryMomentum(BaseFactor):
-    name = "industry_momentum"
+    name = "industry_momentum_1d"
     description = "行业动量因子 (剔除自身的同行业平均收益)"
 
     def __init__(self, period: int = 1) -> None:
@@ -61,7 +61,7 @@ class IndustryMomentum(BaseFactor):
 
 @register_factor
 class StyleCategoryMomentum(BaseFactor):
-    name = "style_category_momentum"
+    name = "style_category_momentum_1d"
     description = "风格分类动量因子 (基于 K-means 聚类的簇内动量溢出)"
 
     def __init__(self, period: int = 1, n_clusters: int = 30) -> None:

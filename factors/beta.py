@@ -11,7 +11,7 @@ from factors.registry import register_factor
 class Beta(BaseFactor):
     """使用市值加权市场组合收益计算滚动 Beta。"""
 
-    name = "beta"
+    name = "beta_252d"
     description = "CAPM Beta"
 
     def __init__(

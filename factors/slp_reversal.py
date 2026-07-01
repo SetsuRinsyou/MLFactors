@@ -14,7 +14,7 @@ class SLPReversal(BaseFactor):
     寻找近期波段的极值点（拐点），计算从极值点到当前的斜率，以此判断超跌/超涨的速度。
     """
 
-    name = "slp_reversal"
+    name = "slp_reversal_20d"
     description = "拐点斜率反转因子"
 
     def __init__(self, window: int = 20) -> None:
