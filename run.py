@@ -74,18 +74,18 @@ class Runner:
         return self.factor_result
 
     def load_benchmark(self) -> pd.DataFrame:
-        """提取回测期间的 SPY 和 QQQ 收盘价。"""
+        """提取回测期间的 HS300 收盘价。"""
         source_symbol = self.data.index.get_level_values("symbol")[0]
         benchmark_data, _ = load_data(
             data_dir=self.data_dir,
             symbols=[source_symbol],
             start=self.start,
             end=self.end,
-            columns=["SPY_close", "QQQ_close"],
+            columns=["HS300_close"],
         )
         self.benchmark = benchmark_data.xs(source_symbol, level="symbol").rename(
-            columns={"SPY_close": "SPY", "QQQ_close": "QQQ"}
-        )[["SPY", "QQQ"]]
+            columns={"HS300_close": "HS300"}
+        )[["HS300"]]
         return self.benchmark
 
     def calculate(self, save: bool = False) -> pd.DataFrame:
@@ -206,69 +206,69 @@ class Runner:
 
 
 if __name__ == "__main__":
-    import factors.beta  # noqa: F401
-    import factors.cfp_1d  # noqa: F401
-    import factors.current_asset_growth_12m  # noqa: F401
-    import factors.current_asset_growth_vol_24m  # noqa: F401
-    import factors.current_liability_ratio_1d  # noqa: F401
-    import factors.current_ratio_1d  # noqa: F401
-    import factors.debt_per_share_1d  # noqa: F401
-    import factors.debt_to_asset_1d  # noqa: F401
-    import factors.debt_to_asset_change_12m  # noqa: F401
-    import factors.dgmarq_12m  # noqa: F401
-    import factors.dgpoaq_12m  # noqa: F401
-    import factors.dip_rebound  # noqa: F401
-    import factors.dividend_yield_1d  # noqa: F401
-    import factors.droaq_12m  # noqa: F401
-    import factors.eps_growth_12m  # noqa: F401
-    import factors.eps_growth_63d  # noqa: F401
-    import factors.eps_growth_accel_3m  # noqa: F401
-    import factors.eps_growth_accel_price_adj_3m  # noqa: F401
-    import factors.eps_growth_accel_vol_adj_3m  # noqa: F401
-    import factors.eps_growth_price_adj_3m  # noqa: F401
-    import factors.eps_growth_vol_adj_3m  # noqa: F401
-    import factors.equity_growth_63d  # noqa: F401
-    import factors.equity_ratio_change_12m  # noqa: F401
-    import factors.equity_to_fixed_asset_change_12m  # noqa: F401
-    import factors.financial_expense_ratio_1d  # noqa: F401
-    import factors.fixed_ratio_1d  # noqa: F401
-    import factors.gpoaq_3m  # noqa: F401
-    import factors.gross_margin_1d  # noqa: F401
-    import factors.gross_profitability_growth_12m  # noqa: F401
-    import factors.gross_profitability_trend_qoq_12m  # noqa: F401
-    import factors.gross_profitability_trend_yoy_48m  # noqa: F401
-    import factors.high_low_volatility  # noqa: F401
-    import factors.industry_current_asset_growth_stability_24m  # noqa: F401
-    import factors.inventory_turnover_1d  # noqa: F401
-    import factors.long_term_debt_ratio_1d  # noqa: F401
-    import factors.long_term_debt_ratio_change_12m  # noqa: F401
-    import factors.max_daily_return  # noqa: F401
-    import factors.multi_horizon_llt_daily  # noqa: F401
-    import factors.multi_horizon_ma_daily  # noqa: F401
-    import factors.net_income_cash_ratio_1d  # noqa: F401
-    import factors.net_income_growth_63d  # noqa: F401
-    import factors.net_profit_margin_1d  # noqa: F401
-    import factors.non_current_asset_growth_12m  # noqa: F401
-    import factors.non_current_asset_growth_vol_24m  # noqa: F401
-    import factors.open_high_surge_10  # noqa: F401
-    import factors.operating_expense_ratio_1d  # noqa: F401
-    import factors.pair_reversal  # noqa: F401
-    import factors.quick_ratio_1d  # noqa: F401
-    import factors.reversal  # noqa: F401
-    import factors.revenue_growth_63d  # noqa: F401
-    import factors.roe_growth_63d  # noqa: F401
-    import factors.r_std  # noqa: F401
-    import factors.semi_beta  # noqa: F401
-    import factors.slp_reversal  # noqa: F401
-    import factors.smallcap_growth  # noqa: F401
-    import factors.sp_1d  # noqa: F401
-    import factors.style  # noqa: F401
-    import factors.total_asset_growth_63d  # noqa: F401
-    import factors.total_asset_growth_vol_24m  # noqa: F401
-    import factors.total_asset_turnover_1d  # noqa: F401
-    import factors.turnover_cv  # noqa: F401
-    import factors.vff3_volatility  # noqa: F401
-    import factors.volume_price_corr  # noqa: F401
+    import factors.risk.beta  # noqa: F401
+    import factors.fundamental.cfp_1d  # noqa: F401
+    import factors.fundamental.current_asset_growth_12m  # noqa: F401
+    import factors.fundamental.current_asset_growth_vol_24m  # noqa: F401
+    import factors.fundamental.current_liability_ratio_1d  # noqa: F401
+    import factors.fundamental.current_ratio_1d  # noqa: F401
+    import factors.fundamental.debt_per_share_1d  # noqa: F401
+    import factors.fundamental.debt_to_asset_1d  # noqa: F401
+    import factors.fundamental.debt_to_asset_change_12m  # noqa: F401
+    import factors.fundamental.dgmarq_12m  # noqa: F401
+    import factors.fundamental.dgpoaq_12m  # noqa: F401
+    import factors.price.dip_rebound  # noqa: F401
+    import factors.fundamental.dividend_yield_1d  # noqa: F401
+    import factors.fundamental.droaq_12m  # noqa: F401
+    import factors.fundamental.eps_growth_12m  # noqa: F401
+    import factors.fundamental.eps_growth_63d  # noqa: F401
+    import factors.fundamental.eps_growth_accel_3m  # noqa: F401
+    import factors.fundamental.eps_growth_accel_price_adj_3m  # noqa: F401
+    import factors.fundamental.eps_growth_accel_vol_adj_3m  # noqa: F401
+    import factors.fundamental.eps_growth_price_adj_3m  # noqa: F401
+    import factors.fundamental.eps_growth_vol_adj_3m  # noqa: F401
+    import factors.fundamental.equity_growth_63d  # noqa: F401
+    import factors.fundamental.equity_ratio_change_12m  # noqa: F401
+    import factors.fundamental.equity_to_fixed_asset_change_12m  # noqa: F401
+    import factors.fundamental.financial_expense_ratio_1d  # noqa: F401
+    import factors.fundamental.fixed_ratio_1d  # noqa: F401
+    import factors.fundamental.gpoaq_3m  # noqa: F401
+    import factors.fundamental.gross_margin_1d  # noqa: F401
+    import factors.fundamental.gross_profitability_growth_12m  # noqa: F401
+    import factors.fundamental.gross_profitability_trend_qoq_12m  # noqa: F401
+    import factors.fundamental.gross_profitability_trend_yoy_48m  # noqa: F401
+    import factors.risk.high_low_volatility  # noqa: F401
+    import factors.sector.industry_current_asset_growth_stability_24m  # noqa: F401
+    import factors.fundamental.inventory_turnover_1d  # noqa: F401
+    import factors.fundamental.long_term_debt_ratio_1d  # noqa: F401
+    import factors.fundamental.long_term_debt_ratio_change_12m  # noqa: F401
+    import factors.price.max_daily_return  # noqa: F401
+    import factors.price.multi_horizon_llt_daily  # noqa: F401
+    import factors.price.multi_horizon_ma_daily  # noqa: F401
+    import factors.fundamental.net_income_cash_ratio_1d  # noqa: F401
+    import factors.fundamental.net_income_growth_63d  # noqa: F401
+    import factors.fundamental.net_profit_margin_1d  # noqa: F401
+    import factors.fundamental.non_current_asset_growth_12m  # noqa: F401
+    import factors.fundamental.non_current_asset_growth_vol_24m  # noqa: F401
+    import factors.price.open_high_surge_10  # noqa: F401
+    import factors.fundamental.operating_expense_ratio_1d  # noqa: F401
+    import factors.price.pair_reversal  # noqa: F401
+    import factors.fundamental.quick_ratio_1d  # noqa: F401
+    import factors.price.reversal  # noqa: F401
+    import factors.fundamental.revenue_growth_63d  # noqa: F401
+    import factors.fundamental.roe_growth_63d  # noqa: F401
+    import factors.risk.r_std  # noqa: F401
+    import factors.risk.semi_beta  # noqa: F401
+    import factors.price.slp_reversal  # noqa: F401
+    import factors.risk.smallcap_growth  # noqa: F401
+    import factors.fundamental.sp_1d  # noqa: F401
+    import factors.sector.style  # noqa: F401
+    import factors.fundamental.total_asset_growth_63d  # noqa: F401
+    import factors.fundamental.total_asset_growth_vol_24m  # noqa: F401
+    import factors.fundamental.total_asset_turnover_1d  # noqa: F401
+    import factors.price.turnover_cv  # noqa: F401
+    import factors.risk.vff3_volatility  # noqa: F401
+    import factors.price.volume_price_corr  # noqa: F401
     import scheme.MaxICWeight
 
     factor_configs = {
@@ -579,10 +579,37 @@ if __name__ == "__main__":
             symbols=None,
             start="2017-01-01",
             n_groups=5,
-            output_dir=f"outputs/{factor_name}",
+            output_dir=f"outputs/hs300/{factor_name}",
             data_columns=config["columns"],
         )
-        runner.run(save_factor=True)
+        runner.run(save_factor=True,
+                   data_dir="cache/hs300_csv")
+        print(f"{factor_name} 已保存到: {runner.output_dir.resolve()}")
+
+        runner = Runner(
+            factor_name=factor_name,
+            factor_params=config["params"],
+            symbols=None,
+            start="2017-01-01",
+            n_groups=5,
+            output_dir=f"outputs/zz500/{factor_name}",
+            data_columns=config["columns"],
+        )
+        runner.run(save_factor=True,
+                   data_dir="cache/zz500_csv")
+        print(f"{factor_name} 已保存到: {runner.output_dir.resolve()}")
+
+        runner = Runner(
+            factor_name=factor_name,
+            factor_params=config["params"],
+            symbols=None,
+            start="2017-01-01",
+            n_groups=5,
+            output_dir=f"outputs/zz1000/{factor_name}",
+            data_columns=config["columns"],
+        )
+        runner.run(save_factor=True,
+                   data_dir="cache/zz1000_csv")
         print(f"{factor_name} 已保存到: {runner.output_dir.resolve()}")
 
     # 组合因子回测
@@ -602,5 +629,5 @@ if __name__ == "__main__":
     #         data_columns=config["columns"],
     #     )
     #     runner.run(save_factor=True,
-    #                factor_dir="factor_results/factor_wide")
+    #                data_dir="cache/hs300_csv")
     #     print(f"{scheme_name} 已保存到: {runner.output_dir.resolve()}")
