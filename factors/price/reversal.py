@@ -50,7 +50,7 @@ class TradingAmount(BaseFactor):
     description = "20日成交金额均值"
 
     def generate_signals(self, data: pd.DataFrame, constituents: dict[str, set[str]] | None = None) -> pd.DataFrame:
-        close = data["close"].unstack("symbol").astype(float).sort_index()
+        close = data["adj_close"].unstack("symbol").astype(float).sort_index()
         volume = data["volume"].unstack("symbol").astype(float).sort_index()
         
         amount = close * volume

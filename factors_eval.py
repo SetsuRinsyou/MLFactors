@@ -315,7 +315,7 @@ def calc_turnover(
 def calc_forward_returns(
     market_data: pd.DataFrame,
     period: int,
-    price_col: str = "close",
+    price_col: str = "adj_close",
 ) -> pd.Series:
     """根据价格面板计算指定周期的未来持有收益。
 

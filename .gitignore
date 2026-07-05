@@ -64,3 +64,5 @@ outputs/
 lab/**
 record/**
 factor_results/**
+scheme_outputs/**
+debug*/**

@@ -272,304 +272,302 @@ if __name__ == "__main__":
     import scheme.MaxICWeight
 
     factor_configs = {
-        "beta_252d": {
-            "params": {"lookback": 252, "min_obs": 120, "clip": (-3.0, 3.0)},
-            "columns": ["close", "market_cap"],
-        },
-        "beta_mn_252d": {
-            "params": {"window": 252, "min_obs": 120, "min_market_obs": 100},
-            "columns": ["close", "market_cap"],
-        },
-        "beta_mp_252d": {
-            "params": {"window": 252, "min_obs": 120, "min_market_obs": 100},
-            "columns": ["close", "market_cap"],
-        },
-        "beta_n_252d": {
-            "params": {"window": 252, "min_obs": 120, "min_market_obs": 100},
-            "columns": ["close", "market_cap"],
-        },
-        "beta_p_252d": {
-            "params": {"window": 252, "min_obs": 120, "min_market_obs": 100},
-            "columns": ["close", "market_cap"],
-        },
-        "dip_rebound_10d": {
-            "params": {"window": 10, "min_periods": 5, "shift_days": 0},
-            "columns": ["close", "low"],
-        },
-        "high_r_std_84d": {
-            "params": {"lookback": 84, "min_periods": None},
-            "columns": ["close", "high", "low", "volume"],
-        },
-        "hml_r_std_84d": {
-            "params": {"lookback": 84, "min_periods": None},
-            "columns": ["close", "high", "low", "volume"],
-        },
-        "industry_momentum_1d": {
-            "params": {"period": 1},
-            "columns": ["close", "sector"],
-        },
-        "max_daily_return_5d": {
-            "params": {
-                "top_n": 5,
-                "min_obs": None,
-                "lookback": 21,
-                "rebalance_step": 21,
-            },
-            "columns": ["close"],
-        },
-        # "multi_horizon_llt_50d": {
-        #     "params": {"periods": None, "lookback_days": 50},
+        # "beta_252d": {
+        #     "params": {"lookback": 252, "min_obs": 120, "clip": (-3.0, 3.0)},
+        #     "columns": ["close", "market_cap"],
+        # },
+        # "beta_mn_252d": {
+        #     "params": {"window": 252, "min_obs": 120, "min_market_obs": 100},
+        #     "columns": ["close", "market_cap"],
+        # },
+        # "beta_mp_252d": {
+        #     "params": {"window": 252, "min_obs": 120, "min_market_obs": 100},
+        #     "columns": ["close", "market_cap"],
+        # },
+        # "beta_n_252d": {
+        #     "params": {"window": 252, "min_obs": 120, "min_market_obs": 100},
+        #     "columns": ["close", "market_cap"],
+        # },
+        # "beta_p_252d": {
+        #     "params": {"window": 252, "min_obs": 120, "min_market_obs": 100},
+        #     "columns": ["close", "market_cap"],
+        # },
+        # "dip_rebound_10d": {
+        #     "params": {"window": 10, "min_periods": 5, "shift_days": 0},
+        #     "columns": ["close", "low"],
+        # },
+        # "high_r_std_84d": {
+        #     "params": {"lookback": 84, "min_periods": None},
+        #     "columns": ["close", "high", "low", "volume"],
+        # },
+        # "hml_r_std_84d": {
+        #     "params": {"lookback": 84, "min_periods": None},
+        #     "columns": ["close", "high", "low", "volume"],
+        # },
+        # "industry_momentum_1d": {
+        #     "params": {"period": 1},
+        #     "columns": ["close", "sector"],
+        # },
+        # "max_daily_return_5d": {
+        #     "params": {
+        #         "top_n": 5,
+        #         "min_obs": None,
+        #         "lookback": 21,
+        #         "rebalance_step": 21,
+        #     },
         #     "columns": ["close"],
         # },
-        # "multi_horizon_ma_50d": {
-        #     "params": {"periods": None, "lookback_days": 50},
+        # # "multi_horizon_llt_50d": {
+        # #     "params": {"periods": None, "lookback_days": 50},
+        # #     "columns": ["close"],
+        # # },
+        # # "multi_horizon_ma_50d": {
+        # #     "params": {"periods": None, "lookback_days": 50},
+        # #     "columns": ["close"],
+        # # },
+        # "open_high_surge_10d": {
+        #     "params": {"window": 10, "min_periods": 5, "shift_days": 0},
+        #     "columns": ["close", "open", "high"],
+        # },
+        # "pair_reversal_60d": {
+        #     "params": {"formation_period": 60, "reversal_period": 5},
         #     "columns": ["close"],
         # },
-        "open_high_surge_10d": {
-            "params": {"window": 10, "min_periods": 5, "shift_days": 0},
-            "columns": ["close", "open", "high"],
-        },
-        "pair_reversal_60d": {
-            "params": {"formation_period": 60, "reversal_period": 5},
-            "columns": ["close"],
-        },
-        "r_std_84d": {
-            "params": {"lookback": 84, "min_periods": None},
-            "columns": ["close", "volume"],
-        },
-        "reversal_1m": {"params": {}, "columns": ["close"]},
-        "reversal_3m": {"params": {}, "columns": ["close"]},
-        "reversal_6m": {"params": {}, "columns": ["close"]},
-        "size_factor_1d": {"params": {}, "columns": ["close", "market_cap"]},
-        "size_squared_1d": {"params": {}, "columns": ["close", "market_cap"]},
-        "slp_reversal_20d": {"params": {"window": 20}, "columns": ["close"]},
-        "smallcap_growth_1d": {
-            "params": {"lower": 0.01, "upper": 0.99, "use_rank": False},
-            "columns": ["close", "market_cap"],
-        },
-        "style_category_momentum_1d": {
-            "params": {"period": 1, "n_clusters": 30},
-            "columns": ["close", "market_cap", "pe_ratio"],
-        },
-        "trading_amount_20d": {"params": {}, "columns": ["close", "volume"]},
-        "turnover_cv_20d": {
-            "params": {"window": 20, "min_periods": 15},
-            "columns": ["close", "volume", "market_cap"],
-        },
-        "vff3_63d": {
-            "params": {"lookback": 63, "min_periods": 40, "min_residuals": 10},
-            "columns": ["close", "volume", "market_cap", "pb_ratio"],
-        },
-        "vff3_up_63d": {
-            "params": {"lookback": 63, "min_periods": 40, "min_residuals": 10},
-            "columns": ["close", "volume", "market_cap", "pb_ratio"],
-        },
-        "vff3_upd_63d": {
-            "params": {"lookback": 63, "min_periods": 40, "min_residuals": 10},
-            "columns": ["close", "volume", "market_cap", "pb_ratio"],
-        },
-        "volume_3m": {"params": {}, "columns": ["close", "volume"]},
-        "volume_price_corr_15d": {
-            "params": {"window": 10},
-            "columns": ["close", "volume", "market_cap"],
-        },
-        "cfp_1d": {
-            "params": {},
-            "columns": ["close", "operating_cash_flow", "market_cap", "sector"],
-        },
-        "current_asset_growth_12m": {
-            "params": {},
-            "columns": ["close", "current_assets"],
-        },
-        "current_asset_growth_vol_24m": {
-            "params": {},
-            "columns": ["close", "current_assets"],
-        },
-        "current_liability_ratio_1d": {
-            "params": {},
-            "columns": ["close", "total_liabilities", "current_liabilities", "sector"],
-        },
-        "current_ratio_1d": {
-            "params": {},
-            "columns": ["close", "current_assets", "current_liabilities", "sector"],
-        },
-        "debt_per_share_1d": {
-            "params": {},
-            "columns": ["close", "total_debt", "shares_basic", "sector"],
-        },
-        "debt_to_asset_1d": {
-            "params": {},
-            "columns": ["close", "total_assets", "total_liabilities", "sector"],
-        },
-        "debt_to_asset_change_12m": {
-            "params": {},
-            "columns": ["close", "total_liabilities", "total_assets"],
-        },
-        "dgmarq_12m": {
-            "params": {"year_days": 252},
-            "columns": ["close", "revenue", "cost_revenue"],
-        },
-        "dgpoaq_12m": {
-            "params": {"year_days": 252},
-            "columns": ["close", "total_assets", "revenue", "cost_revenue"],
-        },
-        "dividend_yield_1d": {
-            "params": {},
-            "columns": ["close", "dividends_paid", "market_cap", "sector"],
-        },
-        "droaq_12m": {
-            "params": {"year_days": 252},
-            "columns": ["close", "roa"],
-        },
-        "eps_growth_12m": {
-            "params": {"year_days": 252},
-            "columns": ["close", "eps"],
-        },
-        "eps_growth_63d": {
-            "params": {},
-            "columns": ["close", "eps", "sector"],
-        },
-        "eps_growth_accel_3m": {
-            "params": {"year_days": 252, "period_days": 63},
-            "columns": ["close", "eps"],
-        },
-        "eps_growth_accel_price_adj_3m": {
-            "params": {"year_days": 252, "period_days": 63},
-            "columns": ["close", "eps"],
-        },
-        "eps_growth_accel_vol_adj_3m": {
-            "params": {
-                "year_days": 252,
-                "period_days": 63,
-                "quarter_days": 63,
-                "n_quarters": 8,
-            },
-            "columns": ["close", "eps"],
-        },
-        "eps_growth_price_adj_3m": {
-            "params": {"year_days": 252, "period_days": 63},
-            "columns": ["close", "eps"],
-        },
-        "eps_growth_vol_adj_3m": {
-            "params": {"year_days": 252, "quarter_days": 63, "n_quarters": 8},
-            "columns": ["close", "eps"],
-        },
-        "equity_growth_63d": {
-            "params": {},
-            "columns": ["close", "shareholder_equity", "sector"],
-        },
-        "equity_ratio_change_12m": {
-            "params": {},
-            "columns": ["close", "shareholder_equity", "total_assets"],
-        },
-        "equity_to_fixed_asset_change_12m": {
-            "params": {},
-            "columns": ["close", "shareholder_equity", "ppe_net"],
-        },
-        "financial_expense_ratio_1d": {
-            "params": {},
-            "columns": ["close", "revenue", "interest_expense", "sector"],
-        },
-        "fixed_ratio_1d": {
-            "params": {},
-            "columns": ["close", "total_assets", "ppe_net", "sector"],
-        },
-        "gpoaq_3m": {
-            "params": {"quarter_days": 63},
-            "columns": ["close", "total_assets", "revenue", "cost_revenue"],
-        },
-        "gross_margin_1d": {
-            "params": {},
-            "columns": ["close", "revenue", "gross_profit", "sector"],
-        },
-        "gross_profitability_growth_12m": {
-            "params": {},
-            "columns": ["close", "gross_profit", "total_assets"],
-        },
-        "gross_profitability_trend_qoq_12m": {
-            "params": {},
-            "columns": ["close", "gross_profit", "total_assets"],
-        },
-        "gross_profitability_trend_yoy_48m": {
-            "params": {},
-            "columns": ["close", "gross_profit", "total_assets"],
-        },
-        "industry_current_asset_growth_stability_24m": {
-            "params": {},
-            "columns": ["close", "current_assets", "sector"],
-        },
-        "inventory_turnover_1d": {
-            "params": {},
-            "columns": ["close", "cost_revenue", "inventory", "sector"],
-        },
-        "long_term_debt_ratio_1d": {
-            "params": {},
-            "columns": ["close", "total_assets", "non_current_debt", "sector"],
-        },
-        "long_term_debt_ratio_change_12m": {
-            "params": {},
-            "columns": ["close", "non_current_debt", "total_assets"],
-        },
-        "net_income_cash_ratio_1d": {
-            "params": {},
-            "columns": ["close", "net_income", "operating_cash_flow", "sector"],
-        },
-        "net_income_growth_63d": {
-            "params": {},
-            "columns": ["close", "net_income", "sector"],
-        },
-        "net_profit_margin_1d": {
-            "params": {},
-            "columns": ["close", "net_income", "revenue", "sector"],
-        },
-        "non_current_asset_growth_12m": {
-            "params": {},
-            "columns": ["close", "non_current_assets"],
-        },
-        "non_current_asset_growth_vol_24m": {
-            "params": {},
-            "columns": ["close", "non_current_assets"],
-        },
-        "operating_expense_ratio_1d": {
-            "params": {},
-            "columns": ["close", "operating_expense", "revenue", "sector"],
-        },
-        "quick_ratio_1d": {
-            "params": {},
-            "columns": [
-                "close",
-                "current_assets",
-                "current_liabilities",
-                "inventory",
-                "sector",
-            ],
-        },
-        "revenue_growth_63d": {
-            "params": {},
-            "columns": ["close", "revenue", "sector"],
-        },
-        "roe_growth_63d": {
-            "params": {},
-            "columns": ["close", "roe", "sector"],
-        },
-        "sp_1d": {
-            "params": {},
-            "columns": ["close", "market_cap", "revenue", "sector"],
-        },
-        "total_asset_growth_63d": {
-            "params": {},
-            "columns": ["close", "total_assets", "sector"],
-        },
-        "total_asset_growth_vol_24m": {
-            "params": {},
-            "columns": ["close", "total_assets"],
-        },
-        "total_asset_turnover_1d": {
-            "params": {},
-            "columns": ["close", "total_assets", "revenue", "sector"],
-        },
-        # "max_ic_weight_10d": {"params": {"ic_window": 10},
-        #                       "columns": ["close"]}
+        # "r_std_84d": {
+        #     "params": {"lookback": 84, "min_periods": None},
+        #     "columns": ["close", "volume"],
+        # },
+        # "reversal_1m": {"params": {}, "columns": ["close"]},
+        # "reversal_3m": {"params": {}, "columns": ["close"]},
+        # "reversal_6m": {"params": {}, "columns": ["close"]},
+        # "size_factor_1d": {"params": {}, "columns": ["close", "market_cap"]},
+        # "size_squared_1d": {"params": {}, "columns": ["close", "market_cap"]},
+        # "slp_reversal_20d": {"params": {"window": 20}, "columns": ["close"]},
+        # "smallcap_growth_1d": {
+        #     "params": {"lower": 0.01, "upper": 0.99, "use_rank": False},
+        #     "columns": ["close", "market_cap"],
+        # },
+        # "style_category_momentum_1d": {
+        #     "params": {"period": 1, "n_clusters": 30},
+        #     "columns": ["close", "market_cap", "pe_ratio"],
+        # },
+        # "trading_amount_20d": {"params": {}, "columns": ["close", "volume"]},
+        # "turnover_cv_20d": {
+        #     "params": {"window": 20, "min_periods": 15},
+        #     "columns": ["close", "volume", "market_cap"],
+        # },
+        # "vff3_63d": {
+        #     "params": {"lookback": 63, "min_periods": 40, "min_residuals": 10},
+        #     "columns": ["close", "volume", "market_cap", "pb_ratio"],
+        # },
+        # "vff3_up_63d": {
+        #     "params": {"lookback": 63, "min_periods": 40, "min_residuals": 10},
+        #     "columns": ["close", "volume", "market_cap", "pb_ratio"],
+        # },
+        # "vff3_upd_63d": {
+        #     "params": {"lookback": 63, "min_periods": 40, "min_residuals": 10},
+        #     "columns": ["close", "volume", "market_cap", "pb_ratio"],
+        # },
+        # "volume_3m": {"params": {}, "columns": ["close", "volume"]},
+        # "volume_price_corr_15d": {
+        #     "params": {"window": 10},
+        #     "columns": ["close", "volume", "market_cap"],
+        # },
+        # "cfp_1d": {
+        #     "params": {},
+        #     "columns": ["close", "operating_cash_flow", "market_cap", "sector"],
+        # },
+        # "current_asset_growth_12m": {
+        #     "params": {},
+        #     "columns": ["close", "current_assets"],
+        # },
+        # "current_asset_growth_vol_24m": {
+        #     "params": {},
+        #     "columns": ["close", "current_assets"],
+        # },
+        # "current_liability_ratio_1d": {
+        #     "params": {},
+        #     "columns": ["close", "total_liabilities", "current_liabilities", "sector"],
+        # },
+        # "current_ratio_1d": {
+        #     "params": {},
+        #     "columns": ["close", "current_assets", "current_liabilities", "sector"],
+        # },
+        # "debt_per_share_1d": {
+        #     "params": {},
+        #     "columns": ["close", "total_debt", "shares_basic", "sector"],
+        # },
+        # "debt_to_asset_1d": {
+        #     "params": {},
+        #     "columns": ["close", "total_assets", "total_liabilities", "sector"],
+        # },
+        # "debt_to_asset_change_12m": {
+        #     "params": {},
+        #     "columns": ["close", "total_liabilities", "total_assets"],
+        # },
+        # "dgmarq_12m": {
+        #     "params": {"year_days": 252},
+        #     "columns": ["close", "revenue", "cost_revenue"],
+        # },
+        # "dgpoaq_12m": {
+        #     "params": {"year_days": 252},
+        #     "columns": ["close", "total_assets", "revenue", "cost_revenue"],
+        # },
+        # "dividend_yield_1d": {
+        #     "params": {},
+        #     "columns": ["close", "dividends_paid", "market_cap", "sector"],
+        # },
+        # "droaq_12m": {
+        #     "params": {"year_days": 252},
+        #     "columns": ["close", "roa"],
+        # },
+        # "eps_growth_12m": {
+        #     "params": {"year_days": 252},
+        #     "columns": ["close", "eps"],
+        # },
+        # "eps_growth_63d": {
+        #     "params": {},
+        #     "columns": ["close", "eps", "sector"],
+        # },
+        # "eps_growth_accel_3m": {
+        #     "params": {"year_days": 252, "period_days": 63},
+        #     "columns": ["close", "eps"],
+        # },
+        # "eps_growth_accel_price_adj_3m": {
+        #     "params": {"year_days": 252, "period_days": 63},
+        #     "columns": ["close", "eps"],
+        # },
+        # "eps_growth_accel_vol_adj_3m": {
+        #     "params": {
+        #         "year_days": 252,
+        #         "period_days": 63,
+        #         "quarter_days": 63,
+        #         "n_quarters": 8,
+        #     },
+        #     "columns": ["close", "eps"],
+        # },
+        # "eps_growth_price_adj_3m": {
+        #     "params": {"year_days": 252, "period_days": 63},
+        #     "columns": ["close", "eps"],
+        # },
+        # "eps_growth_vol_adj_3m": {
+        #     "params": {"year_days": 252, "quarter_days": 63, "n_quarters": 8},
+        #     "columns": ["close", "eps"],
+        # },
+        # "equity_growth_63d": {
+        #     "params": {},
+        #     "columns": ["close", "shareholder_equity", "sector"],
+        # },
+        # "equity_ratio_change_12m": {
+        #     "params": {},
+        #     "columns": ["close", "shareholder_equity", "total_assets"],
+        # },
+        # "equity_to_fixed_asset_change_12m": {
+        #     "params": {},
+        #     "columns": ["close", "shareholder_equity", "ppe_net"],
+        # },
+        # "financial_expense_ratio_1d": {
+        #     "params": {},
+        #     "columns": ["close", "revenue", "interest_expense", "sector"],
+        # },
+        # "fixed_ratio_1d": {
+        #     "params": {},
+        #     "columns": ["close", "total_assets", "ppe_net", "sector"],
+        # },
+        # "gpoaq_3m": {
+        #     "params": {"quarter_days": 63},
+        #     "columns": ["close", "total_assets", "revenue", "cost_revenue"],
+        # },
+        # "gross_margin_1d": {
+        #     "params": {},
+        #     "columns": ["close", "revenue", "gross_profit", "sector"],
+        # },
+        # "gross_profitability_growth_12m": {
+        #     "params": {},
+        #     "columns": ["close", "gross_profit", "total_assets"],
+        # },
+        # "gross_profitability_trend_qoq_12m": {
+        #     "params": {},
+        #     "columns": ["close", "gross_profit", "total_assets"],
+        # },
+        # "gross_profitability_trend_yoy_48m": {
+        #     "params": {},
+        #     "columns": ["close", "gross_profit", "total_assets"],
+        # },
+        # "industry_current_asset_growth_stability_24m": {
+        #     "params": {},
+        #     "columns": ["close", "current_assets", "sector"],
+        # },
+        # "inventory_turnover_1d": {
+        #     "params": {},
+        #     "columns": ["close", "cost_revenue", "inventory", "sector"],
+        # },
+        # "long_term_debt_ratio_1d": {
+        #     "params": {},
+        #     "columns": ["close", "total_assets", "non_current_debt", "sector"],
+        # },
+        # "long_term_debt_ratio_change_12m": {
+        #     "params": {},
+        #     "columns": ["close", "non_current_debt", "total_assets"],
+        # },
+        # "net_income_cash_ratio_1d": {
+        #     "params": {},
+        #     "columns": ["close", "net_income", "operating_cash_flow", "sector"],
+        # },
+        # "net_income_growth_63d": {
+        #     "params": {},
+        #     "columns": ["close", "net_income", "sector"],
+        # },
+        # "net_profit_margin_1d": {
+        #     "params": {},
+        #     "columns": ["close", "net_income", "revenue", "sector"],
+        # },
+        # "non_current_asset_growth_12m": {
+        #     "params": {},
+        #     "columns": ["close", "non_current_assets"],
+        # },
+        # "non_current_asset_growth_vol_24m": {
+        #     "params": {},
+        #     "columns": ["close", "non_current_assets"],
+        # },
+        # "operating_expense_ratio_1d": {
+        #     "params": {},
+        #     "columns": ["close", "operating_expense", "revenue", "sector"],
+        # },
+        # "quick_ratio_1d": {
+        #     "params": {},
+        #     "columns": [
+        #         "close",
+        #         "current_assets",
+        #         "current_liabilities",
+        #         "inventory",
+        #         "sector",
+        #     ],
+        # },
+        # "revenue_growth_63d": {
+        #     "params": {},
+        #     "columns": ["close", "revenue", "sector"],
+        # },
+        # "roe_growth_63d": {
+        #     "params": {},
+        #     "columns": ["close", "roe", "sector"],
+        # },
+        # "sp_1d": {
+        #     "params": {},
+        #     "columns": ["close", "market_cap", "revenue", "sector"],
+        # },
+        # "total_asset_growth_63d": {
+        #     "params": {},
+        #     "columns": ["close", "total_assets", "sector"],
+        # },
+        # "total_asset_growth_vol_24m": {
+        #     "params": {},
+        #     "columns": ["close", "total_assets"],
+        # },
+        # "total_asset_turnover_1d": {
+        #     "params": {},
+        #     "columns": ["close", "total_assets", "revenue", "sector"],
+        # },
     }
 
     for factor_name, config in factor_configs.items():
@@ -613,21 +611,55 @@ if __name__ == "__main__":
         print(f"{factor_name} 已保存到: {runner.output_dir.resolve()}")
 
     # 组合因子回测
-    # scheme_configs = {
-    #     "max_ic_weight_10d": {"params": {"ic_window": 10},
-    #                           "columns": ["close"]}
-    # }
+    scheme_configs = {
+        "max_ic_weight_fundamental_10d": {"params": {"ic_window": 10},
+                                          "columns": ["adj_close"]},
+        "max_ic_weight_price_10d": {"params": {"ic_window": 10},
+                                    "columns": ["adj_close"]},
+        "max_ic_weight_risk_10d": {"params": {"ic_window": 10},
+                                   "columns": ["adj_close"]},
+        "max_ic_weight_all_10d": {"params": {"ic_window": 10},
+                                 "columns": ["adj_close"]},
+    }
 
-    # for scheme_name, config in scheme_configs.items():
-    #     runner = Runner(
-    #         factor_name=scheme_name,
-    #         factor_params=config["params"],
-    #         symbols=None,
-    #         start="2017-01-01",
-    #         n_groups=5,
-    #         output_dir=f"outputs/{scheme_name}",
-    #         data_columns=config["columns"],
-    #     )
-    #     runner.run(save_factor=True,
-    #                data_dir="cache/hs300_csv")
-    #     print(f"{scheme_name} 已保存到: {runner.output_dir.resolve()}")
+    for scheme_name, config in scheme_configs.items():
+        runner = Runner(
+            factor_name=scheme_name,
+            factor_params=config["params"],
+            symbols=None,
+            start="2010-01-01",
+            n_groups=5,
+            output_dir=f"scheme_outputs/hs300/{scheme_name}",
+            data_columns=config["columns"],
+        )
+        runner.run(save_factor=True,
+                   data_dir="cache/hs300_csv",
+                   factor_dir=f"factor_results/hs300_adjusted_factor_wide")
+        print(f"{scheme_name} 已保存到: {runner.output_dir.resolve()}")
+        runner = Runner(
+            factor_name=scheme_name,
+            factor_params=config["params"],
+            symbols=None,
+            start="2010-01-01",
+            n_groups=5,
+            output_dir=f"scheme_outputs/zz500/{scheme_name}",
+            data_columns=config["columns"],
+        )
+        runner.run(save_factor=True,
+                   data_dir="cache/zz500_csv",
+                   factor_dir=f"factor_results/zz500_adjusted_factor_wide")
+        print(f"{scheme_name} 已保存到: {runner.output_dir.resolve()}")
+
+        runner = Runner(
+            factor_name=scheme_name,
+            factor_params=config["params"],
+            symbols=None,
+            start="2010-01-01",
+            n_groups=5,
+            output_dir=f"scheme_outputs/zz1000/{scheme_name}",
+            data_columns=config["columns"],
+        )
+        runner.run(save_factor=True,
+                   data_dir="cache/zz1000_csv",
+                   factor_dir=f"factor_results/zz1000_adjusted_factor_wide")
+        print(f"{scheme_name} 已保存到: {runner.output_dir.resolve()}")
