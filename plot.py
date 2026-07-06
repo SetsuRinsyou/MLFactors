@@ -49,14 +49,26 @@ class FactorPlotter:
         ax.legend(fontsize=8)
 
     def plot_layered_returns(self, ax: plt.Axes) -> None:
-        """绘制各因子分组的累计收益。"""
-        cumulative = self.result.layered.cumulative_returns
-        ax.set_title("Layered Cumulative Returns")
+        """绘制最高和最低因子分组的累计收益。"""
+        layered = self.result.layered
+        cumulative = pd.concat(
+            {
+                "Bottom": layered.bottom_cumulative_returns,
+                "Top": layered.top_cumulative_returns,
+            },
+            axis=1,
+        )
+        ax.set_title("Top/Bottom Cumulative Returns")
         if cumulative.empty:
             return
-        colors = plt.cm.RdYlGn(np.linspace(0.1, 0.9, len(cumulative.columns)))
-        for color, group in zip(colors, cumulative.columns):
-            ax.plot(cumulative.index, cumulative[group], color=color, label=f"Group {group}")
+        colors = {"Bottom": "#d7191c", "Top": "#1a9641"}
+        for group in cumulative.columns:
+            ax.plot(
+                cumulative.index,
+                cumulative[group],
+                color=colors[group],
+                label=group,
+            )
         if self.benchmark_cumulative is not None:
             benchmark_colors = {"SPY": "black", "QQQ": "dimgray"}
             for benchmark in self.benchmark_cumulative.columns:

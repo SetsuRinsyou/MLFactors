@@ -19,39 +19,30 @@ class LayeredResult:
     ----------
     group_returns : pd.DataFrame
         每个调仓日期、每个因子分组的等权平均收益，索引为日期，列为组号。
-    cumulative_returns : pd.DataFrame
-        根据 ``group_returns`` 复利计算的累计收益。
-    annual_returns : pd.Series
-        各组按照实际有效期数和年化频率计算的年化收益。
-    sharpe_ratios : pd.Series
-        各组不扣除无风险利率的年化夏普比率。
-    long_max_drawdown : float
-        最高因子分组作为多头组合时的最大回撤。
-    short_max_drawdown : float
-        最低因子分组取反作为空头组合时的最大回撤。
+    top_cumulative_returns, bottom_cumulative_returns : pd.Series
+        最高/最低因子分组根据逐期收益复利计算的累计收益。
+    top_annual_return, bottom_annual_return : float
+        最高/最低因子分组按照实际有效期数和年化频率计算的年化收益。
+    top_sharpe_ratio, bottom_sharpe_ratio : float
+        最高/最低因子分组不扣除无风险利率的年化夏普比率。
     top_max_drawdown, bottom_max_drawdown : float
-        与 long/short 最大回撤相同的兼容字段。
-    top_excess_annual : float
-        最高组相对所有组等权平均收益的年化超额收益。
-    top_excess_max_drawdown : float
-        最高组超额收益曲线的最大回撤。
-    top_excess_calmar : float
-        年化超额收益除以超额最大回撤绝对值。
+        最高/最低因子分组作为多头组合时的最大回撤。
+    top_bottom_win_rate : float
+        最高因子组收益减最低因子组收益大于 0 的期数占比。
     n_groups : int
         分层数量。
     """
 
     group_returns: pd.DataFrame
-    cumulative_returns: pd.DataFrame
-    annual_returns: pd.Series
-    sharpe_ratios: pd.Series
-    long_max_drawdown: float = 0.0
-    short_max_drawdown: float = 0.0
+    top_cumulative_returns: pd.Series
+    bottom_cumulative_returns: pd.Series
+    top_annual_return: float = 0.0
+    bottom_annual_return: float = 0.0
+    top_sharpe_ratio: float = 0.0
+    bottom_sharpe_ratio: float = 0.0
     top_max_drawdown: float = 0.0
     bottom_max_drawdown: float = 0.0
-    top_excess_annual: float = 0.0
-    top_excess_max_drawdown: float = 0.0
-    top_excess_calmar: float = 0.0
+    win_rate: float = 0.0
     n_groups: int = 5
 
 
@@ -161,41 +152,56 @@ def calc_ic_series(
     return pd.Series(result, name="IC").sort_index()
 
 
-def calc_icir(
-    ic_series: pd.Series,
-    period: int = 1,
-    annualize: bool = False,
-    periods_per_year: int = 252,
-) -> float:
-    """计算 IC 信息比率，并修正多期重叠收益造成的虚高。
+def calc_icir(ic_series: pd.Series) -> float:
+    """计算 IC 信息比率。
 
-    基础 ICIR 为 ``mean(IC) / std(IC)``。当未来收益覆盖多个周期时，结果
-    再除以 ``sqrt(period)``。若要求年化，则乘以
-    ``sqrt(periods_per_year)``。少于两个有效 IC 或标准差为零时返回 NaN。
+    ICIR 为 ``mean(IC) / std(IC)``。少于两个有效 IC 或标准差为零时
+    返回 NaN。
 
     Parameters
     ----------
     ic_series : pd.Series
         按时间排列的 IC 序列。
-    period : int, default 1
-        每个未来收益覆盖的周期数，用于重叠收益修正。
-    annualize : bool, default False
-        是否对修正后的 ICIR 进行年化。
-    periods_per_year : int, default 252
-        一年的基础周期数，日频通常使用 252。
 
     Returns
     -------
     float
-        修正后或年化后的 ICIR。
+        ICIR。
     """
     values = ic_series.dropna()
     if len(values) < 2 or values.std() == 0:
         return np.nan
-    result = values.mean() / values.std() / np.sqrt(period)
-    if annualize:
-        result *= np.sqrt(periods_per_year)
-    return float(result)
+    return float(values.mean() / values.std())
+
+
+def calc_offset_ic_stats(
+    ic_series: pd.Series,
+    period: int = 1,
+) -> dict[str, float]:
+    """按收益周期拆分 offset 后汇总 IC 均值、标准差和 ICIR。"""
+    if period <= 0:
+        raise ValueError("period 必须为正整数")
+    values = ic_series.sort_index()
+    means = []
+    stds = []
+    icirs = []
+    for offset in range(period):
+        offset_values = values.iloc[offset::period].dropna()
+        if offset_values.empty:
+            continue
+        means.append(float(offset_values.mean()))
+        if len(offset_values) >= 2:
+            std = offset_values.std()
+            if std > 0:
+                stds.append(float(std))
+                icirs.append(float(offset_values.mean() / std))
+            elif std == 0:
+                stds.append(0.0)
+    return {
+        "IC_mean": float(np.mean(means)) if means else np.nan,
+        "IC_std": float(np.mean(stds)) if stds else np.nan,
+        "ICIR": float(np.mean(icirs)) if icirs else np.nan,
+    }
 
 
 def calc_t_stat(ic_series: pd.Series) -> tuple[float, float]:
@@ -387,9 +393,8 @@ def layered_backtest(
 
     每个日期先对因子值排名，以 ``method="first"`` 打破相同因子值的并列，
     然后用 qcut 划分为 1 到 ``n_groups``。组号越大表示因子值越高，各组
-    收益为组内股票的等权平均收益。函数进一步计算累计收益、年化收益、
-    年化夏普、最高组多头最大回撤、最低组取反后的空头最大回撤，以及最高
-    组相对全部组等权基准的超额收益、回撤和 Calmar 比率。
+    收益为组内股票的等权平均收益。函数进一步计算最高/最低因子组的累计
+    收益、年化收益、年化夏普和最大回撤。
 
     Parameters
     ----------
@@ -450,9 +455,8 @@ def layered_backtest(
     if not records:
         return LayeredResult(
             group_returns=pd.DataFrame(),
-            cumulative_returns=pd.DataFrame(),
-            annual_returns=pd.Series(dtype=float),
-            sharpe_ratios=pd.Series(dtype=float),
+            top_cumulative_returns=pd.Series(dtype=float),
+            bottom_cumulative_returns=pd.Series(dtype=float),
             n_groups=n_groups,
         )
 
@@ -477,40 +481,38 @@ def layered_backtest(
 
     top_group = int(group_returns.columns.max())
     bottom_group = int(group_returns.columns.min())
-    long_max_drawdown = calc_max_drawdown(group_returns[top_group])
-    short_max_drawdown = calc_max_drawdown(-group_returns[bottom_group])
-
-    benchmark_returns = group_returns.mean(axis=1)
-    excess_returns = (group_returns[top_group] - benchmark_returns).dropna()
-    if excess_returns.empty:
-        excess_annual = 0.0
-        excess_max_drawdown = 0.0
-    else:
-        excess_total = (1 + excess_returns).prod(skipna=True)
-        excess_annual = (
-            float(excess_total ** (periods_per_year / len(excess_returns)) - 1)
-            if excess_total > 0
-            else np.nan
-        )
-        excess_max_drawdown = calc_max_drawdown(excess_returns)
-    excess_calmar = (
-        float(excess_annual / abs(excess_max_drawdown))
-        if np.isfinite(excess_annual) and excess_max_drawdown < 0
+    top_cumulative_returns = cumulative_returns[top_group].rename(
+        "top_cumulative_returns"
+    )
+    bottom_cumulative_returns = cumulative_returns[bottom_group].rename(
+        "bottom_cumulative_returns"
+    )
+    top_annual_return = float(annual_returns.loc[top_group])
+    bottom_annual_return = float(annual_returns.loc[bottom_group])
+    top_sharpe_ratio = float(sharpe_ratios.loc[top_group])
+    bottom_sharpe_ratio = float(sharpe_ratios.loc[bottom_group])
+    top_max_drawdown = calc_max_drawdown(group_returns[top_group])
+    bottom_max_drawdown = calc_max_drawdown(group_returns[bottom_group])
+    top_bottom_returns = (
+        group_returns[top_group] - group_returns[bottom_group]
+    ).dropna()
+    win_rate = (
+        float((top_bottom_returns > 0).mean())
+        if not top_bottom_returns.empty
         else 0.0
     )
 
     return LayeredResult(
         group_returns=group_returns,
-        cumulative_returns=cumulative_returns,
-        annual_returns=annual_returns,
-        sharpe_ratios=sharpe_ratios,
-        long_max_drawdown=long_max_drawdown,
-        short_max_drawdown=short_max_drawdown,
-        top_max_drawdown=long_max_drawdown,
-        bottom_max_drawdown=short_max_drawdown,
-        top_excess_annual=excess_annual,
-        top_excess_max_drawdown=excess_max_drawdown,
-        top_excess_calmar=excess_calmar,
+        top_cumulative_returns=top_cumulative_returns,
+        bottom_cumulative_returns=bottom_cumulative_returns,
+        top_annual_return=top_annual_return,
+        bottom_annual_return=bottom_annual_return,
+        top_sharpe_ratio=top_sharpe_ratio,
+        bottom_sharpe_ratio=bottom_sharpe_ratio,
+        top_max_drawdown=top_max_drawdown,
+        bottom_max_drawdown=bottom_max_drawdown,
+        win_rate=win_rate,
         n_groups=n_groups,
     )
 
@@ -524,11 +526,12 @@ def eval(
 ) -> FactorEvalResult:
     """汇总单个因子的 IC、换手率和分层回测指标。
 
-    函数根据 ``market_data`` 计算指定周期的未来收益，并按照
-    ``forward_period`` 对交易日期进行等间隔采样，再将因子值与收益对齐，
-    汇总 IC、换手率、分层收益和风险指标。日期采样确保多日未来收益不会
-    因每日调仓而发生持有期重叠。DataFrame 因子输入应为 ``date × symbol``
-    宽表；Series 输入应使用 ``(date, symbol)`` MultiIndex。
+    函数根据 ``market_data`` 计算指定周期的未来收益，并将因子值与收益
+    对齐，汇总 IC、换手率、分层收益和风险指标。``IC_mean``、``IC_std``
+    和 ``ICIR`` 使用完整 IC 序列的多 offset 汇总；组合日期采样确保多日
+    未来收益不会因每日调仓而发生持有期重叠。DataFrame 因子输入应为
+    ``date × symbol`` 宽表；Series 输入应使用 ``(date, symbol)``
+    MultiIndex。
 
     Parameters
     ----------
@@ -539,7 +542,7 @@ def eval(
         ``(date, symbol)`` MultiIndex 行情数据，至少包含 ``close`` 列。
     forward_period : int, default 1
         未来收益持有周期和调仓间隔。函数每隔该数量的交易日选择一次
-        因子截面，同时用于 ICIR 和分层收益年化频率修正。
+        因子截面，同时用于 IC offset 汇总和分层收益年化频率修正。
     n_groups : int, default 5
         每个日期截面的分组数量。
     ic_method : str, default "rank"
@@ -570,6 +573,11 @@ def eval(
     else:
         factor = factor_values.rename("factor")
 
+    forward_returns = calc_forward_returns(market_data, forward_period)
+    full_ic_series = calc_ic_series(factor, forward_returns, method=ic_method)
+    offset_ic_stats = calc_offset_ic_stats(full_ic_series, period=forward_period)
+
+    # sampled_dates 用于分层回测和换手率计算，确保每个调仓期的未来收益不重叠。
     trading_dates = pd.DatetimeIndex(
         market_data.index.get_level_values("date").unique()
     ).sort_values()
@@ -577,12 +585,12 @@ def eval(
     factor = factor[
         factor.index.get_level_values("date").isin(sampled_dates)
     ]
-
-    forward_returns = calc_forward_returns(market_data, forward_period)
     forward_returns = forward_returns[
         forward_returns.index.get_level_values("date").isin(sampled_dates)
     ]
-    ic_series = calc_ic_series(factor, forward_returns, method=ic_method)
+    ic_series = full_ic_series[
+        full_ic_series.index.get_level_values("date").isin(sampled_dates)
+    ]
     turnover = calc_turnover(factor, quantiles=n_groups)
     layered = layered_backtest(
         factor,
@@ -599,28 +607,33 @@ def eval(
     # )
 
     t_stat, p_value = calc_t_stat(ic_series)
-    long_sharpe = 0.0
-    if not layered.sharpe_ratios.empty:
-        long_sharpe = float(layered.sharpe_ratios.loc[layered.sharpe_ratios.index.max()])
+
+    def final_cumulative_return(returns: pd.Series) -> float:
+        values = returns.dropna()
+        return float(values.iloc[-1]) if not values.empty else 0.0
 
     summary = pd.DataFrame([{
         "period": forward_period,
-        "IC_mean": round(float(ic_series.mean()), 4),
-        "IC_std": round(float(ic_series.std()), 4),
-        "ICIR": round(
-            calc_icir(ic_series, period=forward_period, annualize=True),
-            4,
-        ),
+        "IC_mean": round(offset_ic_stats["IC_mean"], 4),
+        "IC_std": round(offset_ic_stats["IC_std"], 4),
+        "ICIR": round(offset_ic_stats["ICIR"], 4),
         "t_stat": round(t_stat, 4),
         "p_value": round(p_value, 6),
-        "IC>0_ratio": round(float((ic_series > 0).mean()), 4),
-        "turnover": round(float(turnover.mean()), 4),
-        "long_sharpe": round(long_sharpe, 4),
-        "long_max_drawdown": round(layered.long_max_drawdown, 4),
-        "short_max_drawdown": round(layered.short_max_drawdown, 4),
-        "top_excess_annual": round(layered.top_excess_annual, 4),
-        "top_excess_max_dd": round(layered.top_excess_max_drawdown, 4),
-        "top_excess_calmar": round(layered.top_excess_calmar, 4),
+        "top_cumulative_return": round(
+            final_cumulative_return(layered.top_cumulative_returns),
+            4,
+        ),
+        "bottom_cumulative_return": round(
+            final_cumulative_return(layered.bottom_cumulative_returns),
+            4,
+        ),
+        "top_annual_return": round(layered.top_annual_return, 4),
+        "bottom_annual_return": round(layered.bottom_annual_return, 4),
+        "top_sharpe_ratio": round(layered.top_sharpe_ratio, 4),
+        "bottom_sharpe_ratio": round(layered.bottom_sharpe_ratio, 4),
+        "top_max_drawdown": round(layered.top_max_drawdown, 4),
+        "bottom_max_drawdown": round(layered.bottom_max_drawdown, 4),
+        "top_bottom_win_rate": round(layered.win_rate, 4),
     }])
     return FactorEvalResult(
         summary=summary.set_index("period"),
