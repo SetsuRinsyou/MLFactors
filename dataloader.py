@@ -110,8 +110,8 @@ class DataLoader:
         )
         # 仅保留指定指数的成分股
         constituents = constituents[constituents["index_code"] == self.constituent_index]
-        # 仅保留回测期间的成分股
-        if self.start is not None:
+        # 仅保留回测结束日前的成分股；开始日前的最后一条记录用于对齐首个行情日。
+        if self.data.empty and self.start is not None:
             constituents = constituents[constituents["trade_date"] >= pd.Timestamp(self.start)]
         if self.end is not None:
             constituents = constituents[constituents["trade_date"] <= pd.Timestamp(self.end)]
@@ -134,6 +134,27 @@ class DataLoader:
         )
         constituents.index.name = "date"
         constituents.columns.name = "symbol"
+
+        if not self.data.empty:
+            data_dates = pd.DatetimeIndex(
+                self.data.index.get_level_values("date").unique()
+            ).sort_values()
+            target_dates = data_dates[data_dates >= constituents.index.min()]
+            if target_dates.empty:
+                raise ValueError(
+                    f"{self.constituent_index} 的成分股日期与行情日期没有交集"
+                )
+            constituents = (
+                constituents.reindex(constituents.index.union(target_dates))
+                .astype("boolean")
+                .sort_index()
+                .ffill()
+                .reindex(target_dates)
+                .fillna(False)
+                .astype(bool)
+            )
+            constituents.index.name = "date"
+            constituents.columns.name = "symbol"
         return constituents
 
     def load_factor_result(self) -> pd.DataFrame:
