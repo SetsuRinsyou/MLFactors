@@ -1,0 +1,138 @@
+{
+  "dip_rebound_10d": {
+    "module": "factors.price.dip_rebound",
+    "params": {
+      "window": 10,
+      "min_periods": 5,
+      "shift_days": 0
+    },
+    "columns": [
+      "close",
+      "low"
+    ]
+  },
+  "max_daily_return_5d": {
+    "module": "factors.price.max_daily_return",
+    "params": {
+      "top_n": 5,
+      "min_obs": null,
+      "lookback": 21,
+      "rebalance_step": 21
+    },
+    "columns": [
+      "close"
+    ]
+  },
+  "multi_horizon_llt_50d": {
+    "module": "factors.price.multi_horizon_llt_daily",
+    "params": {
+      "periods": null,
+      "lookback_days": 50
+    },
+    "columns": [
+      "close"
+    ]
+  },
+  "multi_horizon_ma_50d": {
+    "module": "factors.price.multi_horizon_ma_daily",
+    "params": {
+      "periods": null,
+      "lookback_days": 50
+    },
+    "columns": [
+      "close"
+    ]
+  },
+  "open_high_surge_10d": {
+    "module": "factors.price.open_high_surge_10",
+    "params": {
+      "window": 10,
+      "min_periods": 5,
+      "shift_days": 0
+    },
+    "columns": [
+      "close",
+      "open",
+      "high"
+    ]
+  },
+  "pair_reversal_60d": {
+    "module": "factors.price.pair_reversal",
+    "params": {
+      "formation_period": 60,
+      "reversal_period": 5
+    },
+    "columns": [
+      "close"
+    ]
+  },
+  "reversal_1m": {
+    "module": "factors.price.reversal",
+    "params": {},
+    "columns": [
+      "close"
+    ]
+  },
+  "reversal_3m": {
+    "module": "factors.price.reversal",
+    "params": {},
+    "columns": [
+      "close"
+    ]
+  },
+  "reversal_6m": {
+    "module": "factors.price.reversal",
+    "params": {},
+    "columns": [
+      "close"
+    ]
+  },
+  "slp_reversal_20d": {
+    "module": "factors.price.slp_reversal",
+    "params": {
+      "window": 20
+    },
+    "columns": [
+      "close"
+    ]
+  },
+  "trading_amount_20d": {
+    "module": "factors.price.reversal",
+    "params": {},
+    "columns": [
+      "close",
+      "volume"
+    ]
+  },
+  "turnover_cv_20d": {
+    "module": "factors.price.turnover_cv",
+    "params": {
+      "window": 20,
+      "min_periods": 15
+    },
+    "columns": [
+      "close",
+      "volume",
+      "market_cap"
+    ]
+  },
+  "volume_3m": {
+    "module": "factors.price.reversal",
+    "params": {},
+    "columns": [
+      "close",
+      "volume"
+    ]
+  },
+  "volume_price_corr_15d": {
+    "module": "factors.price.volume_price_corr",
+    "params": {
+      "window": 10
+    },
+    "columns": [
+      "close",
+      "volume",
+      "market_cap"
+    ]
+  }
+}

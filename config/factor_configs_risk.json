@@ -1,0 +1,172 @@
+{
+  "beta_252d": {
+    "module": "factors.risk.beta",
+    "params": {
+      "lookback": 252,
+      "min_obs": 120,
+      "clip": [
+        -3.0,
+        3.0
+      ]
+    },
+    "columns": [
+      "close",
+      "market_cap"
+    ]
+  },
+  "beta_mn_252d": {
+    "module": "factors.risk.semi_beta",
+    "params": {
+      "window": 252,
+      "min_obs": 120,
+      "min_market_obs": 100
+    },
+    "columns": [
+      "close",
+      "market_cap"
+    ]
+  },
+  "beta_mp_252d": {
+    "module": "factors.risk.semi_beta",
+    "params": {
+      "window": 252,
+      "min_obs": 120,
+      "min_market_obs": 100
+    },
+    "columns": [
+      "close",
+      "market_cap"
+    ]
+  },
+  "beta_n_252d": {
+    "module": "factors.risk.semi_beta",
+    "params": {
+      "window": 252,
+      "min_obs": 120,
+      "min_market_obs": 100
+    },
+    "columns": [
+      "close",
+      "market_cap"
+    ]
+  },
+  "beta_p_252d": {
+    "module": "factors.risk.semi_beta",
+    "params": {
+      "window": 252,
+      "min_obs": 120,
+      "min_market_obs": 100
+    },
+    "columns": [
+      "close",
+      "market_cap"
+    ]
+  },
+  "high_r_std_84d": {
+    "module": "factors.risk.high_low_volatility",
+    "params": {
+      "lookback": 84,
+      "min_periods": null
+    },
+    "columns": [
+      "close",
+      "high",
+      "low",
+      "volume"
+    ]
+  },
+  "hml_r_std_84d": {
+    "module": "factors.risk.high_low_volatility",
+    "params": {
+      "lookback": 84,
+      "min_periods": null
+    },
+    "columns": [
+      "close",
+      "high",
+      "low",
+      "volume"
+    ]
+  },
+  "r_std_84d": {
+    "module": "factors.risk.r_std",
+    "params": {
+      "lookback": 84,
+      "min_periods": null
+    },
+    "columns": [
+      "close",
+      "volume"
+    ]
+  },
+  "size_factor_1d": {
+    "module": "factors.risk.size",
+    "params": {},
+    "columns": [
+      "close",
+      "market_cap"
+    ]
+  },
+  "size_squared_1d": {
+    "module": "factors.risk.size",
+    "params": {},
+    "columns": [
+      "close",
+      "market_cap"
+    ]
+  },
+  "smallcap_growth_1d": {
+    "module": "factors.risk.smallcap_growth",
+    "params": {
+      "lower": 0.01,
+      "upper": 0.99,
+      "use_rank": false
+    },
+    "columns": [
+      "close",
+      "market_cap"
+    ]
+  },
+  "vff3_63d": {
+    "module": "factors.risk.vff3_volatility",
+    "params": {
+      "lookback": 63,
+      "min_periods": 40,
+      "min_residuals": 10
+    },
+    "columns": [
+      "close",
+      "volume",
+      "market_cap",
+      "pb_ratio"
+    ]
+  },
+  "vff3_up_63d": {
+    "module": "factors.risk.vff3_volatility",
+    "params": {
+      "lookback": 63,
+      "min_periods": 40,
+      "min_residuals": 10
+    },
+    "columns": [
+      "close",
+      "volume",
+      "market_cap",
+      "pb_ratio"
+    ]
+  },
+  "vff3_upd_63d": {
+    "module": "factors.risk.vff3_volatility",
+    "params": {
+      "lookback": 63,
+      "min_periods": 40,
+      "min_residuals": 10
+    },
+    "columns": [
+      "close",
+      "volume",
+      "market_cap",
+      "pb_ratio"
+    ]
+  }
+}

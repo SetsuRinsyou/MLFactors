@@ -1,0 +1,30 @@
+{
+  "size_factor_1d": {
+    "module": "factors.risk.size",
+    "params": {},
+    "columns": [
+      "adj_close",
+      "market_cap"
+    ]
+  },
+  "size_squared_1d": {
+    "module": "factors.risk.size",
+    "params": {},
+    "columns": [
+      "adj_close",
+      "market_cap"
+    ]
+  },
+  "smallcap_growth_1d": {
+    "module": "factors.risk.smallcap_growth",
+    "params": {
+      "lower": 0.01,
+      "upper": 0.99,
+      "use_rank": false
+    },
+    "columns": [
+      "adj_close",
+      "market_cap"
+    ]
+  }
+}
