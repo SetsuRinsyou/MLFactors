@@ -53,7 +53,7 @@ class MultiHorizonMADaily(BaseFactor):
             a_dict[period] = ma_dict[period] / close
 
         # 计算日收益率
-        daily_ret = close.pct_change()
+        daily_ret = close.pct_change(fill_method=None)
 
         # 初始化因子结果矩阵
         signals = pd.DataFrame(np.nan, index=close.index, columns=close.columns)

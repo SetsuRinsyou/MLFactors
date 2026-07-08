@@ -1,6 +1,11 @@
 """因子评估结果可视化。"""
 
+import os
 from pathlib import Path
+
+matplotlib_config_dir = Path("/tmp") / f"matplotlib-{os.getuid()}"
+matplotlib_config_dir.mkdir(parents=True, exist_ok=True)
+os.environ.setdefault("MPLCONFIGDIR", str(matplotlib_config_dir))
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -63,7 +68,13 @@ class FactorPlotter:
                 label=f"Group {group}",
             )
         if self.benchmark_cumulative is not None:
-            benchmark_colors = {"SPY": "black", "QQQ": "dimgray"}
+            benchmark_colors = {
+                "HS300": "black",
+                "ZZ500": "dimgray",
+                "ZZ1000": "steelblue",
+                "SPY": "black",
+                "QQQ": "dimgray",
+            }
             for benchmark in self.benchmark_cumulative.columns:
                 ax.plot(
                     self.benchmark_cumulative.index,

@@ -138,7 +138,7 @@ def calc_ic_series(
 
     combined = pd.DataFrame({"factor": factor, "returns": returns}).dropna()
     if combined.empty:
-        return pd.Series(dtype=float, name="IC")
+        return pd.Series(dtype=float, name="IC", index=pd.DatetimeIndex([], name="date"))
 
     def cross_sectional_ic(cross_section: pd.DataFrame) -> float:
         """计算 groupby 传入的单日截面 IC。
@@ -172,6 +172,14 @@ def calc_icir(ic_series: pd.Series) -> float:
     if len(values) < 2 or values.std() == 0:
         return np.nan
     return float(values.mean() / values.std())
+
+
+def _index_dates(index: pd.Index) -> pd.DatetimeIndex:
+    """从普通索引或 MultiIndex 中取日期轴。"""
+    if isinstance(index, pd.MultiIndex):
+        level = "date" if "date" in index.names else 0
+        return pd.DatetimeIndex(index.get_level_values(level))
+    return pd.DatetimeIndex(index)
 
 
 def calc_offset_ic_stats(
@@ -351,6 +359,11 @@ def calc_forward_returns(
     """
     if period <= 0:
         raise ValueError("period 必须为正整数")
+    if price_col not in market_data.columns:
+        if price_col == "adj_close" and "close" in market_data.columns:
+            price_col = "close"
+        else:
+            raise ValueError(f"market_data 缺少未来收益价格列: {price_col}")
     price = market_data[price_col].unstack()
     return (
         price.shift(-(1 + period)) / price.shift(-1) - 1
@@ -523,6 +536,7 @@ def eval(
     n_groups: int = 5,
     ic_method: str = "rank",
     max_lag: int = 20,
+    price_col: str = "adj_close",
 ) -> FactorEvalResult:
     """汇总单个因子的 IC、换手率和分层回测指标。
 
@@ -573,7 +587,7 @@ def eval(
     else:
         factor = factor_values.rename("factor")
 
-    forward_returns = calc_forward_returns(market_data, forward_period)
+    forward_returns = calc_forward_returns(market_data, forward_period, price_col=price_col)
     full_ic_series = calc_ic_series(factor, forward_returns, method=ic_method)
     offset_ic_stats = calc_offset_ic_stats(full_ic_series, period=forward_period)
 
@@ -582,14 +596,10 @@ def eval(
         market_data.index.get_level_values("date").unique()
     ).sort_values()
     sampled_dates = trading_dates[::forward_period]
-    factor = factor[
-        factor.index.get_level_values("date").isin(sampled_dates)
-    ]
-    forward_returns = forward_returns[
-        forward_returns.index.get_level_values("date").isin(sampled_dates)
-    ]
+    factor = factor[_index_dates(factor.index).isin(sampled_dates)]
+    forward_returns = forward_returns[_index_dates(forward_returns.index).isin(sampled_dates)]
     ic_series = full_ic_series[
-        full_ic_series.index.get_level_values("date").isin(sampled_dates)
+        _index_dates(full_ic_series.index).isin(sampled_dates)
     ]
     turnover = calc_turnover(factor, quantiles=n_groups)
     layered = layered_backtest(
