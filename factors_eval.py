@@ -11,6 +11,13 @@ from scipy import stats
 warnings.filterwarnings("ignore", category=stats.ConstantInputWarning)
 
 
+TIMING_WIN_HORIZON_WEIGHTS = {
+    5: 0.6,
+    10: 0.3,
+    21: 0.1,
+}
+
+
 @dataclass
 class LayeredResult:
     """保存分层回测产生的收益和风险指标。
@@ -343,7 +350,7 @@ def calc_forward_returns(
         索引为 ``(date, symbol)`` 的行情数据。
     period : int
         未来持有交易日数量，必须为正整数。
-    price_col : str, default "close"
+    price_col : str, default "adj_close"
         用于计算收益的价格列。
 
     Returns
@@ -355,19 +362,79 @@ def calc_forward_returns(
     Raises
     ------
     ValueError
-        ``period`` 不是正整数时抛出。
+        ``period`` 不是正整数，或缺少指定价格列时抛出。
     """
     if period <= 0:
         raise ValueError("period 必须为正整数")
     if price_col not in market_data.columns:
-        if price_col == "adj_close" and "close" in market_data.columns:
-            price_col = "close"
-        else:
-            raise ValueError(f"market_data 缺少未来收益价格列: {price_col}")
+        raise ValueError(f"market_data 缺少未来收益价格列: {price_col}")
     price = market_data[price_col].unstack()
     return (
         price.shift(-(1 + period)) / price.shift(-1) - 1
     ).stack().rename(f"fwd_ret_{period}")
+
+
+def _timing_horizon_weights(
+    horizon_weights: dict[int, float] | None = None,
+) -> tuple[dict[int, float], float]:
+    """校验并返回择时胜率周期权重。"""
+    weights = horizon_weights or TIMING_WIN_HORIZON_WEIGHTS
+    if not weights or any(horizon <= 0 for horizon in weights):
+        raise ValueError("horizon_weights 必须包含正整数周期")
+    total_weight = float(sum(weights.values()))
+    if total_weight <= 0:
+        raise ValueError("horizon_weights 权重和必须大于 0")
+    return weights, total_weight
+
+
+def calc_timing_win_score(
+    market_data: pd.DataFrame,
+    price_col: str = "adj_close",
+    horizon_weights: dict[int, float] | None = None,
+) -> pd.Series:
+    """计算每只股票的 5、10、21 日加权不亏钱得分。
+
+    每个周期先把未来收益转换为二值数据：收益大于等于 0 记为 1，否则记为
+    0。默认用 5 日、10 日、21 日三个二值结果按 ``0.6、0.3、0.1`` 加权，
+    得到 ``(date, symbol)`` 粒度的总胜率得分。
+    """
+    weights, total_weight = _timing_horizon_weights(horizon_weights)
+    weighted_scores = {}
+    for horizon, weight in weights.items():
+        returns = calc_forward_returns(market_data, horizon, price_col=price_col)
+        weighted_scores[horizon] = returns.ge(0).astype(float) * float(weight)
+
+    combined = pd.concat(weighted_scores, axis=1).dropna()
+    if combined.empty:
+        return pd.Series(
+            dtype=float,
+            name="timing_win_score",
+            index=pd.MultiIndex.from_arrays([[], []], names=["date", "symbol"]),
+        )
+    return combined.sum(axis=1).div(total_weight).rename("timing_win_score")
+
+
+def calc_timing_ic_series(
+    factor: pd.DataFrame | pd.Series,
+    market_data: pd.DataFrame,
+    price_col: str = "adj_close",
+    horizon_weights: dict[int, float] | None = None,
+) -> pd.Series:
+    """计算因子值与总胜率得分的逐日截面 Rank IC。
+
+    该指标衡量因子值越高时，股票未来 5、10、21 日加权不亏钱得分是否也越
+    高。每个日期截面使用 Spearman 秩相关，最后由调用方按评价周期汇总。
+    """
+    if isinstance(factor, pd.DataFrame):
+        factor = factor.stack().rename("factor")
+    else:
+        factor = factor.rename("factor")
+    timing_score = calc_timing_win_score(
+        market_data,
+        price_col=price_col,
+        horizon_weights=horizon_weights,
+    )
+    return calc_ic_series(factor, timing_score, method="rank").rename("TimingIC")
 
 
 def calc_max_drawdown(returns: pd.Series) -> float:
@@ -553,7 +620,8 @@ def eval(
         因子计算结果。DataFrame 的索引为 date、列为 symbol；Series 的
         索引为 ``(date, symbol)``。
     market_data : pd.DataFrame
-        ``(date, symbol)`` MultiIndex 行情数据，至少包含 ``close`` 列。
+        ``(date, symbol)`` MultiIndex 行情数据，至少包含 ``price_col`` 列，
+        默认是 ``adj_close``。
     forward_period : int, default 1
         未来收益持有周期和调仓间隔。函数每隔该数量的交易日选择一次
         因子截面，同时用于 IC offset 汇总和分层收益年化频率修正。
@@ -590,6 +658,15 @@ def eval(
     forward_returns = calc_forward_returns(market_data, forward_period, price_col=price_col)
     full_ic_series = calc_ic_series(factor, forward_returns, method=ic_method)
     offset_ic_stats = calc_offset_ic_stats(full_ic_series, period=forward_period)
+    full_timing_ic_series = calc_timing_ic_series(
+        factor,
+        market_data,
+        price_col=price_col,
+    )
+    timing_ic_stats = calc_offset_ic_stats(
+        full_timing_ic_series,
+        period=forward_period,
+    )
 
     # sampled_dates 用于分层回测和换手率计算，确保每个调仓期的未来收益不重叠。
     trading_dates = pd.DatetimeIndex(
@@ -629,6 +706,7 @@ def eval(
         "ICIR": round(offset_ic_stats["ICIR"], 4),
         "t_stat": round(t_stat, 4),
         "p_value": round(p_value, 6),
+        "timing_IC_mean": round(timing_ic_stats["IC_mean"], 4),
         "top_cumulative_return": round(
             final_cumulative_return(layered.top_cumulative_returns),
             4,

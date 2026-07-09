@@ -8,7 +8,7 @@ import pandas as pd
 DATE_COLUMN_CANDIDATES = ("date", "trade_date")
 
 FIELD_ALIASES = {
-    "adj_close": ("adj_close", "close"),
+    "adj_close": ("adj_close",),
     "gross_margin": ("grossprofit_margin", "gross_margin_calc"),
     "operating_cash_flow": (
         "operating_cashflow",

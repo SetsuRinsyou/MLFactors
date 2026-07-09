@@ -69,3 +69,6 @@ debug*/**
 # Local archives
 zz500_factor_values.tar*
 zz500_outputs.tar*
+
+# Local generated files
+outputs_new/

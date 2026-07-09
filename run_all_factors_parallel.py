@@ -1,7 +1,6 @@
 """并行批量运行全部因子。
-
 默认顺序为中证500、中证1000、沪深300；每个指数内部按 32 进程并行。
-完成记录会实时追加到 ``outputs/<index>_completed_factors.csv``。
+完成记录会实时追加到 ``<output_root>/<index>_completed_factors.csv``。
 """
 
 from __future__ import annotations
@@ -75,14 +74,15 @@ def _load_factor_configs(config_path: Path) -> dict[str, dict[str, Any]]:
         return json.load(file)
 
 
-def _factor_outputs_exist(index_name: str, factor_name: str) -> bool:
+def _factor_outputs_exist(output_root: Path, index_name: str, factor_name: str) -> bool:
     """检查某个因子是否已经保存了按股票拆分的因子值 CSV。"""
-    factor_dir = Path("outputs") / index_name / factor_name / "factors"
+    factor_dir = output_root / index_name / factor_name / "factors"
     return factor_dir.is_dir() and any(factor_dir.glob("*.csv"))
 
 
 def _completed_successes(
     progress_path: Path,
+    output_root: Path,
     index_name: str,
     require_factor_outputs: bool,
 ) -> set[str]:
@@ -99,7 +99,7 @@ def _completed_successes(
             if row.get("status") == "success"
             and (
                 not require_factor_outputs
-                or _factor_outputs_exist(index_name, row["factor_name"])
+                or _factor_outputs_exist(output_root, index_name, row["factor_name"])
             )
         }
 
@@ -122,6 +122,7 @@ def _append_progress(progress_path: Path, row: dict[str, Any]) -> None:
 
 
 def run_one_factor(
+    output_root: Path,
     index_name: str,
     index_config: dict[str, str],
     factor_name: str,
@@ -133,7 +134,7 @@ def run_one_factor(
     """子进程执行单个因子。"""
     started_at = _now()
     start_time = time.perf_counter()
-    output_dir = Path("outputs") / index_name / factor_name
+    output_dir = output_root / index_name / factor_name
 
     try:
         importlib.import_module(factor_config["module"])
@@ -173,6 +174,7 @@ def run_one_factor(
 
 
 def run_index(
+    output_root: Path,
     index_name: str,
     factor_configs: dict[str, dict[str, Any]],
     workers: int,
@@ -186,12 +188,13 @@ def run_index(
 ) -> None:
     """按指定并行度跑完一个指数上的全部因子。"""
     index_config = INDEX_RUNS[index_name]
-    progress_path = Path("outputs") / f"{index_name}_completed_factors.csv"
+    progress_path = output_root / f"{index_name}_completed_factors.csv"
     _ensure_progress_file(progress_path, overwrite=force)
 
     completed = (
         _completed_successes(
             progress_path,
+            output_root=output_root,
             index_name=index_name,
             require_factor_outputs=save_factor,
         )
@@ -225,6 +228,7 @@ def run_index(
         future_map = {
             executor.submit(
                 run_one_factor,
+                output_root,
                 index_name,
                 index_config,
                 factor_name,
@@ -275,6 +279,11 @@ def parse_args() -> argparse.Namespace:
     """解析命令行参数。"""
     parser = argparse.ArgumentParser(description="并行批量运行全部因子")
     parser.add_argument("--config", default="config/factor_configs.json")
+    parser.add_argument(
+        "--output-root",
+        default="outputs",
+        help="输出根目录，默认 outputs；例如 outputs_new",
+    )
     parser.add_argument("--workers", type=int, default=32)
     parser.add_argument(
         "--indices",
@@ -329,6 +338,7 @@ def main() -> None:
     """脚本入口。"""
     args = parse_args()
     args.heartbeat_seconds = max(1, args.heartbeat_seconds)
+    output_root = Path(args.output_root)
     factor_configs = _load_factor_configs(Path(args.config))
     exclude_factors = set(args.exclude_factors)
     if exclude_factors:
@@ -354,7 +364,8 @@ def main() -> None:
     print(
         f"[{_now()}] CPU={os.cpu_count()} workers={args.workers} "
         f"factor_count={len(factor_configs)} config={args.config} "
-        f"save_factor={args.save_factor} periodic_reports={not args.no_periodic_reports}",
+        f"output_root={output_root} save_factor={args.save_factor} "
+        f"periodic_reports={not args.no_periodic_reports}",
         flush=True,
     )
     if len(factor_configs) != 74:
@@ -366,6 +377,7 @@ def main() -> None:
 
     for index_name in args.indices:
         run_index(
+            output_root=output_root,
             index_name=index_name,
             factor_configs=factor_configs,
             workers=args.workers,
