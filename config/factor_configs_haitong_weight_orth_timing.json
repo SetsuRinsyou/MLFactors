@@ -1,0 +1,60 @@
+{
+  "haitong_fmb_24m": {
+    "module": "scheme.HaitongFactorWeightOrthTiming",
+    "params": {
+      "premium_window": 504,
+      "min_cross_section_stocks": 30,
+      "min_factor_coverage": 0.5
+    },
+    "columns": [
+      "adj_close",
+      "market_cap",
+      "sector"
+    ]
+  },
+  "haitong_fmb_orth_24m": {
+    "module": "scheme.HaitongFactorWeightOrthTiming",
+    "params": {
+      "premium_window": 504,
+      "min_cross_section_stocks": 30,
+      "min_factor_coverage": 0.5
+    },
+    "columns": [
+      "adj_close",
+      "market_cap",
+      "sector"
+    ]
+  },
+  "haitong_fmb_timing_24m": {
+    "module": "scheme.HaitongFactorWeightOrthTiming",
+    "params": {
+      "premium_window": 504,
+      "min_cross_section_stocks": 30,
+      "min_factor_coverage": 0.5,
+      "timing_return_windows": [
+        5,
+        21
+      ],
+      "timing_volatility_window": 21
+    },
+    "index_params": {
+      "hs300": {
+        "benchmark_col": "hs300_close"
+      },
+      "zz500": {
+        "benchmark_col": "zz500_close"
+      },
+      "zz1000": {
+        "benchmark_col": "zz1000_close"
+      }
+    },
+    "columns": [
+      "adj_close",
+      "market_cap",
+      "sector",
+      "hs300_close",
+      "zz500_close",
+      "zz1000_close"
+    ]
+  }
+}

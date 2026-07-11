@@ -1,5 +1,6 @@
 from factors.base import BaseFactor
 from factors.registry import register_factor
+from scheme.neutralization import neutralize_market_cap_sector
 import numpy as np
 import pandas as pd
 
@@ -209,6 +210,7 @@ class MaxICWeight(BaseFactor):
 
         result.index.name = "date"
         result.columns.name = "symbol"
+        result = neutralize_market_cap_sector(result, data)
         if not constituents:
             return result
 

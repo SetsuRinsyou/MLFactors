@@ -72,3 +72,7 @@ zz500_outputs.tar*
 
 # Local generated files
 outputs_new/
+
+# Scheme output artifacts
+scheme_factor_results/
+scheme_outputs_report*/

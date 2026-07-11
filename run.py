@@ -99,15 +99,19 @@ class Runner:
                   combined_data: pd.DataFrame | None = None,
                   save: bool = False) -> pd.DataFrame:
         """计算因子；save=True 时按股票保存完整回测期因子值。"""
-        signals = self.factor.generate_signals(combined_data, None)
+        data = self.data if combined_data is None else combined_data
+        if data is None or data.empty:
+            raise ValueError("没有可用于计算因子的 combined_data")
+
+        signals = self.factor.generate_signals(data, None)
         self.result = signals
         if save:
             factor_dir = self.output_dir / "factors"
             factor_dir.mkdir(parents=True, exist_ok=True)
-            symbols = combined_data.index.get_level_values("symbol").unique()
+            symbols = data.index.get_level_values("symbol").unique()
             factor_result = signals.reindex(columns=symbols)
             for symbol in symbols:
-                dates = combined_data.xs(symbol, level="symbol").index
+                dates = data.xs(symbol, level="symbol").index
                 factor_data = factor_result[symbol].reindex(dates).rename(self.factor_name)
                 factor_data.index = factor_data.index.strftime("%Y-%m-%d")
                 factor_data.index.name = "date"
