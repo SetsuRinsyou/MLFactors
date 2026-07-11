@@ -38,7 +38,6 @@ class Runner:
         forward_periods: tuple[int, ...] = (1, 5, 10, 21),
         n_groups: int = 5,
         ic_method: str = "rank",
-        max_lag: int = 20,
         output_dir: str | Path | None = None,
         eval_price_col: str = "adj_close",
         security_status_path: str | Path | None = DEFAULT_SECURITY_STATUS_PATH,
@@ -47,7 +46,6 @@ class Runner:
         self.forward_periods = forward_periods
         self.n_groups = n_groups
         self.ic_method = ic_method
-        self.max_lag = max_lag
         self.eval_price_col = eval_price_col
         self.security_status_path = Path(security_status_path) if security_status_path is not None else None
         self.output_dir = Path(output_dir or Path("outputs") / factor_name)
@@ -105,7 +103,6 @@ class Runner:
                 forward_period=period,
                 n_groups=self.n_groups,
                 ic_method=self.ic_method,
-                max_lag=self.max_lag,
                 price_col=self.eval_price_col,
             )
             for period in self.forward_periods
@@ -219,7 +216,7 @@ class Runner:
 
 
 if __name__ == "__main__":
-    factor_config_path = "config/factor_configs_onlysize.json"
+    factor_config_path = "config/factor_configs.json"
     with open(factor_config_path, "r", encoding="utf-8") as f:
         factor_configs = json.load(f)
 

@@ -175,11 +175,18 @@ def load_data(
     else:
         csv_files = [data_dir / f"{symbol}.csv" for symbol in symbols]
 
+    if csv_files:
+        available_columns = _read_header(csv_files[0])
+        date_column = resolve_date_column(available_columns, csv_files[0])
+        usecols = resolve_source_columns(
+            columns,
+            available_columns,
+            date_column,
+            csv_files[0],
+        )
+
     frames = []
     for csv_file in csv_files:
-        available_columns = _read_header(csv_file)
-        date_column = resolve_date_column(available_columns, csv_file)
-        usecols = resolve_source_columns(columns, available_columns, date_column, csv_file)
         frame = pd.read_csv(csv_file, usecols=usecols, parse_dates=[date_column])
         frame = normalize_fields(frame, columns)
         frame["symbol"] = csv_file.stem

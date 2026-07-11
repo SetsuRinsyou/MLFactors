@@ -110,38 +110,6 @@
       "sector"
     ]
   },
-  "max_daily_return_5d": {
-    "module": "factors.price.max_daily_return",
-    "params": {
-      "top_n": 5,
-      "min_obs": null,
-      "lookback": 21,
-      "rebalance_step": 21
-    },
-    "columns": [
-      "close"
-    ]
-  },
-  "multi_horizon_llt_50d": {
-    "module": "factors.price.multi_horizon_llt_daily",
-    "params": {
-      "periods": null,
-      "lookback_days": 50
-    },
-    "columns": [
-      "close"
-    ]
-  },
-  "multi_horizon_ma_50d": {
-    "module": "factors.price.multi_horizon_ma_daily",
-    "params": {
-      "periods": null,
-      "lookback_days": 50
-    },
-    "columns": [
-      "close"
-    ]
-  },
   "open_high_surge_10d": {
     "module": "factors.price.open_high_surge_10",
     "params": {
