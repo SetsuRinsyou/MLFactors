@@ -61,24 +61,21 @@ class FactorEvalResult:
     ----------
     summary : pd.DataFrame
         单行核心指标汇总表。
-    ic_series : pd.Series
-        每个日期截面的 IC 时间序列。
+    full_ic_series : pd.Series
+        每个交易日截面的完整 IC 时间序列。
+    sampled_ic_series : pd.Series
+        按前向收益周期抽样、用于绘图和显著性检验的 IC 时间序列。
     turnover : pd.Series
         最高因子分组组合的单边换手率。
-    forward_returns : pd.Series
-        与因子值对齐使用的未来收益。
     layered : LayeredResult
         分层收益和风险指标。
-    ic_decay : pd.Series
-        从 1 到 ``max_lag`` 的平均 IC 衰减曲线。
     """
 
     summary: pd.DataFrame
-    ic_series: pd.Series
+    full_ic_series: pd.Series
+    sampled_ic_series: pd.Series
     turnover: pd.Series
-    forward_returns: pd.Series
     layered: LayeredResult
-    ic_decay: pd.Series
 
 
 def calc_ic(
@@ -157,36 +154,6 @@ def calc_ic_series(
 
     result = combined.groupby(level=0).apply(cross_sectional_ic)
     return pd.Series(result, name="IC").sort_index()
-
-
-def calc_icir(ic_series: pd.Series) -> float:
-    """计算 IC 信息比率。
-
-    ICIR 为 ``mean(IC) / std(IC)``。少于两个有效 IC 或标准差为零时
-    返回 NaN。
-
-    Parameters
-    ----------
-    ic_series : pd.Series
-        按时间排列的 IC 序列。
-
-    Returns
-    -------
-    float
-        ICIR。
-    """
-    values = ic_series.dropna()
-    if len(values) < 2 or values.std() == 0:
-        return np.nan
-    return float(values.mean() / values.std())
-
-
-def _index_dates(index: pd.Index) -> pd.DatetimeIndex:
-    """从普通索引或 MultiIndex 中取日期轴。"""
-    if isinstance(index, pd.MultiIndex):
-        level = "date" if "date" in index.names else 0
-        return pd.DatetimeIndex(index.get_level_values(level))
-    return pd.DatetimeIndex(index)
 
 
 def calc_offset_ic_stats(
@@ -635,8 +602,8 @@ def eval(
     Returns
     -------
     FactorEvalResult
-        完整评估结果，包含汇总表、IC 序列、换手率、未来收益、分层结果
-        和 IC 衰减曲线，可直接交给绘图模块使用。
+        完整评估结果，包含汇总表、完整 IC 序列、换手率和分层结果，
+        可直接交给绘图模块使用。
 
     Raises
     ------
@@ -658,11 +625,12 @@ def eval(
     forward_returns = calc_forward_returns(market_data, forward_period, price_col=price_col)
     full_ic_series = calc_ic_series(factor, forward_returns, method=ic_method)
     offset_ic_stats = calc_offset_ic_stats(full_ic_series, period=forward_period)
-    full_timing_ic_series = calc_timing_ic_series(
+    timing_score = forward_returns.ge(0).astype(float)
+    full_timing_ic_series = calc_ic_series(
         factor,
-        market_data,
-        price_col=price_col,
-    )
+        timing_score,
+        method="rank",
+    ).rename("TimingIC")
     timing_ic_stats = calc_offset_ic_stats(
         full_timing_ic_series,
         period=forward_period,
@@ -673,11 +641,13 @@ def eval(
         market_data.index.get_level_values("date").unique()
     ).sort_values()
     sampled_dates = trading_dates[::forward_period]
-    factor = factor[_index_dates(factor.index).isin(sampled_dates)]
-    forward_returns = forward_returns[_index_dates(forward_returns.index).isin(sampled_dates)]
-    ic_series = full_ic_series[
-        _index_dates(full_ic_series.index).isin(sampled_dates)
+    factor = factor[
+        factor.index.get_level_values("date").isin(sampled_dates)
     ]
+    forward_returns = forward_returns[
+        forward_returns.index.get_level_values("date").isin(sampled_dates)
+    ]
+    sampled_ic_series = full_ic_series[full_ic_series.index.isin(sampled_dates)]
     turnover = calc_turnover(factor, quantiles=n_groups)
     layered = layered_backtest(
         factor,
@@ -685,15 +655,8 @@ def eval(
         n_groups=n_groups,
         period=forward_period,
     )
-    # 暂不计算 IC 衰减，避免为每个 lag 构造完整收益面板。
-    # ic_decay = calc_ic_decay(
-    #     factor,
-    #     forward_returns,
-    #     max_lag=max_lag,
-    #     method=ic_method,
-    # )
 
-    t_stat, p_value = calc_t_stat(ic_series)
+    t_stat, p_value = calc_t_stat(sampled_ic_series)
 
     def final_cumulative_return(returns: pd.Series) -> float:
         values = returns.dropna()
@@ -725,9 +688,8 @@ def eval(
     }])
     return FactorEvalResult(
         summary=summary.set_index("period"),
-        ic_series=ic_series,
+        full_ic_series=full_ic_series,
+        sampled_ic_series=sampled_ic_series,
         turnover=turnover,
-        forward_returns=forward_returns,
         layered=layered,
-        ic_decay=pd.Series(dtype=float, name="IC_decay"),
     )
