@@ -29,7 +29,7 @@ class FactorPlotter:
 
     def plot_ic_series(self, ax: plt.Axes, rolling_window: int = 20) -> None:
         """绘制 IC 时间序列及滚动均值。"""
-        ic = self.result.ic_series.dropna()
+        ic = self.result.sampled_ic_series.dropna()
         ax.set_title("IC Time Series")
         if ic.empty:
             return

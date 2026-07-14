@@ -8,7 +8,6 @@ import pandas as pd
 DATE_COLUMN_CANDIDATES = ("date", "trade_date")
 
 FIELD_ALIASES = {
-    "adj_close": ("adj_close",),
     "gross_margin": ("grossprofit_margin", "gross_margin_calc"),
     "operating_cash_flow": (
         "operating_cashflow",
@@ -16,7 +15,7 @@ FIELD_ALIASES = {
         "im_net_cashflow_oper_act",
     ),
     "share_factor": ("adj_factor",),
-    "sector": ("industry_1", "stock_basic_industry", "sector"),
+    "sector": ("industry_1", "stock_basic_industry"),
     "SPY_close": ("hs300_close",),
     "QQQ_close": ("zz500_close",),
     "HS300_close": ("hs300_close",),
@@ -25,8 +24,8 @@ FIELD_ALIASES = {
 }
 
 DERIVED_FIELD_SOURCES = {
-    "gross_margin": ("grossprofit_margin", "gross_margin_calc", "gross_profit", "revenue", "cost_revenue"),
     "gross_profit": ("revenue", "cost_revenue"),
+    "gross_margin": ("gross_profit", "revenue", "cost_revenue"),
     "non_current_debt": (
         "lt_borr",
         "bond_payable",
@@ -44,40 +43,14 @@ BENCHMARK_COLUMNS = {
     "QQQ_close": "QQQ",
 }
 
-NON_STOCK_CSV_FILES = {
-    "constituents_daily.csv",
-    "index_members_rebalance.csv",
-}
-
-SECURITY_STATUS_COLUMNS = [
-    "record_type",
-    "ticker",
-    "trade_date",
-    "start_date",
-    "end_date",
-    "is_suspended",
-    "is_st",
-    "listing_status",
-]
-
-_SECURITY_STATUS_CACHE: dict[Path, pd.DataFrame] = {}
-
+NON_STOCK_CSV_FILES = {"constituents_daily.csv", "index_members_rebalance.csv"}
 
 def _read_header(csv_file: Path) -> set[str]:
     """读取 CSV 表头。"""
     return set(pd.read_csv(csv_file, nrows=0).columns)
 
 
-def _list_stock_csv_files(data_dir: Path) -> list[Path]:
-    """列出按股票拆分的数据文件，跳过指数成分股等辅助 CSV。"""
-    return sorted(
-        csv_file
-        for csv_file in data_dir.glob("*.csv")
-        if csv_file.name not in NON_STOCK_CSV_FILES
-    )
-
-
-def _resolve_date_column(columns: set[str], csv_file: Path) -> str:
+def resolve_date_column(columns: set[str], csv_file: Path) -> str:
     """返回数据文件实际使用的日期列名。"""
     for column in DATE_COLUMN_CANDIDATES:
         if column in columns:
@@ -85,22 +58,30 @@ def _resolve_date_column(columns: set[str], csv_file: Path) -> str:
     raise ValueError(f"{csv_file} 缺少日期列，支持字段: {DATE_COLUMN_CANDIDATES}")
 
 
-def _source_columns_for_field(field: str, available: set[str]) -> list[str]:
+def get_source_columns_for_field(field: str, available: set[str]) -> list[str]:
     """把统一字段名解析为当前 CSV 需要读取的源字段。"""
     if field == "date":
         return []
-    if field in DERIVED_FIELD_SOURCES and field not in available:
-        sources = [column for column in DERIVED_FIELD_SOURCES[field] if column in available]
-        if sources:
-            return sources
-    candidates = (*FIELD_ALIASES.get(field, ()), field)
-    for candidate in candidates:
+
+    direct_fields = []
+    direct_fields.extend(FIELD_ALIASES.get(field, ()))
+    direct_fields.append(field)
+    for candidate in direct_fields:
         if candidate in available:
             return [candidate]
+
+    if field in DERIVED_FIELD_SOURCES:
+        sources = []
+        for column in DERIVED_FIELD_SOURCES[field]:
+            if column in available:
+                sources.append(column)
+        if sources:
+            return sources
+
     return []
 
 
-def _resolve_source_columns(
+def resolve_source_columns(
     requested_columns: list[str] | None,
     available: set[str],
     date_column: str,
@@ -111,71 +92,67 @@ def _resolve_source_columns(
         return None
 
     source_columns = [date_column]
-    missing = []
     for field in dict.fromkeys(requested_columns):
-        resolved = _source_columns_for_field(field, available)
-        if not resolved:
-            missing.append(field)
+        if field == "date":
             continue
+        resolved = get_source_columns_for_field(field, available)
+        if not resolved:
+            raise ValueError(f"{csv_file} 缺少字段: {field}")
         source_columns.extend(resolved)
-    if missing:
-        raise ValueError(f"{csv_file} 缺少字段: {missing}")
     return list(dict.fromkeys(source_columns))
 
 
-def _coalesce_columns(frame: pd.DataFrame, candidates: tuple[str, ...]) -> pd.Series | None:
-    """按候选顺序返回逐列回退后的 Series。"""
-    sources = [column for column in candidates if column in frame.columns]
-    if not sources:
-        return None
-    if len(sources) == 1:
-        return frame[sources[0]]
-    return frame[sources].bfill(axis=1).iloc[:, 0]
-
-
-def _normalize_fields(frame: pd.DataFrame, requested_columns: list[str] | None) -> pd.DataFrame:
+def normalize_fields(frame: pd.DataFrame, requested_columns: list[str] | None) -> pd.DataFrame:
     """把 A 股源字段规范为因子代码使用的统一字段名。"""
-    if "trade_date" in frame.columns and "date" not in frame.columns:
-        frame = frame.rename(columns={"trade_date": "date"})
-
-    target_columns = set(requested_columns or frame.columns)
-    for target, candidates in FIELD_ALIASES.items():
-        if target not in target_columns and requested_columns is not None:
-            continue
-        values = _coalesce_columns(frame, candidates)
-        if values is not None:
-            frame[target] = values
-
-    if (
-        ("gross_margin" in target_columns or requested_columns is None)
-        and {"gross_profit", "revenue"}.issubset(frame.columns)
-    ):
-        calculated = frame["gross_profit"] / frame["revenue"].replace(0, pd.NA)
-        if "gross_margin" in frame.columns:
-            frame["gross_margin"] = frame["gross_margin"].fillna(calculated)
+    if "trade_date" in frame.columns:
+        if "date" in frame.columns:
+            frame = frame.drop(columns=["trade_date"])
         else:
-            frame["gross_margin"] = calculated
+            frame = frame.rename(columns={"trade_date": "date"})
 
-    if (
-        ("gross_profit" in target_columns or requested_columns is None)
-        and "gross_profit" not in frame.columns
-        and {"revenue", "cost_revenue"}.issubset(frame.columns)
-    ):
-        frame["gross_profit"] = frame["revenue"] - frame["cost_revenue"]
+    target_columns = set(requested_columns) if requested_columns is not None else None
+    for target, candidates in FIELD_ALIASES.items():
+        if target_columns is not None and target not in target_columns:
+            continue
+        for candidate in candidates:
+            if candidate in frame.columns:
+                frame[target] = frame[candidate]
+                break
 
-    debt_sources = [column for column in DERIVED_FIELD_SOURCES["non_current_debt"] if column in frame.columns]
-    if (
-        ("non_current_debt" in target_columns or requested_columns is None)
-        and "non_current_debt" not in frame.columns
-        and debt_sources
-    ):
-        frame["non_current_debt"] = frame[debt_sources].fillna(0).sum(axis=1, min_count=1)
+    for target, sources in DERIVED_FIELD_SOURCES.items():
+        if target in frame.columns:
+            continue
+
+        if target == "gross_profit":
+            revenue_column, cost_column = sources
+            if {revenue_column, cost_column}.issubset(frame.columns):
+                frame[target] = frame[revenue_column] - frame[cost_column]
+
+        elif target == "gross_margin":
+            gross_profit_column = sources[0]
+            revenue_column = sources[1]
+            if {gross_profit_column, revenue_column}.issubset(frame.columns):
+                frame[target] = (
+                    frame[gross_profit_column] / frame[revenue_column].replace(0, pd.NA)
+                )
+
+        elif target == "non_current_debt":
+            debt_sources = []
+            for column in sources:
+                if column in frame.columns:
+                    debt_sources.append(column)
+            if debt_sources:
+                frame[target] = frame[debt_sources].fillna(0).sum(axis=1, min_count=1)
 
     if requested_columns is None:
         return frame
 
-    output_columns = ["date", *dict.fromkeys(requested_columns)]
-    return frame[[column for column in output_columns if column in frame.columns]]
+    output_columns = ["date"]
+    for column in dict.fromkeys(requested_columns):
+        if column == "date":
+            continue
+        output_columns.append(column)
+    return frame[output_columns]
 
 
 def load_data(
@@ -189,17 +166,29 @@ def load_data(
     data_dir = Path(data_dir).expanduser().resolve()
 
     if symbols is None:
-        csv_files = _list_stock_csv_files(data_dir)
+        csv_files = []
+        for csv_file in data_dir.glob("*.csv"):
+            if csv_file.name in NON_STOCK_CSV_FILES:
+                continue
+            csv_files.append(csv_file)
+        csv_files = sorted(csv_files)
     else:
         csv_files = [data_dir / f"{symbol}.csv" for symbol in symbols]
 
+    if csv_files:
+        available_columns = _read_header(csv_files[0])
+        date_column = resolve_date_column(available_columns, csv_files[0])
+        usecols = resolve_source_columns(
+            columns,
+            available_columns,
+            date_column,
+            csv_files[0],
+        )
+
     frames = []
     for csv_file in csv_files:
-        available_columns = _read_header(csv_file)
-        date_column = _resolve_date_column(available_columns, csv_file)
-        usecols = _resolve_source_columns(columns, available_columns, date_column, csv_file)
         frame = pd.read_csv(csv_file, usecols=usecols, parse_dates=[date_column])
-        frame = _normalize_fields(frame, columns)
+        frame = normalize_fields(frame, columns)
         frame["symbol"] = csv_file.stem
         if start is not None:
             frame = frame[frame["date"] >= pd.Timestamp(start)]
@@ -232,103 +221,53 @@ def filter_by_constituent(
     return data.loc[data.index.isin(member_index)].sort_index()
 
 
+def align_constituents_to_data(
+    constituents: pd.DataFrame,
+    data: pd.DataFrame,
+) -> pd.DataFrame:
+    """将成分股矩阵前向填充到行情交易日。"""
+    if data.empty:
+        return constituents
+
+    data_dates = pd.DatetimeIndex(
+        data.index.get_level_values("date").unique()
+    ).sort_values()
+    target_dates = data_dates[data_dates >= constituents.index.min()]
+    if target_dates.empty:
+        raise ValueError("成分股日期与行情日期没有交集")
+
+    constituents = (
+        constituents.reindex(constituents.index.union(target_dates))
+        .astype("boolean")
+        .sort_index()
+        .ffill()
+        .reindex(target_dates)
+        .fillna(False)
+        .astype(bool)
+    )
+    constituents.index.name = "date"
+    constituents.columns.name = "symbol"
+    return constituents
+
+
 def _truthy(series: pd.Series) -> pd.Series:
     """将 tushare 状态字段转换为布尔值。"""
     return series.astype(str).str.lower().isin({"t", "true", "1", "y", "yes"})
 
 
-def _build_security_exclusion_index(
-    status: pd.DataFrame,
-    data_index: pd.MultiIndex,
-) -> pd.MultiIndex:
-    """根据 ST、停牌、退市记录构造需要剔除的 (date, symbol) 索引。"""
-    if data_index.empty or status.empty:
-        return pd.MultiIndex.from_arrays([[], []], names=["date", "symbol"])
-
-    data_dates = pd.DatetimeIndex(data_index.get_level_values("date").unique()).sort_values()
-    data_symbols = pd.Index(data_index.get_level_values("symbol").unique())
-    if data_dates.empty or data_symbols.empty:
-        return pd.MultiIndex.from_arrays([[], []], names=["date", "symbol"])
-
-    status = status[status["ticker"].isin(data_symbols)].copy()
-    if status.empty:
-        return pd.MultiIndex.from_arrays([[], []], names=["date", "symbol"])
-
-    excluded_dates = []
-    excluded_symbols = []
-
-    suspended = status[
-        status["record_type"].eq("suspend_daily")
-        & _truthy(status["is_suspended"])
-    ].copy()
-    if not suspended.empty:
-        suspended["date"] = pd.to_datetime(suspended["trade_date"], errors="coerce")
-        suspended = suspended[
-            suspended["date"].isin(data_dates)
-            & suspended["ticker"].isin(data_symbols)
-        ]
-        if not suspended.empty:
-            excluded_dates.append(suspended["date"].to_numpy())
-            excluded_symbols.append(suspended["ticker"].to_numpy())
-
-    interval_filters = [
-        status["record_type"].eq("st_status_history") & _truthy(status["is_st"]),
-        status["record_type"].eq("listing_status_history")
-        & status["listing_status"].astype(str).str.lower().eq("delisted"),
-    ]
-    for mask in interval_filters:
-        intervals = status[mask].copy()
-        if intervals.empty:
-            continue
-        intervals["start"] = pd.to_datetime(intervals["start_date"], errors="coerce")
-        intervals["end"] = pd.to_datetime(intervals["end_date"], errors="coerce").fillna(data_dates[-1])
-        intervals = intervals.dropna(subset=["start"])
-        for row in intervals.itertuples(index=False):
-            left = data_dates.searchsorted(row.start, side="left")
-            right = data_dates.searchsorted(row.end, side="right")
-            if right <= left:
-                continue
-            dates = data_dates[left:right]
-            excluded_dates.append(dates.to_numpy())
-            excluded_symbols.append(pd.Index([row.ticker] * len(dates)).to_numpy())
-
-    if not excluded_dates:
-        return pd.MultiIndex.from_arrays([[], []], names=["date", "symbol"])
-
-    return pd.MultiIndex.from_arrays(
-        [pd.Index(pd.concat([pd.Series(values) for values in excluded_dates])).to_numpy(),
-         pd.Index(pd.concat([pd.Series(values) for values in excluded_symbols])).to_numpy()],
-        names=["date", "symbol"],
-    ).drop_duplicates()
-
-
 def filter_by_security_status(
     data: pd.DataFrame,
-    security_status_path: str | Path,
-) -> tuple[pd.DataFrame, pd.MultiIndex]:
-    """剔除每日 ST、停牌、退市股票。"""
-    if data.empty:
-        empty_index = pd.MultiIndex.from_arrays([[], []], names=["date", "symbol"])
-        return data, empty_index
+    security_status: pd.DataFrame,
+) -> pd.DataFrame:
+    """剔除每日 ST、停牌股票。"""
+    if data.empty or security_status.empty:
+        return data
     if not isinstance(data.index, pd.MultiIndex) or data.index.names[:2] != ["date", "symbol"]:
         raise ValueError("data 必须使用 (date, symbol) MultiIndex")
 
-    security_status_path = Path(security_status_path)
-    if not security_status_path.exists():
-        raise FileNotFoundError(f"证券状态文件不存在: {security_status_path}")
-
-    security_status_path = security_status_path.resolve()
-    if security_status_path not in _SECURITY_STATUS_CACHE:
-        _SECURITY_STATUS_CACHE[security_status_path] = pd.read_csv(
-            security_status_path,
-            usecols=SECURITY_STATUS_COLUMNS,
-            dtype=str,
-        )
-    status = _SECURITY_STATUS_CACHE[security_status_path]
-    excluded_index = _build_security_exclusion_index(status, data.index)
-    if excluded_index.empty:
-        return data, excluded_index
-    return data.loc[~data.index.isin(excluded_index)].sort_index(), excluded_index
+    excluded = security_status.astype(bool).stack()
+    excluded_index = excluded[excluded].index
+    return data.loc[~data.index.isin(excluded_index)].sort_index()
 
 
 class DataLoader:
@@ -361,7 +300,7 @@ class DataLoader:
         self.factor_result = pd.DataFrame()
         self.benchmark = pd.DataFrame()
         self.constituents = pd.DataFrame()
-        self.security_exclusions = pd.MultiIndex.from_arrays([[], []], names=["date", "symbol"])
+        self.security_status = pd.DataFrame()
 
     def load_basic(self) -> pd.DataFrame:
         """加载基础行情数据和可选成分股。"""
@@ -382,36 +321,6 @@ class DataLoader:
         constituents_path = Path(self.constituents_path)
         if not constituents_path.exists():
             raise FileNotFoundError(f"成分股文件不存在: {constituents_path}")
-
-        header = _read_header(constituents_path)
-        if {"date", "tickers"}.issubset(header):
-            constituents_daily = pd.read_csv(
-                constituents_path,
-                usecols=["date", "tickers"],
-                parse_dates=["date"],
-            )
-            records = []
-            for row in constituents_daily.itertuples(index=False):
-                tickers = str(row.tickers).split(",") if pd.notna(row.tickers) else []
-                records.extend((row.date, ticker.strip(), True) for ticker in tickers if ticker.strip())
-            constituents = pd.DataFrame(records, columns=["date", "symbol", "is_member"])
-            if constituents.empty:
-                raise ValueError(f"{constituents_path} 没有可用成分股数据")
-            constituents = (
-                constituents.pivot_table(
-                    index="date",
-                    columns="symbol",
-                    values="is_member",
-                    aggfunc="last",
-                    fill_value=False,
-                )
-                .astype(bool)
-                .sort_index()
-                .sort_index(axis=1)
-            )
-            constituents.index.name = "date"
-            constituents.columns.name = "symbol"
-            return self._align_constituents_to_data(constituents)
 
         constituents = pd.read_csv(
             constituents_path,
@@ -449,32 +358,134 @@ class DataLoader:
         constituents.index.name = "date"
         constituents.columns.name = "symbol"
 
-        return self._align_constituents_to_data(constituents)
+        return align_constituents_to_data(constituents, self.data)
 
-    def _align_constituents_to_data(self, constituents: pd.DataFrame) -> pd.DataFrame:
-        """将成分股矩阵前向填充到行情交易日。"""
-        if self.data.empty:
-            return constituents
-
+    def build_suspended_status_table(
+        self,
+        status: pd.DataFrame,
+    ) -> pd.DataFrame:
+        """将逐日停牌记录构造为与行情数据对齐的布尔表。"""
         data_dates = pd.DatetimeIndex(
             self.data.index.get_level_values("date").unique()
         ).sort_values()
-        target_dates = data_dates[data_dates >= constituents.index.min()]
-        if target_dates.empty:
-            raise ValueError(f"{self.constituent_index} 的成分股日期与行情日期没有交集")
+        data_symbols = pd.Index(self.data.index.get_level_values("symbol").unique())
 
-        constituents = (
-            constituents.reindex(constituents.index.union(target_dates))
+        suspended = status[["ticker", "trade_date", "is_suspended"]].copy()
+        suspended["date"] = pd.to_datetime(
+            suspended["trade_date"],
+            errors="coerce",
+        )
+        suspended["is_excluded"] = _truthy(suspended["is_suspended"])
+        suspended = suspended.dropna(subset=["date"])
+
+        suspended_status = suspended.pivot_table(
+            index="date",
+            columns="ticker",
+            values="is_excluded",
+            aggfunc="last",
+        )
+        suspended_status = (
+            suspended_status.reindex(index=data_dates, columns=data_symbols)
             .astype("boolean")
-            .sort_index()
-            .ffill()
-            .reindex(target_dates)
             .fillna(False)
             .astype(bool)
         )
-        constituents.index.name = "date"
-        constituents.columns.name = "symbol"
-        return constituents
+        suspended_status.index.name = "date"
+        suspended_status.columns.name = "symbol"
+        return suspended_status
+
+    def build_st_status_table(
+        self,
+        status: pd.DataFrame,
+    ) -> pd.DataFrame:
+        """将 ST 状态区间构造为与行情数据对齐的布尔表。"""
+        data_dates = pd.DatetimeIndex(
+            self.data.index.get_level_values("date").unique()
+        ).sort_values()
+        data_symbols = pd.Index(self.data.index.get_level_values("symbol").unique())
+
+        intervals = status.copy()
+        intervals["start"] = pd.to_datetime(
+            intervals["start_date"],
+            errors="coerce",
+        )
+        intervals["end"] = pd.to_datetime(
+            intervals["end_date"],
+            errors="coerce",
+        ).fillna(data_dates[-1])
+        intervals["is_excluded"] = _truthy(intervals["is_st"])
+        intervals = intervals.dropna(subset=["start"])
+
+        records = []
+        for row in intervals.itertuples(index=False):
+            left = data_dates.searchsorted(row.start, side="left")
+            right = data_dates.searchsorted(row.end, side="right")
+            dates = data_dates[left:right]
+            if dates.empty:
+                continue
+            records.append(pd.DataFrame({
+                "date": dates,
+                "ticker": row.ticker,
+                "is_excluded": row.is_excluded,
+            }))
+
+        if records:
+            normalized = pd.concat(records, ignore_index=True).dropna(subset=["date"])
+        else:
+            normalized = pd.DataFrame(columns=["date", "ticker", "is_excluded"])
+
+        st_status = normalized.pivot_table(
+            index="date",
+            columns="ticker",
+            values="is_excluded",
+            aggfunc="last",
+        )
+        st_status = (
+            st_status.reindex(index=data_dates, columns=data_symbols)
+            .astype("boolean")
+            .fillna(False)
+            .astype(bool)
+        )
+        st_status.index.name = "date"
+        st_status.columns.name = "symbol"
+        return st_status
+
+    def load_security_status(self) -> pd.DataFrame:
+        """读取停牌和 ST 状态，并对齐到行情日期。"""
+        if self.data.empty or self.security_status_path is None:
+            return pd.DataFrame()
+
+        security_status_path = Path(self.security_status_path)
+        if not security_status_path.exists():
+            raise FileNotFoundError(f"证券状态文件不存在: {security_status_path}")
+
+        columns = [
+            "ticker",
+            "trade_date",
+            "start_date",
+            "end_date",
+            "is_suspended",
+            "is_st",
+        ]
+        status = pd.read_csv(
+            security_status_path,
+            usecols=columns,
+            dtype=str,
+        )
+
+        data_symbols = pd.Index(self.data.index.get_level_values("symbol").unique())
+        status = status[
+            status["ticker"].isin(data_symbols)
+            & (status["is_suspended"].notna() | status["is_st"].notna())
+        ].copy()
+
+        suspended_status = self.build_suspended_status_table(
+            status[status["is_suspended"].notna()]
+        )
+        st_status = self.build_st_status_table(
+            status[status["is_st"].notna()]
+        )
+        return suspended_status | st_status
 
     def load_factor_result(self) -> pd.DataFrame:
         """加载已保存的因子宽表，并合并到基础行情数据。"""
@@ -524,9 +535,10 @@ class DataLoader:
             self.constituents = self.load_constituents()
             self.data = filter_by_constituent(self.data, self.constituents)
         if self.security_status_path is not None:
-            self.data, self.security_exclusions = filter_by_security_status(
+            self.security_status = self.load_security_status()
+            self.data = filter_by_security_status(
                 self.data,
-                self.security_status_path,
+                self.security_status,
             )
         self.benchmark = self.load_benchmark()
         return self.data

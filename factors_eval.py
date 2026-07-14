@@ -6,6 +6,7 @@ import warnings
 import numpy as np
 import pandas as pd
 from scipy import stats
+import statsmodels.api as sm
 
 
 warnings.filterwarnings("ignore", category=stats.ConstantInputWarning)
@@ -61,24 +62,21 @@ class FactorEvalResult:
     ----------
     summary : pd.DataFrame
         单行核心指标汇总表。
-    ic_series : pd.Series
-        每个日期截面的 IC 时间序列。
+    full_ic_series : pd.Series
+        每个交易日截面的完整 IC 时间序列。
+    sampled_ic_series : pd.Series
+        按前向收益周期抽样、用于绘图和显著性检验的 IC 时间序列。
     turnover : pd.Series
         最高因子分组组合的单边换手率。
-    forward_returns : pd.Series
-        与因子值对齐使用的未来收益。
     layered : LayeredResult
         分层收益和风险指标。
-    ic_decay : pd.Series
-        从 1 到 ``max_lag`` 的平均 IC 衰减曲线。
     """
 
     summary: pd.DataFrame
-    ic_series: pd.Series
+    full_ic_series: pd.Series
+    sampled_ic_series: pd.Series
     turnover: pd.Series
-    forward_returns: pd.Series
     layered: LayeredResult
-    ic_decay: pd.Series
 
 
 def calc_ic(
@@ -159,36 +157,6 @@ def calc_ic_series(
     return pd.Series(result, name="IC").sort_index()
 
 
-def calc_icir(ic_series: pd.Series) -> float:
-    """计算 IC 信息比率。
-
-    ICIR 为 ``mean(IC) / std(IC)``。少于两个有效 IC 或标准差为零时
-    返回 NaN。
-
-    Parameters
-    ----------
-    ic_series : pd.Series
-        按时间排列的 IC 序列。
-
-    Returns
-    -------
-    float
-        ICIR。
-    """
-    values = ic_series.dropna()
-    if len(values) < 2 or values.std() == 0:
-        return np.nan
-    return float(values.mean() / values.std())
-
-
-def _index_dates(index: pd.Index) -> pd.DatetimeIndex:
-    """从普通索引或 MultiIndex 中取日期轴。"""
-    if isinstance(index, pd.MultiIndex):
-        level = "date" if "date" in index.names else 0
-        return pd.DatetimeIndex(index.get_level_values(level))
-    return pd.DatetimeIndex(index)
-
-
 def calc_offset_ic_stats(
     ic_series: pd.Series,
     period: int = 1,
@@ -219,73 +187,86 @@ def calc_offset_ic_stats(
     }
 
 
-def calc_t_stat(ic_series: pd.Series) -> tuple[float, float]:
-    """检验 IC 均值是否显著偏离零。
-
-    使用 SciPy 单样本 t 检验，以零为原假设均值。计算前删除 NaN；有效
-    样本少于 2 个时返回 ``(np.nan, np.nan)``。
+def calc_t_stat(
+    ic_series: pd.Series,
+    period: int = 1,
+    maxlags: int | None = None,
+) -> tuple[float, float]:
+    """使用 Newey-West / HAC 标准误检验 IC 均值是否显著偏离零。
 
     Parameters
     ----------
     ic_series : pd.Series
-        IC 时间序列。
+        按时间排列的 IC 序列。
+
+    period : int, default=1
+        前瞻收益窗口覆盖的 IC 观测期数。
+
+        例如：
+        - 每日计算 IC，使用未来 1 日收益：period=1
+        - 每日计算 IC，使用未来 5 日收益：period=5
+        - 每日计算 IC，使用未来 20 日收益：period=20
+
+    maxlags : int | None, default=None
+        HAC 最大滞后阶数。
+
+        默认使用 period - 1，对收益窗口重合导致的序列相关
+        进行修正。
+
+        可以显式指定更大的值，以处理 IC 本身额外存在的
+        时间序列相关性。
 
     Returns
     -------
     tuple[float, float]
-        ``(t_stat, p_value)``，分别为 t 统计量和双侧 p-value。
+        HAC 修正后的 ``(t_stat, p_value)``。
     """
-    values = ic_series.dropna()
-    if len(values) < 2:
+    if period <= 0:
+        raise ValueError("period 必须为正整数")
+
+    values = (
+        ic_series
+        .sort_index()
+        .replace([np.inf, -np.inf], np.nan)
+        .dropna()
+        .astype(float)
+    )
+
+    n_obs = len(values)
+
+    if n_obs < 3:
         return np.nan, np.nan
-    t_stat, p_value = stats.ttest_1samp(values, 0)
+
+    # h 期收益最多产生 h - 1 阶机械重叠
+    if maxlags is None:
+        maxlags = period - 1
+
+    if maxlags < 0:
+        raise ValueError("maxlags 不能小于 0")
+
+    # HAC 滞后阶数不能超过样本数量减 1
+    maxlags = min(maxlags, n_obs - 1)
+
+    # IC_t = alpha + epsilon_t
+    # alpha 即 IC 样本均值
+    X = np.ones((n_obs, 1), dtype=float)
+
+    result = sm.OLS(
+        endog=values.to_numpy(),
+        exog=X,
+    ).fit(
+        cov_type="HAC",
+        cov_kwds={
+            "maxlags": maxlags,
+            "use_correction": True,
+        },
+        use_t=True,
+    )
+
+    t_stat = result.tvalues[0]
+    p_value = result.pvalues[0]
+
     return float(t_stat), float(p_value)
-
-
-def calc_ic_decay(
-    factor: pd.DataFrame | pd.Series,
-    returns_provider,
-    max_lag: int = 20,
-    method: str = "rank",
-) -> pd.Series:
-    """计算因子对不同未来滞后收益的平均 IC，观察预测能力衰减。
-
-    ``lag=1`` 使用原始收益，``lag=2`` 将宽表收益向前移动一个日期，以此
-    类推。收益既可以直接传入，也可以由函数或按 lag 索引的对象动态提供。
-    DataFrame 输入只使用第一列。
-
-    Parameters
-    ----------
-    factor : pd.Series or pd.DataFrame
-        ``(date, symbol)`` MultiIndex 因子值。
-    returns_provider : pd.Series, pd.DataFrame, callable or mapping
-        未来收益数据。可调用对象接收 lag 并返回收益；映射使用 lag 取值。
-    max_lag : int, default 20
-        需要计算的最大滞后期，结果包含 1 到 ``max_lag``。
-    method : str, default "rank"
-        每个截面使用的 IC 计算方法。
-
-    Returns
-    -------
-    pd.Series
-        索引为 lag、值为对应 IC 时间序列均值，名称为 ``IC_decay``。
-    """
-    if isinstance(factor, pd.DataFrame):
-        factor = factor.iloc[:, 0]
-
-    result = {}
-    if isinstance(returns_provider, (pd.DataFrame, pd.Series)):
-        returns = returns_provider.iloc[:, 0] if isinstance(returns_provider, pd.DataFrame) else returns_provider
-        returns = returns.unstack()
-        for lag in range(1, max_lag + 1):
-            shifted_returns = returns.shift(-(lag - 1)).stack()
-            result[lag] = calc_ic_series(factor, shifted_returns, method).mean()
-    else:
-        for lag in range(1, max_lag + 1):
-            returns = returns_provider(lag) if callable(returns_provider) else returns_provider[lag]
-            result[lag] = calc_ic_series(factor, returns, method).mean()
-    return pd.Series(result, name="IC_decay")
-
 
 def calc_turnover(
     factor: pd.DataFrame | pd.Series,
@@ -385,56 +366,6 @@ def _timing_horizon_weights(
     if total_weight <= 0:
         raise ValueError("horizon_weights 权重和必须大于 0")
     return weights, total_weight
-
-
-def calc_timing_win_score(
-    market_data: pd.DataFrame,
-    price_col: str = "adj_close",
-    horizon_weights: dict[int, float] | None = None,
-) -> pd.Series:
-    """计算每只股票的 5、10、21 日加权不亏钱得分。
-
-    每个周期先把未来收益转换为二值数据：收益大于等于 0 记为 1，否则记为
-    0。默认用 5 日、10 日、21 日三个二值结果按 ``0.6、0.3、0.1`` 加权，
-    得到 ``(date, symbol)`` 粒度的总胜率得分。
-    """
-    weights, total_weight = _timing_horizon_weights(horizon_weights)
-    weighted_scores = {}
-    for horizon, weight in weights.items():
-        returns = calc_forward_returns(market_data, horizon, price_col=price_col)
-        weighted_scores[horizon] = returns.ge(0).astype(float) * float(weight)
-
-    combined = pd.concat(weighted_scores, axis=1).dropna()
-    if combined.empty:
-        return pd.Series(
-            dtype=float,
-            name="timing_win_score",
-            index=pd.MultiIndex.from_arrays([[], []], names=["date", "symbol"]),
-        )
-    return combined.sum(axis=1).div(total_weight).rename("timing_win_score")
-
-
-def calc_timing_ic_series(
-    factor: pd.DataFrame | pd.Series,
-    market_data: pd.DataFrame,
-    price_col: str = "adj_close",
-    horizon_weights: dict[int, float] | None = None,
-) -> pd.Series:
-    """计算因子值与总胜率得分的逐日截面 Rank IC。
-
-    该指标衡量因子值越高时，股票未来 5、10、21 日加权不亏钱得分是否也越
-    高。每个日期截面使用 Spearman 秩相关，最后由调用方按评价周期汇总。
-    """
-    if isinstance(factor, pd.DataFrame):
-        factor = factor.stack().rename("factor")
-    else:
-        factor = factor.rename("factor")
-    timing_score = calc_timing_win_score(
-        market_data,
-        price_col=price_col,
-        horizon_weights=horizon_weights,
-    )
-    return calc_ic_series(factor, timing_score, method="rank").rename("TimingIC")
 
 
 def calc_max_drawdown(returns: pd.Series) -> float:
@@ -602,7 +533,6 @@ def eval(
     forward_period: int = 1,
     n_groups: int = 5,
     ic_method: str = "rank",
-    max_lag: int = 20,
     price_col: str = "adj_close",
 ) -> FactorEvalResult:
     """汇总单个因子的 IC、换手率和分层回测指标。
@@ -635,8 +565,8 @@ def eval(
     Returns
     -------
     FactorEvalResult
-        完整评估结果，包含汇总表、IC 序列、换手率、未来收益、分层结果
-        和 IC 衰减曲线，可直接交给绘图模块使用。
+        完整评估结果，包含汇总表、完整 IC 序列、换手率和分层结果，
+        可直接交给绘图模块使用。
 
     Raises
     ------
@@ -647,8 +577,6 @@ def eval(
         raise ValueError("forward_period 必须为正整数")
     if n_groups <= 0:
         raise ValueError("n_groups 必须为正整数")
-    if max_lag <= 0:
-        raise ValueError("max_lag 必须为正整数")
 
     if isinstance(factor_values, pd.DataFrame):
         factor = factor_values.stack().rename("factor")
@@ -658,11 +586,12 @@ def eval(
     forward_returns = calc_forward_returns(market_data, forward_period, price_col=price_col)
     full_ic_series = calc_ic_series(factor, forward_returns, method=ic_method)
     offset_ic_stats = calc_offset_ic_stats(full_ic_series, period=forward_period)
-    full_timing_ic_series = calc_timing_ic_series(
+    timing_score = forward_returns.ge(0).astype(float)
+    full_timing_ic_series = calc_ic_series(
         factor,
-        market_data,
-        price_col=price_col,
-    )
+        timing_score,
+        method="rank",
+    ).rename("TimingIC")
     timing_ic_stats = calc_offset_ic_stats(
         full_timing_ic_series,
         period=forward_period,
@@ -673,11 +602,13 @@ def eval(
         market_data.index.get_level_values("date").unique()
     ).sort_values()
     sampled_dates = trading_dates[::forward_period]
-    factor = factor[_index_dates(factor.index).isin(sampled_dates)]
-    forward_returns = forward_returns[_index_dates(forward_returns.index).isin(sampled_dates)]
-    ic_series = full_ic_series[
-        _index_dates(full_ic_series.index).isin(sampled_dates)
+    factor = factor[
+        factor.index.get_level_values("date").isin(sampled_dates)
     ]
+    forward_returns = forward_returns[
+        forward_returns.index.get_level_values("date").isin(sampled_dates)
+    ]
+    sampled_ic_series = full_ic_series[full_ic_series.index.isin(sampled_dates)]
     turnover = calc_turnover(factor, quantiles=n_groups)
     layered = layered_backtest(
         factor,
@@ -685,15 +616,8 @@ def eval(
         n_groups=n_groups,
         period=forward_period,
     )
-    # 暂不计算 IC 衰减，避免为每个 lag 构造完整收益面板。
-    # ic_decay = calc_ic_decay(
-    #     factor,
-    #     forward_returns,
-    #     max_lag=max_lag,
-    #     method=ic_method,
-    # )
 
-    t_stat, p_value = calc_t_stat(ic_series)
+    t_stat, p_value = calc_t_stat(full_ic_series, period=forward_period)
 
     def final_cumulative_return(returns: pd.Series) -> float:
         values = returns.dropna()
@@ -725,9 +649,8 @@ def eval(
     }])
     return FactorEvalResult(
         summary=summary.set_index("period"),
-        ic_series=ic_series,
+        full_ic_series=full_ic_series,
+        sampled_ic_series=sampled_ic_series,
         turnover=turnover,
-        forward_returns=forward_returns,
         layered=layered,
-        ic_decay=pd.Series(dtype=float, name="IC_decay"),
     )
