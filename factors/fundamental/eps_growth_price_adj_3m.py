@@ -17,13 +17,13 @@ class EPSGrowthPriceAdj3M(BaseFactor):
         self.period_days = period_days
 
     def generate_signals(self, data: pd.DataFrame, constituents=None) -> pd.DataFrame:
-        required = {"eps", "close"}
+        required = {"eps", "adj_close"}
         missing = required.difference(data.columns)
         if missing:
             raise ValueError(f"EPSGrowthPriceAdj3M missing data columns: {sorted(missing)}")
 
         eps = data["eps"].unstack("symbol").astype(float).sort_index()
-        close = data["close"].unstack("symbol").astype(float).sort_index()
+        close = data["adj_close"].unstack("symbol").astype(float).sort_index()
 
         prior_year_eps = eps.shift(self.year_days)
         prior_period_price = close.shift(self.period_days).where(

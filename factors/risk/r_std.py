@@ -30,12 +30,12 @@ class RStd84D(BaseFactor):
         data: pd.DataFrame,
         constituents: dict[str, set[str]] | None = None,
     ) -> pd.DataFrame:
-        required = {"close", "volume"}
+        required = {"adj_close", "volume"}
         missing = required.difference(data.columns)
         if missing:
             raise KeyError(f"r_std_84d 缺少字段: {sorted(missing)}")
 
-        close = data["close"].unstack("symbol").astype(float).sort_index()
+        close = data["adj_close"].unstack("symbol").astype(float).sort_index()
         volume = data["volume"].unstack("symbol").reindex_like(close).astype(float)
         close = close.where((close > 0) & (volume > 0))
         returns = close.pct_change(fill_method=None)

@@ -31,14 +31,14 @@ class HighLowVolatility(BaseFactor):
         data: pd.DataFrame,
         constituents: dict[str, set[str]] | None = None,
     ) -> pd.DataFrame:
-        required = {"close", "high", "low", "volume"}
+        required = {"adj_close", "adj_high", "adj_low", "volume"}
         missing = required.difference(data.columns)
         if missing:
             raise KeyError(f"{self.name} 缺少字段: {sorted(missing)}")
 
-        close = data["close"].unstack("symbol").astype(float).sort_index()
-        high = data["high"].unstack("symbol").reindex_like(close).astype(float)
-        low = data["low"].unstack("symbol").reindex_like(close).astype(float)
+        close = data["adj_close"].unstack("symbol").astype(float).sort_index()
+        high = data["adj_high"].unstack("symbol").reindex_like(close).astype(float)
+        low = data["adj_low"].unstack("symbol").reindex_like(close).astype(float)
         volume = data["volume"].unstack("symbol").reindex_like(close).astype(float)
         valid_close = (close > 0) & (volume > 0)
         previous_close = close.where(valid_close).shift(1)

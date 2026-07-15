@@ -27,8 +27,8 @@ class Runner:
     def __init__(
         self,
         factor_name: str,
+        relay_class: str,
         factor_params: dict[str, Any] | None = None,
-        factor_type: str | None = None,
         symbols: list[str] | None = None,
         start: str | date | None = None,
         end: str | date | None = None,
@@ -52,9 +52,7 @@ class Runner:
         self.eval_price_col = eval_price_col
         self.security_status_path = Path(security_status_path) if security_status_path is not None else None
         self.output_dir = Path(output_dir or Path("outputs") / factor_name)
-        self.factor = FactorRegistry.get(factor_type or factor_name)(
-            **(factor_params or {})
-        )
+        self.factor = FactorRegistry.get(relay_class)(**(factor_params or {}))
         self.data = pd.DataFrame()
         self.benchmark = pd.DataFrame()
         self.result = pd.DataFrame()
@@ -222,7 +220,7 @@ class Runner:
 
 
 if __name__ == "__main__":
-    factor_config_path = "config/good_alpha158_factor_configs.json"
+    factor_config_path = "config/factor_configs.json"
     with open(factor_config_path, "r", encoding="utf-8") as f:
         factor_configs = json.load(f)
 
@@ -230,13 +228,13 @@ if __name__ == "__main__":
     for factor_name, config in tqdm(
         factor_configs.items(),
         total=len(factor_configs),
-        desc="Alpha158 回测",
+        desc="自主因子回测",
         unit="factor",
     ):
         importlib.import_module(config["module"])
         runner = Runner(
             factor_name=factor_name,
-            factor_type=config["factor_type"],
+            relay_class=config["relay_class"],
             factor_params=config["params"],
             start="2010-01-01",
             data_columns=[column for column in config["columns"]],
@@ -244,6 +242,6 @@ if __name__ == "__main__":
             factor_dir=None,
             constituents_path=data_dir.parent / "zz500_index_members_rebalance.csv",
             constituents="000905.SH",
-            output_dir=Path("outputs/zz500/alpha158") / factor_name,
+            output_dir=Path("outputs/zz500/review") / factor_name,
         )
         runner.run()

@@ -1,0 +1,640 @@
+{
+  "eps_growth_63d": {
+    "module": "factors.fundamental.eps_growth_63d",
+    "relay_class": "EpsGrowthFactor63D",
+    "params": {},
+    "columns": [
+      "close",
+      "eps",
+      "sector"
+    ]
+  },
+  "high_r_std_84d": {
+    "module": "factors.risk.high_low_volatility",
+    "relay_class": "HighRStd84D",
+    "params": {
+      "lookback": 84,
+      "min_periods": null
+    },
+    "columns": [
+      "adj_close",
+      "adj_high",
+      "adj_low",
+      "volume"
+    ]
+  },
+  "hml_r_std_84d": {
+    "module": "factors.risk.high_low_volatility",
+    "relay_class": "HMLRStd84D",
+    "params": {
+      "lookback": 84,
+      "min_periods": null
+    },
+    "columns": [
+      "adj_close",
+      "adj_high",
+      "adj_low",
+      "volume"
+    ]
+  },
+  "net_income_growth_63d": {
+    "module": "factors.fundamental.net_income_growth_63d",
+    "relay_class": "NetIncomeGrowthFactor63D",
+    "params": {},
+    "columns": [
+      "close",
+      "net_income",
+      "sector"
+    ]
+  },
+  "roe_growth_63d": {
+    "module": "factors.fundamental.roe_growth_63d",
+    "relay_class": "RoeGrowthFactor63D",
+    "params": {},
+    "columns": [
+      "close",
+      "roe",
+      "sector"
+    ]
+  },
+  "trading_amount_20d": {
+    "module": "factors.price.reversal",
+    "relay_class": "TradingAmount",
+    "params": {},
+    "columns": [
+      "close",
+      "volume"
+    ]
+  },
+  "turnover_cv_20d": {
+    "module": "factors.price.turnover_cv",
+    "relay_class": "TurnoverCV",
+    "params": {
+      "window": 20,
+      "min_periods": 15
+    },
+    "columns": [
+      "adj_close",
+      "volume",
+      "market_cap"
+    ]
+  },
+  "vff3_up_63d": {
+    "module": "factors.risk.vff3_volatility",
+    "relay_class": "VFF3Up63D",
+    "params": {
+      "lookback": 63,
+      "min_periods": 40,
+      "min_residuals": 10
+    },
+    "columns": [
+      "adj_close",
+      "volume",
+      "market_cap",
+      "pb_ratio"
+    ]
+  },
+  "vff3_upd_63d": {
+    "module": "factors.risk.vff3_volatility",
+    "relay_class": "VFF3UpD63D",
+    "params": {
+      "lookback": 63,
+      "min_periods": 40,
+      "min_residuals": 10
+    },
+    "columns": [
+      "adj_close",
+      "volume",
+      "market_cap",
+      "pb_ratio"
+    ]
+  },
+  "gross_profitability_growth_12m": {
+    "module": "factors.fundamental.gross_profitability_growth_12m",
+    "relay_class": "GrossProfitabilityGrowth12m",
+    "params": {},
+    "columns": [
+      "close",
+      "gross_profit",
+      "total_assets"
+    ]
+  },
+  "gross_profitability_trend_qoq_12m": {
+    "module": "factors.fundamental.gross_profitability_trend_qoq_12m",
+    "relay_class": "GrossProfitabilityTrendQoq12m",
+    "params": {},
+    "columns": [
+      "close",
+      "gross_profit",
+      "total_assets"
+    ]
+  },
+  "gross_profitability_trend_yoy_48m": {
+    "module": "factors.fundamental.gross_profitability_trend_yoy_48m",
+    "relay_class": "GrossProfitabilityTrendYoy48m",
+    "params": {},
+    "columns": [
+      "close",
+      "gross_profit",
+      "total_assets"
+    ]
+  },
+  "non_current_asset_growth_vol_24m": {
+    "module": "factors.fundamental.non_current_asset_growth_vol_24m",
+    "relay_class": "NonCurrentAssetGrowthVol24m",
+    "params": {},
+    "columns": [
+      "close",
+      "non_current_assets"
+    ]
+  },
+  "r_std_84d": {
+    "module": "factors.risk.r_std",
+    "relay_class": "RStd84D",
+    "params": {
+      "lookback": 84,
+      "min_periods": null
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ]
+  },
+  "reversal_1m": {
+    "module": "factors.price.reversal",
+    "relay_class": "Reversal1M",
+    "params": {},
+    "columns": [
+      "adj_close"
+    ]
+  },
+  "reversal_3m": {
+    "module": "factors.price.reversal",
+    "relay_class": "Reversal3M",
+    "params": {},
+    "columns": [
+      "adj_close"
+    ]
+  },
+  "vff3_63d": {
+    "module": "factors.risk.vff3_volatility",
+    "relay_class": "VFF363D",
+    "params": {
+      "lookback": 63,
+      "min_periods": 40,
+      "min_residuals": 10
+    },
+    "columns": [
+      "adj_close",
+      "volume",
+      "market_cap",
+      "pb_ratio"
+    ]
+  },
+  "volume_price_corr_15d": {
+    "module": "factors.price.volume_price_corr",
+    "relay_class": "VolumePriceCorr",
+    "params": {
+      "window": 10
+    },
+    "columns": [
+      "adj_close",
+      "volume",
+      "market_cap"
+    ]
+  },
+  "beta_mn_252d": {
+    "module": "factors.risk.semi_beta",
+    "relay_class": "BetaMN",
+    "params": {
+      "window": 252,
+      "min_obs": 120,
+      "min_market_obs": 100
+    },
+    "columns": [
+      "adj_close",
+      "market_cap"
+    ]
+  },
+  "beta_mp_252d": {
+    "module": "factors.risk.semi_beta",
+    "relay_class": "BetaMP",
+    "params": {
+      "window": 252,
+      "min_obs": 120,
+      "min_market_obs": 100
+    },
+    "columns": [
+      "adj_close",
+      "market_cap"
+    ]
+  },
+  "current_asset_growth_vol_24m": {
+    "module": "factors.fundamental.current_asset_growth_vol_24m",
+    "relay_class": "CurrentAssetGrowthVol24m",
+    "params": {},
+    "columns": [
+      "close",
+      "current_assets"
+    ]
+  },
+  "dgpoaq_12m": {
+    "module": "factors.fundamental.dgpoaq_12m",
+    "relay_class": "DGPOAQ12M",
+    "params": {
+      "year_days": 252
+    },
+    "columns": [
+      "close",
+      "total_assets",
+      "revenue",
+      "cost_revenue"
+    ]
+  },
+  "dip_rebound_10d": {
+    "module": "factors.price.dip_rebound",
+    "relay_class": "DipRebound10",
+    "params": {
+      "window": 10,
+      "min_periods": 5,
+      "shift_days": 0
+    },
+    "columns": [
+      "adj_close",
+      "adj_low"
+    ]
+  },
+  "industry_current_asset_growth_stability_24m": {
+    "module": "factors.sector.industry_current_asset_growth_stability_24m",
+    "relay_class": "IndustryCurrentAssetGrowthStability24m",
+    "params": {},
+    "columns": [
+      "close",
+      "current_assets",
+      "sector"
+    ]
+  },
+  "open_high_surge_10d": {
+    "module": "factors.price.open_high_surge_10",
+    "relay_class": "OpenHighSurge10",
+    "params": {
+      "window": 10,
+      "min_periods": 5,
+      "shift_days": 0
+    },
+    "columns": [
+      "adj_close",
+      "adj_open",
+      "adj_high"
+    ]
+  },
+  "total_asset_growth_vol_24m": {
+    "module": "factors.fundamental.total_asset_growth_vol_24m",
+    "relay_class": "TotalAssetGrowthVol24m",
+    "params": {},
+    "columns": [
+      "close",
+      "total_assets"
+    ]
+  },
+  "dgmarq_12m": {
+    "module": "factors.fundamental.dgmarq_12m",
+    "relay_class": "DGMARQ12M",
+    "params": {
+      "year_days": 252
+    },
+    "columns": [
+      "close",
+      "revenue",
+      "cost_revenue"
+    ]
+  },
+  "droaq_12m": {
+    "module": "factors.fundamental.droaq_12m",
+    "relay_class": "DROAQ12M",
+    "params": {
+      "year_days": 252
+    },
+    "columns": [
+      "close",
+      "roa"
+    ]
+  },
+  "eps_growth_12m": {
+    "module": "factors.fundamental.eps_growth_12m",
+    "relay_class": "EPSGrowth12M",
+    "params": {
+      "year_days": 252
+    },
+    "columns": [
+      "close",
+      "eps"
+    ]
+  },
+  "eps_growth_accel_3m": {
+    "module": "factors.fundamental.eps_growth_accel_3m",
+    "relay_class": "EPSGrowthAccel3M",
+    "params": {
+      "year_days": 252,
+      "period_days": 63
+    },
+    "columns": [
+      "close",
+      "eps"
+    ]
+  },
+  "eps_growth_price_adj_3m": {
+    "module": "factors.fundamental.eps_growth_price_adj_3m",
+    "relay_class": "EPSGrowthPriceAdj3M",
+    "params": {
+      "year_days": 252,
+      "period_days": 63
+    },
+    "columns": [
+      "adj_close",
+      "eps"
+    ]
+  },
+  "eps_growth_vol_adj_3m": {
+    "module": "factors.fundamental.eps_growth_vol_adj_3m",
+    "relay_class": "EPSGrowthVolAdj3M",
+    "params": {
+      "year_days": 252,
+      "quarter_days": 63,
+      "n_quarters": 8
+    },
+    "columns": [
+      "close",
+      "eps"
+    ]
+  },
+  "equity_growth_63d": {
+    "module": "factors.fundamental.equity_growth_63d",
+    "relay_class": "EquityGrowthFactor63D",
+    "params": {},
+    "columns": [
+      "close",
+      "shareholder_equity",
+      "sector"
+    ]
+  },
+  "revenue_growth_63d": {
+    "module": "factors.fundamental.revenue_growth_63d",
+    "relay_class": "RevenueGrowthFactor63D",
+    "params": {},
+    "columns": [
+      "close",
+      "revenue",
+      "sector"
+    ]
+  },
+  "volume_3m": {
+    "module": "factors.price.reversal",
+    "relay_class": "Volume3M",
+    "params": {},
+    "columns": [
+      "close",
+      "volume"
+    ]
+  },
+  "beta_n_252d": {
+    "module": "factors.risk.semi_beta",
+    "relay_class": "BetaN",
+    "params": {
+      "window": 252,
+      "min_obs": 120,
+      "min_market_obs": 100
+    },
+    "columns": [
+      "adj_close",
+      "market_cap"
+    ]
+  },
+  "beta_p_252d": {
+    "module": "factors.risk.semi_beta",
+    "relay_class": "BetaP",
+    "params": {
+      "window": 252,
+      "min_obs": 120,
+      "min_market_obs": 100
+    },
+    "columns": [
+      "adj_close",
+      "market_cap"
+    ]
+  },
+  "cfp_1d": {
+    "module": "factors.fundamental.cfp_1d",
+    "relay_class": "CfpFactor1D",
+    "params": {},
+    "columns": [
+      "close",
+      "operating_cash_flow",
+      "market_cap",
+      "sector"
+    ]
+  },
+  "current_asset_growth_12m": {
+    "module": "factors.fundamental.current_asset_growth_12m",
+    "relay_class": "CurrentAssetGrowth12m",
+    "params": {},
+    "columns": [
+      "close",
+      "current_assets"
+    ]
+  },
+  "current_liability_ratio_1d": {
+    "module": "factors.fundamental.current_liability_ratio_1d",
+    "relay_class": "CurrentLiabilityRatioFactor1D",
+    "params": {},
+    "columns": [
+      "close",
+      "total_liabilities",
+      "current_liabilities",
+      "sector"
+    ]
+  },
+  "debt_to_asset_change_12m": {
+    "module": "factors.fundamental.debt_to_asset_change_12m",
+    "relay_class": "DebtToAssetChange12m",
+    "params": {},
+    "columns": [
+      "close",
+      "total_liabilities",
+      "total_assets"
+    ]
+  },
+  "eps_growth_accel_price_adj_3m": {
+    "module": "factors.fundamental.eps_growth_accel_price_adj_3m",
+    "relay_class": "EPSGrowthAccelPriceAdj3M",
+    "params": {
+      "year_days": 252,
+      "period_days": 63
+    },
+    "columns": [
+      "adj_close",
+      "eps"
+    ]
+  },
+  "eps_growth_accel_vol_adj_3m": {
+    "module": "factors.fundamental.eps_growth_accel_vol_adj_3m",
+    "relay_class": "EPSGrowthAccelVolAdj3M",
+    "params": {
+      "year_days": 252,
+      "period_days": 63,
+      "quarter_days": 63,
+      "n_quarters": 8
+    },
+    "columns": [
+      "close",
+      "eps"
+    ]
+  },
+  "equity_ratio_change_12m": {
+    "module": "factors.fundamental.equity_ratio_change_12m",
+    "relay_class": "EquityRatioChange12m",
+    "params": {},
+    "columns": [
+      "close",
+      "shareholder_equity",
+      "total_assets"
+    ]
+  },
+  "equity_to_fixed_asset_change_12m": {
+    "module": "factors.fundamental.equity_to_fixed_asset_change_12m",
+    "relay_class": "EquityToFixedAssetChange12m",
+    "params": {},
+    "columns": [
+      "close",
+      "shareholder_equity",
+      "ppe_net"
+    ]
+  },
+  "gpoaq_3m": {
+    "module": "factors.fundamental.gpoaq_3m",
+    "relay_class": "GPOAQ3M",
+    "params": {
+      "quarter_days": 63
+    },
+    "columns": [
+      "close",
+      "total_assets",
+      "revenue",
+      "cost_revenue"
+    ]
+  },
+  "inventory_turnover_1d": {
+    "module": "factors.fundamental.inventory_turnover_1d",
+    "relay_class": "InventoryTurnoverFactor1D",
+    "params": {},
+    "columns": [
+      "close",
+      "cost_revenue",
+      "inventory",
+      "sector"
+    ]
+  },
+  "long_term_debt_ratio_1d": {
+    "module": "factors.fundamental.long_term_debt_ratio_1d",
+    "relay_class": "LongTermDebtRatioFactor1D",
+    "params": {},
+    "columns": [
+      "close",
+      "total_assets",
+      "non_current_debt",
+      "sector"
+    ]
+  },
+  "long_term_debt_ratio_change_12m": {
+    "module": "factors.fundamental.long_term_debt_ratio_change_12m",
+    "relay_class": "LongTermDebtRatioChange12m",
+    "params": {},
+    "columns": [
+      "close",
+      "non_current_debt",
+      "total_assets"
+    ]
+  },
+  "net_income_cash_ratio_1d": {
+    "module": "factors.fundamental.net_income_cash_ratio_1d",
+    "relay_class": "NetIncomeCashRatioFactor1D",
+    "params": {},
+    "columns": [
+      "close",
+      "net_income",
+      "operating_cash_flow",
+      "sector"
+    ]
+  },
+  "non_current_asset_growth_12m": {
+    "module": "factors.fundamental.non_current_asset_growth_12m",
+    "relay_class": "NonCurrentAssetGrowth12m",
+    "params": {},
+    "columns": [
+      "close",
+      "non_current_assets"
+    ]
+  },
+  "reversal_6m": {
+    "module": "factors.price.reversal",
+    "relay_class": "Reversal6M",
+    "params": {},
+    "columns": [
+      "adj_close"
+    ]
+  },
+  "size_factor_1d": {
+    "module": "factors.risk.size",
+    "relay_class": "SizeFactor",
+    "params": {},
+    "columns": [
+      "close",
+      "market_cap"
+    ]
+  },
+  "size_squared_1d": {
+    "module": "factors.risk.size",
+    "relay_class": "SizeSquaredFactor",
+    "params": {},
+    "columns": [
+      "close",
+      "market_cap"
+    ]
+  },
+  "smallcap_growth_1d": {
+    "module": "factors.risk.smallcap_growth",
+    "relay_class": "SmallCapGrowth",
+    "params": {
+      "lower": 0.01,
+      "upper": 0.99,
+      "use_rank": false
+    },
+    "columns": [
+      "close",
+      "market_cap"
+    ]
+  },
+  "style_category_momentum_1d": {
+    "module": "factors.sector.style",
+    "relay_class": "StyleCategoryMomentum",
+    "params": {
+      "period": 1,
+      "n_clusters": 30
+    },
+    "columns": [
+      "adj_close",
+      "market_cap",
+      "pe_ratio"
+    ]
+  },
+  "total_asset_growth_63d": {
+    "module": "factors.fundamental.total_asset_growth_63d",
+    "relay_class": "TotalAssetGrowthFactor63D",
+    "params": {},
+    "columns": [
+      "close",
+      "total_assets",
+      "sector"
+    ]
+  }
+}

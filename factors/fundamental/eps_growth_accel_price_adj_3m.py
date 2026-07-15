@@ -17,7 +17,7 @@ class EPSGrowthAccelPriceAdj3M(BaseFactor):
         self.period_days = period_days
 
     def generate_signals(self, data: pd.DataFrame, constituents=None) -> pd.DataFrame:
-        required = {"eps", "close"}
+        required = {"eps", "adj_close"}
         missing = required.difference(data.columns)
         if missing:
             raise ValueError(
@@ -25,7 +25,7 @@ class EPSGrowthAccelPriceAdj3M(BaseFactor):
             )
 
         eps = data["eps"].unstack("symbol").astype(float).sort_index()
-        close = data["close"].unstack("symbol").astype(float).sort_index()
+        close = data["adj_close"].unstack("symbol").astype(float).sort_index()
 
         current_growth = (
             eps - eps.shift(self.year_days)

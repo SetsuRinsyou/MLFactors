@@ -43,12 +43,12 @@ class MaxDailyReturn5(BaseFactor):
             raise ValueError("lookback 必须为正整数")
         if self.rebalance_step <= 0:
             raise ValueError("rebalance_step 必须为正整数")
-        if "close" not in data.columns:
-            raise ValueError("字段 close 缺失")
+        if "adj_close" not in data.columns:
+            raise ValueError("字段 adj_close 缺失")
         if not isinstance(data.index, pd.MultiIndex) or data.index.names[:2] != ["date", "symbol"]:
             raise ValueError("因子输入必须使用 (date, symbol) MultiIndex")
 
-        close = data["close"].unstack("symbol").astype(float).sort_index()
+        close = data["adj_close"].unstack("symbol").astype(float).sort_index()
         returns = close.pct_change(fill_method=None)
         result = pd.DataFrame(np.nan, index=returns.index, columns=returns.columns)
 
