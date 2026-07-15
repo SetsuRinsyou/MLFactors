@@ -1,0 +1,1027 @@
+{
+  "CORD_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORD",
+      "window": 5
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "CORD_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORD",
+      "window": 10
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "CORD_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORD",
+      "window": 20
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "CORD_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORD",
+      "window": 30
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "CORD_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORD",
+      "window": 60
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "CORR_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORR",
+      "window": 5
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "CORR_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORR",
+      "window": 10
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "CORR_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORR",
+      "window": 20
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "CORR_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORR",
+      "window": 30
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "KLOW_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "KLOW"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "KLOW2_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "KLOW2"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "KMID_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "KMID"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "KMID2_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "KMID2"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "KSFT_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "KSFT"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "KSFT2_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "KSFT2"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "KUP_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "KUP"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "LOW0_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "LOW0"
+    },
+    "columns": [
+      "adj_low",
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "OPEN0_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "OPEN0"
+    },
+    "columns": [
+      "adj_open",
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "VWAP0_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VWAP0"
+    },
+    "columns": [
+      "vwap",
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "IMIN_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMIN",
+      "window": 5
+    },
+    "columns": [
+      "adj_low",
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "IMIN_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMIN",
+      "window": 10
+    },
+    "columns": [
+      "adj_low",
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "IMXD_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMXD",
+      "window": 5
+    },
+    "columns": [
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "IMXD_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMXD",
+      "window": 30
+    },
+    "columns": [
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "IMXD_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMXD",
+      "window": 60
+    },
+    "columns": [
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "MAX_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MAX",
+      "window": 60
+    },
+    "columns": [
+      "adj_high",
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "MIN_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MIN",
+      "window": 5
+    },
+    "columns": [
+      "adj_low",
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "MIN_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MIN",
+      "window": 10
+    },
+    "columns": [
+      "adj_low",
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "MIN_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MIN",
+      "window": 20
+    },
+    "columns": [
+      "adj_low",
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "MIN_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MIN",
+      "window": 30
+    },
+    "columns": [
+      "adj_low",
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "MIN_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MIN",
+      "window": 60
+    },
+    "columns": [
+      "adj_low",
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "QTLD_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLD",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "QTLD_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLD",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "QTLD_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLD",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "QTLD_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLD",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "QTLD_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLD",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "QTLU_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLU",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "QTLU_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLU",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "QTLU_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLU",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "QTLU_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLU",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "QTLU_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLU",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "RANK_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RANK",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "RANK_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RANK",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "RANK_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RANK",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "RANK_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RANK",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "RANK_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RANK",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "RSV_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RSV",
+      "window": 5
+    },
+    "columns": [
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "RSV_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RSV",
+      "window": 60
+    },
+    "columns": [
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "BETA_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "BETA",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "BETA_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "BETA",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "BETA_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "BETA",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "MA_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MA",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "MA_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MA",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "MA_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MA",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "MA_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MA",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "MA_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MA",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "RESI_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RESI",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "RESI_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RESI",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "ROC_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "ROC",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "ROC_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "ROC",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "ROC_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "ROC",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "ROC_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "ROC",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "ROC_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "ROC",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "RSQR_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RSQR",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "SUMD_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMD",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "SUMD_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMD",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "SUMN_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMN",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "SUMN_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMN",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "SUMP_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMP",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "SUMP_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMP",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "VMA_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VMA",
+      "window": 5
+    },
+    "columns": [
+      "volume"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "VMA_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VMA",
+      "window": 10
+    },
+    "columns": [
+      "volume"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "VMA_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VMA",
+      "window": 60
+    },
+    "columns": [
+      "volume"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "VSUMD_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMD",
+      "window": 20
+    },
+    "columns": [
+      "volume"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "VSUMD_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMD",
+      "window": 30
+    },
+    "columns": [
+      "volume"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "VSUMD_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMD",
+      "window": 60
+    },
+    "columns": [
+      "volume"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "VSUMN_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMN",
+      "window": 5
+    },
+    "columns": [
+      "volume"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "VSUMN_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMN",
+      "window": 10
+    },
+    "columns": [
+      "volume"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "VSUMN_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMN",
+      "window": 20
+    },
+    "columns": [
+      "volume"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "VSUMN_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMN",
+      "window": 30
+    },
+    "columns": [
+      "volume"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "VSUMN_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMN",
+      "window": 60
+    },
+    "columns": [
+      "volume"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "VSUMP_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMP",
+      "window": 20
+    },
+    "columns": [
+      "volume"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "VSUMP_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMP",
+      "window": 30
+    },
+    "columns": [
+      "volume"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "VSUMP_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMP",
+      "window": 60
+    },
+    "columns": [
+      "volume"
+    ],
+    "factor_type": "alpha158_price"
+  },
+  "KLEN_1d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "KLEN"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "factor_type": "alpha158_risk"
+  },
+  "STD_30d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "STD",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_risk"
+  },
+  "STD_60d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "STD",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "factor_type": "alpha158_risk"
+  },
+  "WVMA_20d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "WVMA",
+      "window": 20
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "factor_type": "alpha158_risk"
+  },
+  "WVMA_30d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "WVMA",
+      "window": 30
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "factor_type": "alpha158_risk"
+  },
+  "WVMA_60d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "WVMA",
+      "window": 60
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "factor_type": "alpha158_risk"
+  }
+}

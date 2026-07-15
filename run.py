@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+from tqdm import tqdm
 
 from dataloader import DataLoader
 from factors_eval import FactorEvalResult, eval as evaluate_factor
@@ -27,12 +28,14 @@ class Runner:
         self,
         factor_name: str,
         factor_params: dict[str, Any] | None = None,
+        factor_type: str | None = None,
         symbols: list[str] | None = None,
         start: str | date | None = None,
         end: str | date | None = None,
         data_columns: list[str] | None = None,
         data_dir: str | Path = Path(__file__).resolve().parent / "cache" / "csv",
         factor_dir: str | Path | None = None,
+        factor_columns: list[str] | None = None,
         constituents_path: str | Path | None = None,
         constituents: str | None = None,
         forward_periods: tuple[int, ...] = (1, 5, 10, 21),
@@ -49,7 +52,9 @@ class Runner:
         self.eval_price_col = eval_price_col
         self.security_status_path = Path(security_status_path) if security_status_path is not None else None
         self.output_dir = Path(output_dir or Path("outputs") / factor_name)
-        self.factor = FactorRegistry.get(factor_name)(**(factor_params or {}))
+        self.factor = FactorRegistry.get(factor_type or factor_name)(
+            **(factor_params or {})
+        )
         self.data = pd.DataFrame()
         self.benchmark = pd.DataFrame()
         self.result = pd.DataFrame()
@@ -67,6 +72,7 @@ class Runner:
             end=end,
             columns=loader_columns,
             factor_dir=factor_dir,
+            factor_columns=factor_columns,
             constituents_path=constituents_path,
             constituent_index=constituents,
             security_status_path=security_status_path,
@@ -216,44 +222,28 @@ class Runner:
 
 
 if __name__ == "__main__":
-    factor_config_path = "config/factor_configs.json"
+    factor_config_path = "config/good_alpha158_factor_configs.json"
     with open(factor_config_path, "r", encoding="utf-8") as f:
         factor_configs = json.load(f)
 
-    index_runs = [
-        # {
-        #     "name": "hs300",
-        #     "data_dir": "cache/hs300_csv",
-        #     "constituents": "000300.SH",
-        # },
-        {
-            "name": "zz500",
-            "data_dir": "cache/zz500_csv",
-            "constituents": "000905.SH",
-        },
-        # {
-        #     "name": "zz1000",
-        #     "data_dir": "cache/zz1000_csv",
-        #     "constituents": "000852.SH",
-        # },
-    ]
-
-    for factor_name, config in factor_configs.items():
+    data_dir = Path("cache/zz500_csv")
+    for factor_name, config in tqdm(
+        factor_configs.items(),
+        total=len(factor_configs),
+        desc="Alpha158 回测",
+        unit="factor",
+    ):
         importlib.import_module(config["module"])
-        for index_config in index_runs:
-            index_name = index_config["name"]
-            data_dir = Path(index_config["data_dir"])
-            runner = Runner(
-                factor_name=factor_name,
-                factor_params=config["params"],
-                symbols=None,
-                start="2010-01-01",
-                n_groups=5,
-                output_dir=Path("outputs") / index_name / factor_name,
-                data_columns=config["columns"],
-                data_dir=data_dir,
-                constituents_path=data_dir.parent / f"{index_name}_index_members_rebalance.csv",
-                constituents=index_config["constituents"],
-            )
-            runner.run(save_factor=True)
-            print(f"{factor_name} 已保存到: {runner.output_dir.resolve()}")
+        runner = Runner(
+            factor_name=factor_name,
+            factor_type=config["factor_type"],
+            factor_params=config["params"],
+            start="2010-01-01",
+            data_columns=[column for column in config["columns"]],
+            data_dir=data_dir,
+            factor_dir=None,
+            constituents_path=data_dir.parent / "zz500_index_members_rebalance.csv",
+            constituents="000905.SH",
+            output_dir=Path("outputs/zz500/alpha158") / factor_name,
+        )
+        runner.run()

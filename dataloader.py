@@ -26,6 +26,7 @@ FIELD_ALIASES = {
 DERIVED_FIELD_SOURCES = {
     "gross_profit": ("revenue", "cost_revenue"),
     "gross_margin": ("gross_profit", "revenue", "cost_revenue"),
+    "vwap": ("amount", "volume", "close", "adj_close"),
     "non_current_debt": (
         "lt_borr",
         "bond_payable",
@@ -134,6 +135,20 @@ def normalize_fields(frame: pd.DataFrame, requested_columns: list[str] | None) -
             if {gross_profit_column, revenue_column}.issubset(frame.columns):
                 frame[target] = (
                     frame[gross_profit_column] / frame[revenue_column].replace(0, pd.NA)
+                )
+
+        elif target == "vwap":
+            amount_column, volume_column, close_column, adj_close_column = sources
+            if set(sources).issubset(frame.columns):
+                raw_vwap = (
+                    frame[amount_column]
+                    * 10
+                    / frame[volume_column].where(frame[volume_column] != 0)
+                )
+                frame[target] = (
+                    raw_vwap
+                    * frame[adj_close_column]
+                    / frame[close_column].where(frame[close_column] != 0)
                 )
 
         elif target == "non_current_debt":
@@ -281,6 +296,7 @@ class DataLoader:
         end: str | date | None = None,
         columns: list[str] | None = None,
         factor_dir: str | Path | None = None,
+        factor_columns: list[str] | None = None,
         constituents_path: str | Path | None = None,
         constituent_index: str | None = None,
         security_status_path: str | Path | None = None,
@@ -291,6 +307,7 @@ class DataLoader:
         self.end = end
         self.columns = columns
         self.factor_dir = factor_dir
+        self.factor_columns = factor_columns
         self.constituents_path = constituents_path
         self.constituent_index = constituent_index
         self.security_status_path = security_status_path
@@ -495,6 +512,7 @@ class DataLoader:
             symbols=self.symbols,
             start=self.start,
             end=self.end,
+            columns=self.factor_columns,
         )
         if not self.data.empty:
             self.data = self.data.join(factor_result, how="left")
