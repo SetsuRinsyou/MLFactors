@@ -19,6 +19,23 @@ TIMING_WIN_HORIZON_WEIGHTS = {
 }
 
 
+TAIL_FRACTIONS = (0.05, 0.10, 0.15, 0.20, 0.25)
+DAILY_METRIC_COLUMNS = (
+    "IC",
+    "TimingIC",
+    "top_5%_return",
+    "bottom_5%_return",
+    "top_10%_return",
+    "bottom_10%_return",
+    "top_15%_return",
+    "bottom_15%_return",
+    "top_20%_return",
+    "bottom_20%_return",
+    "top_25%_return",
+    "bottom_25%_return",
+)
+
+
 @dataclass
 class LayeredResult:
     """保存分层回测产生的收益和风险指标。
@@ -64,6 +81,8 @@ class FactorEvalResult:
         单行核心指标汇总表。
     full_ic_series : pd.Series
         每个交易日截面的完整 IC 时间序列。
+    daily_metrics : pd.DataFrame
+        每个交易日的 IC、TimingIC 和顶部/底部不同选股比例的平均未来收益。
     sampled_ic_series : pd.Series
         按前向收益周期抽样、用于绘图和显著性检验的 IC 时间序列。
     turnover : pd.Series
@@ -74,6 +93,7 @@ class FactorEvalResult:
 
     summary: pd.DataFrame
     full_ic_series: pd.Series
+    daily_metrics: pd.DataFrame
     sampled_ic_series: pd.Series
     turnover: pd.Series
     layered: LayeredResult
@@ -157,6 +177,81 @@ def calc_ic_series(
     return pd.Series(result, name="IC").sort_index()
 
 
+def calc_tail_group_returns(
+    factor: pd.DataFrame | pd.Series,
+    returns: pd.DataFrame | pd.Series,
+    fractions: tuple[float, ...] = TAIL_FRACTIONS,
+) -> pd.DataFrame:
+    """计算每日因子顶部/底部指定比例股票的等权平均未来收益。
+
+    对同一交易日，先将因子值和未来收益对齐并去除缺失值，再按因子值排序。
+    每个比例 ``p`` 选取 ``ceil(p * n)`` 只股票；相同因子值使用稳定排序，
+    从而保证每个截面始终选出固定数量的顶部和底部股票。
+
+    Parameters
+    ----------
+    factor, returns
+        使用 ``(date, symbol)`` MultiIndex 的因子值和未来收益。
+    fractions
+        顶部及底部选股比例，例如 ``0.05`` 表示 5%。
+
+    Returns
+    -------
+    pd.DataFrame
+        索引为 date，列按 ``top_<比例>_return``、
+        ``bottom_<比例>_return`` 成对排列。每个值均为当日形成组合的
+        等权平均未来收益，而非累计收益。
+    """
+    if isinstance(factor, pd.DataFrame):
+        factor = factor.iloc[:, 0]
+    if isinstance(returns, pd.DataFrame):
+        returns = returns.iloc[:, 0]
+    if not fractions or any(not 0 < fraction <= 1 for fraction in fractions):
+        raise ValueError("fractions 必须为 (0, 1] 内的非空比例")
+
+    columns = [
+        column
+        for fraction in fractions
+        for column in (
+            f"top_{fraction:.0%}_return",
+            f"bottom_{fraction:.0%}_return",
+        )
+    ]
+    combined = pd.DataFrame({"factor": factor, "returns": returns}).dropna()
+    if combined.empty:
+        return pd.DataFrame(
+            columns=columns,
+            index=pd.DatetimeIndex([], name="date"),
+            dtype=float,
+        )
+
+    records: list[dict[str, float | pd.Timestamp]] = []
+    for current_date, cross_section in combined.groupby(level=0, sort=True):
+        values = cross_section.droplevel(0).sort_values(
+            "factor",
+            kind="mergesort",
+        )
+        count = len(values)
+        record: dict[str, float | pd.Timestamp] = {"date": current_date}
+        for fraction in fractions:
+            selected_count = max(1, int(np.ceil(count * fraction)))
+            label = f"{fraction:.0%}"
+            record[f"top_{label}_return"] = float(
+                values.iloc[-selected_count:]["returns"].mean()
+            )
+            record[f"bottom_{label}_return"] = float(
+                values.iloc[:selected_count]["returns"].mean()
+            )
+        records.append(record)
+
+    return (
+        pd.DataFrame.from_records(records)
+        .set_index("date")
+        .reindex(columns=columns)
+        .sort_index()
+    )
+
+
 def calc_offset_ic_stats(
     ic_series: pd.Series,
     period: int = 1,
@@ -185,6 +280,125 @@ def calc_offset_ic_stats(
         "IC_std": float(np.mean(stds)) if stds else np.nan,
         "ICIR": float(np.mean(icirs)) if icirs else np.nan,
     }
+
+
+def calc_ic_half_life(
+    ic_series: pd.Series,
+    ic_mean: float,
+    smoothing_window: int = 5,
+) -> float:
+    """计算日频 IC 平滑序列的平均半衰期（交易日）。
+
+    先对每日 IC 计算中心化滑动平均
+    ``x_t = mean(IC[t-2], ..., IC[t+2])``。为使负向有效因子也能按同一
+    "有效性衰减"口径衡量，若全时段 ``IC_mean < 0``，会先将 IC 乘以 -1。
+    对每一个有效 ``x_t``，半衰期是第一个满足
+    ``x_(t+m) <= x_t / 2`` 且 ``x_(t+m+1) <= x_t / 2`` 的 ``m``；
+    已经不具正向有效性的 ``x_t <= 0`` 记为 0。样本末端尚未找到连续两日
+    衰减点的观测记为 ``NaN``，不参与平均值。
+
+    Parameters
+    ----------
+    ic_series
+        用指定前向收益周期计算得到的日频 IC 序列。
+    ic_mean
+        当前回测窗口的 IC 均值，用于确定因子有效方向。
+    smoothing_window
+        中心化滑动窗口长度；当前口径固定为 5。
+
+    Returns
+    -------
+    float
+        所有可定义局部半衰期的平均交易日数；没有可定义观测时返回 ``NaN``。
+    """
+    if smoothing_window != 5:
+        raise ValueError("当前 IC 半衰期口径固定使用 5 日中心化滑动窗口")
+    if not np.isfinite(ic_mean) or ic_mean == 0:
+        return np.nan
+
+    values = (
+        ic_series.sort_index()
+        .replace([np.inf, -np.inf], np.nan)
+        .astype(float)
+    )
+    if values.empty:
+        return np.nan
+
+    oriented_ic = values * np.sign(ic_mean)
+    smoothed = oriented_ic.rolling(
+        window=smoothing_window,
+        center=True,
+        min_periods=smoothing_window,
+    ).mean()
+    x_values = smoothed.to_numpy(dtype=float)
+    half_lives: list[float] = []
+
+    # 最后两个有效 x_t 不可能拥有一对连续的未来 x，因此不作为起点。
+    for position in range(len(x_values) - 2):
+        baseline = x_values[position]
+        if not np.isfinite(baseline):
+            continue
+        if baseline <= 0:
+            half_lives.append(0.0)
+            continue
+
+        threshold = baseline / 2.0
+        for future_position in range(position + 1, len(x_values) - 1):
+            first = x_values[future_position]
+            second = x_values[future_position + 1]
+            if (
+                np.isfinite(first)
+                and np.isfinite(second)
+                and first <= threshold
+                and second <= threshold
+            ):
+                half_lives.append(float(future_position - position))
+                break
+
+    return float(np.mean(half_lives)) if half_lives else np.nan
+
+
+def calc_ic_positive_rate(ic_series: pd.Series) -> float:
+    """计算有效日频 IC 中严格大于零的交易日占比。"""
+    values = (
+        ic_series.replace([np.inf, -np.inf], np.nan)
+        .dropna()
+        .astype(float)
+    )
+    return float((values > 0).mean()) if not values.empty else np.nan
+
+
+def calc_quintile_monotonicity(
+    group_returns: pd.DataFrame,
+    ic_mean: float,
+    n_groups: int = 5,
+) -> float:
+    """以 IC 方向为基准计算五分组收益单调性。
+
+    先计算每个因子分组的平均未来收益 ``r_1, ..., r_5``，再令相邻差分
+    ``d_i = r_(i+1) - r_i``。返回
+
+    ``sign(IC_mean) * sum(d_i) / sum(abs(d_i))``。
+
+    该指标位于 ``[-1, 1]``：``+1`` 表示五组收益完全沿 IC 方向单调，
+    ``-1`` 表示完全反向单调。例如 IC_mean 为正但底部组平均收益高于顶部
+    组时，指标为负。IC_mean 为零、分组不完整或所有组收益完全相等时返回
+    ``NaN``。
+    """
+    if not np.isfinite(ic_mean) or ic_mean == 0:
+        return np.nan
+    expected_groups = list(range(1, n_groups + 1))
+    if group_returns.empty or not set(expected_groups).issubset(group_returns.columns):
+        return np.nan
+
+    means = group_returns[expected_groups].mean().dropna()
+    if len(means) != n_groups:
+        return np.nan
+    differences = means.diff().dropna()
+    absolute_change = float(differences.abs().sum())
+    if absolute_change == 0:
+        return np.nan
+    return float(np.sign(ic_mean) * differences.sum() / absolute_change)
 
 
 def calc_t_stat(
@@ -583,7 +797,11 @@ def eval(
     else:
         factor = factor_values.rename("factor")
 
-    forward_returns = calc_forward_returns(market_data, forward_period, price_col=price_col)
+    forward_returns = calc_forward_returns(
+        market_data,
+        forward_period,
+        price_col=price_col,
+    )
     full_ic_series = calc_ic_series(factor, forward_returns, method=ic_method)
     offset_ic_stats = calc_offset_ic_stats(full_ic_series, period=forward_period)
     timing_score = forward_returns.ge(0).astype(float)
@@ -596,25 +814,41 @@ def eval(
         full_timing_ic_series,
         period=forward_period,
     )
+    tail_group_returns = calc_tail_group_returns(factor, forward_returns)
+    daily_metrics = pd.concat(
+        [
+            full_ic_series.rename("IC"),
+            full_timing_ic_series.rename("TimingIC"),
+            tail_group_returns,
+        ],
+        axis=1,
+    ).reindex(columns=DAILY_METRIC_COLUMNS).sort_index()
+    daily_metrics.index.name = "date"
 
-    # sampled_dates 用于分层回测和换手率计算，确保每个调仓期的未来收益不重叠。
+    # sampled_dates 用于分层回测、尾部组合收益和换手率计算，确保每个调仓期的
+    # 未来收益不重叠。
     trading_dates = pd.DatetimeIndex(
         market_data.index.get_level_values("date").unique()
     ).sort_values()
     sampled_dates = trading_dates[::forward_period]
-    factor = factor[
+    sampled_factor = factor[
         factor.index.get_level_values("date").isin(sampled_dates)
     ]
-    forward_returns = forward_returns[
+    sampled_forward_returns = forward_returns[
         forward_returns.index.get_level_values("date").isin(sampled_dates)
     ]
     sampled_ic_series = full_ic_series[full_ic_series.index.isin(sampled_dates)]
-    turnover = calc_turnover(factor, quantiles=n_groups)
+    turnover = calc_turnover(sampled_factor, quantiles=n_groups)
     layered = layered_backtest(
-        factor,
-        forward_returns,
+        sampled_factor,
+        sampled_forward_returns,
         n_groups=n_groups,
         period=forward_period,
+    )
+    sampled_tail_group_returns = calc_tail_group_returns(
+        sampled_factor,
+        sampled_forward_returns,
+        fractions=(0.05, 0.10, 0.15),
     )
 
     t_stat, p_value = calc_t_stat(full_ic_series, period=forward_period)
@@ -623,33 +857,76 @@ def eval(
         values = returns.dropna()
         return float(values.iloc[-1]) if not values.empty else 0.0
 
+    def tail_cumulative_return(column: str) -> float:
+        if column not in sampled_tail_group_returns:
+            return 0.0
+        returns = sampled_tail_group_returns[column].dropna()
+        return float((1.0 + returns).prod() - 1.0) if not returns.empty else 0.0
+
+    ic_mean = offset_ic_stats["IC_mean"]
+    ic_half_life = calc_ic_half_life(full_ic_series, ic_mean)
+    ic_positive_rate = calc_ic_positive_rate(full_ic_series)
+    quintile_monotonicity = calc_quintile_monotonicity(
+        layered.group_returns,
+        ic_mean,
+        n_groups=n_groups,
+    )
+
     summary = pd.DataFrame([{
         "period": forward_period,
-        "IC_mean": round(offset_ic_stats["IC_mean"], 4),
+        "IC_mean": round(ic_mean, 4),
         "IC_std": round(offset_ic_stats["IC_std"], 4),
         "ICIR": round(offset_ic_stats["ICIR"], 4),
         "t_stat": round(t_stat, 4),
         "p_value": round(p_value, 6),
         "timing_IC_mean": round(timing_ic_stats["IC_mean"], 4),
-        "top_cumulative_return": round(
+        "IC_half_life": round(ic_half_life, 4),
+        "IC_positive_rate": round(ic_positive_rate, 4),
+        "quintile_monotonicity": round(quintile_monotonicity, 4),
+        "top_5%_cumulative_return": round(
+            tail_cumulative_return("top_5%_return"),
+            4,
+        ),
+        "bottom_5%_cumulative_return": round(
+            tail_cumulative_return("bottom_5%_return"),
+            4,
+        ),
+        "top_10%_cumulative_return": round(
+            tail_cumulative_return("top_10%_return"),
+            4,
+        ),
+        "bottom_10%_cumulative_return": round(
+            tail_cumulative_return("bottom_10%_return"),
+            4,
+        ),
+        "top_15%_cumulative_return": round(
+            tail_cumulative_return("top_15%_return"),
+            4,
+        ),
+        "bottom_15%_cumulative_return": round(
+            tail_cumulative_return("bottom_15%_return"),
+            4,
+        ),
+        "top_20%_cumulative_return": round(
             final_cumulative_return(layered.top_cumulative_returns),
             4,
         ),
-        "bottom_cumulative_return": round(
+        "bottom_20%_cumulative_return": round(
             final_cumulative_return(layered.bottom_cumulative_returns),
             4,
         ),
-        "top_annual_return": round(layered.top_annual_return, 4),
-        "bottom_annual_return": round(layered.bottom_annual_return, 4),
-        "top_sharpe_ratio": round(layered.top_sharpe_ratio, 4),
-        "bottom_sharpe_ratio": round(layered.bottom_sharpe_ratio, 4),
-        "top_max_drawdown": round(layered.top_max_drawdown, 4),
-        "bottom_max_drawdown": round(layered.bottom_max_drawdown, 4),
-        "top_bottom_win_rate": round(layered.win_rate, 4),
+        "top_20%_annual_return": round(layered.top_annual_return, 4),
+        "bottom_20%_annual_return": round(layered.bottom_annual_return, 4),
+        "top_20%_sharpe_ratio": round(layered.top_sharpe_ratio, 4),
+        "bottom_20%_sharpe_ratio": round(layered.bottom_sharpe_ratio, 4),
+        "top_20%_max_drawdown": round(layered.top_max_drawdown, 4),
+        "bottom_20%_max_drawdown": round(layered.bottom_max_drawdown, 4),
+        "top_20%_bottom_20%_win_rate": round(layered.win_rate, 4),
     }])
     return FactorEvalResult(
         summary=summary.set_index("period"),
         full_ic_series=full_ic_series,
+        daily_metrics=daily_metrics,
         sampled_ic_series=sampled_ic_series,
         turnover=turnover,
         layered=layered,

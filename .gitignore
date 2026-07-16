@@ -76,3 +76,6 @@ outputs_new/
 # Scheme output artifacts
 scheme_factor_results/
 scheme_outputs_report*/
+
+# Large local artifacts
+good_factors.zip

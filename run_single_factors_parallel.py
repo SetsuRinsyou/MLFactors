@@ -1,5 +1,7 @@
-"""并行批量运行全部因子。
-默认顺序为中证500、中证1000、沪深300；每个指数内部按 32 进程并行。
+"""并行批量回测全部单因子。
+
+默认在中证500、中证1000、沪深300依次回测 74 个单因子；
+每个指数内部按 32 进程并行。多周期 LLT 和 MA 因子固定排除。
 完成记录会实时追加到 ``<output_root>/<index>_completed_factors.csv``。
 """
 
@@ -27,8 +29,22 @@ for thread_env in (
 ):
     os.environ[thread_env] = "1"
 
-from run import DEFAULT_SECURITY_STATUS_PATH, Runner
-
+DEFAULT_CONFIG_PATHS = (
+    "config/factor_configs_fundamental.json",
+    "config/factor_configs_price.json",
+    "config/factor_configs_risk.json",
+    "config/factor_configs_sector.json",
+)
+EXCLUDED_FACTOR_MODULES = frozenset({
+    "factors.price.multi_horizon_llt_daily",
+    "factors.price.multi_horizon_ma_daily",
+})
+EXPECTED_FACTOR_COUNT = 74
+DEFAULT_SECURITY_STATUS_PATH = (
+    Path(__file__).resolve().parent
+    / "cache"
+    / "tushare_security_status_missing_tables_20100104_20260623_20260706.csv"
+)
 
 INDEX_RUNS = {
     "zz500": {
@@ -68,10 +84,25 @@ def _now() -> str:
     return datetime.now().isoformat(timespec="seconds")
 
 
-def _load_factor_configs(config_path: Path) -> dict[str, dict[str, Any]]:
-    """读取因子配置。"""
-    with config_path.open("r", encoding="utf-8") as file:
-        return json.load(file)
+def _load_factor_configs(config_paths: list[Path]) -> dict[str, dict[str, Any]]:
+    """合并各类别单因子配置，并拒绝重名因子。"""
+    factor_configs: dict[str, dict[str, Any]] = {}
+    for config_path in config_paths:
+        with config_path.open("r", encoding="utf-8") as file:
+            config = json.load(file)
+        duplicate_names = sorted(set(config).intersection(factor_configs))
+        if duplicate_names:
+            raise ValueError(
+                f"配置文件 {config_path} 与此前配置存在重名因子: "
+                f"{', '.join(duplicate_names)}"
+            )
+        factor_configs.update(config)
+    return factor_configs
+
+
+def _is_default_excluded(factor_config: dict[str, Any]) -> bool:
+    """判断是否为固定排除的多周期 LLT/MA 因子。"""
+    return factor_config.get("module") in EXCLUDED_FACTOR_MODULES
 
 
 def _factor_outputs_exist(output_root: Path, index_name: str, factor_name: str) -> bool:
@@ -137,6 +168,8 @@ def run_one_factor(
     output_dir = output_root / index_name / factor_name
 
     try:
+        from run import Runner
+
         importlib.import_module(factor_config["module"])
         data_dir = Path(index_config["data_dir"])
         runner = Runner(
@@ -277,8 +310,13 @@ def run_index(
 
 def parse_args() -> argparse.Namespace:
     """解析命令行参数。"""
-    parser = argparse.ArgumentParser(description="并行批量运行全部因子")
-    parser.add_argument("--config", default="config/factor_configs.json")
+    parser = argparse.ArgumentParser(description="并行批量回测全部单因子")
+    parser.add_argument(
+        "--config",
+        nargs="+",
+        default=list(DEFAULT_CONFIG_PATHS),
+        help="单因子配置文件，可传多个；默认合并基本面、价格、风险、行业配置",
+    )
     parser.add_argument(
         "--output-root",
         default="outputs",
@@ -301,7 +339,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--no-periodic-reports",
         action="store_true",
-        help="只保存总区间报告，不生成年度/月度报告",
+        help="只保存总区间报告，不生成年度报告",
     )
     parser.add_argument(
         "--no-resume",
@@ -329,7 +367,7 @@ def parse_args() -> argparse.Namespace:
         "--exclude-factors",
         nargs="+",
         default=[],
-        help="临时跳过指定因子名，例如: --exclude-factors factor_a factor_b",
+        help="在固定排除多周期 LLT/MA 的基础上，额外跳过指定因子名",
     )
     return parser.parse_args()
 
@@ -339,10 +377,21 @@ def main() -> None:
     args = parse_args()
     args.heartbeat_seconds = max(1, args.heartbeat_seconds)
     output_root = Path(args.output_root)
-    factor_configs = _load_factor_configs(Path(args.config))
-    exclude_factors = set(args.exclude_factors)
-    if exclude_factors:
-        unknown_excluded = sorted(exclude_factors - set(factor_configs))
+    config_paths = [Path(config_path) for config_path in args.config]
+    factor_configs = _load_factor_configs(config_paths)
+    default_excluded = sorted(
+        factor_name
+        for factor_name, factor_config in factor_configs.items()
+        if _is_default_excluded(factor_config)
+    )
+    factor_configs = {
+        factor_name: factor_config
+        for factor_name, factor_config in factor_configs.items()
+        if not _is_default_excluded(factor_config)
+    }
+    extra_excluded = set(args.exclude_factors)
+    if extra_excluded:
+        unknown_excluded = sorted(extra_excluded - set(factor_configs))
         if unknown_excluded:
             print(
                 f"[{_now()}] 注意: 以下排除因子不在配置文件中: "
@@ -352,27 +401,31 @@ def main() -> None:
         factor_configs = {
             factor_name: factor_config
             for factor_name, factor_config in factor_configs.items()
-            if factor_name not in exclude_factors
+            if factor_name not in extra_excluded
         }
         print(
-            f"[{_now()}] 已排除 {len(exclude_factors) - len(unknown_excluded)} 个因子: "
-            f"{', '.join(sorted(exclude_factors - set(unknown_excluded)))}",
+            f"[{_now()}] 已额外排除 {len(extra_excluded) - len(unknown_excluded)} 个因子: "
+            f"{', '.join(sorted(extra_excluded - set(unknown_excluded)))}",
             flush=True,
         )
     security_status_path = args.security_status_path or None
 
     print(
         f"[{_now()}] CPU={os.cpu_count()} workers={args.workers} "
-        f"factor_count={len(factor_configs)} config={args.config} "
+        f"factor_count={len(factor_configs)} config={', '.join(map(str, config_paths))} "
         f"output_root={output_root} save_factor={args.save_factor} "
         f"periodic_reports={not args.no_periodic_reports}",
         flush=True,
     )
-    if len(factor_configs) != 74:
-        print(
-            f"[{_now()}] 注意: 当前配置实际包含 {len(factor_configs)} 个因子，"
-            "不是 74 个；脚本会按配置文件实际内容执行。",
-            flush=True,
+    print(
+        f"[{_now()}] 固定排除 {len(default_excluded)} 个多周期因子: "
+        f"{', '.join(default_excluded)}",
+        flush=True,
+    )
+    if not extra_excluded and len(factor_configs) != EXPECTED_FACTOR_COUNT:
+        raise ValueError(
+            f"固定排除后应有 {EXPECTED_FACTOR_COUNT} 个单因子，"
+            f"实际为 {len(factor_configs)}。请检查配置文件。"
         )
 
     for index_name in args.indices:

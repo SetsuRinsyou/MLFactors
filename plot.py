@@ -14,6 +14,72 @@ import pandas as pd
 from factors_eval import FactorEvalResult
 
 
+YEARLY_SUMMARY_METRICS = (
+    "IC_mean",
+    "ICIR",
+    "timing_IC_mean",
+    "top_20%_annual_return",
+    "bottom_20%_annual_return",
+    "top_20%_sharpe_ratio",
+    "bottom_20%_sharpe_ratio",
+    "top_20%_bottom_20%_win_rate",
+)
+
+
+def save_yearly_summary_trends(
+    yearly_summary: pd.DataFrame,
+    output_path: str | Path,
+    factor_name: str,
+    dpi: int = 150,
+) -> Path:
+    """绘制年度 ``factor_summary.csv`` 指定指标的逐年变化。
+
+    输入表每行对应一个自然年和一个前向周期。绘图直接使用原始数值，
+    不取绝对值，以保留指标的方向信息。
+    """
+    required_columns = {"year", *YEARLY_SUMMARY_METRICS}
+    missing_columns = required_columns.difference(yearly_summary.columns)
+    if missing_columns:
+        missing = ", ".join(sorted(missing_columns))
+        raise ValueError(f"yearly_summary 缺少绘图字段: {missing}")
+
+    values = yearly_summary.copy().sort_values("year")
+    years = values["year"].astype(str).tolist()
+    positions = np.arange(len(values))
+    figure, axes = plt.subplots(4, 2, figsize=(16, 16), sharex=True)
+
+    for axis, metric in zip(axes.flat, YEARLY_SUMMARY_METRICS):
+        metric_values = pd.to_numeric(values[metric], errors="coerce")
+        axis.plot(
+            positions,
+            metric_values,
+            marker="o",
+            linewidth=1.5,
+            color="steelblue",
+        )
+        axis.axhline(0, color="gray", linewidth=0.8, linestyle="--")
+        axis.set_title(metric)
+        axis.set_ylabel(metric)
+        axis.grid(alpha=0.25)
+
+    for axis in axes[-1, :]:
+        axis.set_xticks(positions)
+        axis.set_xticklabels(years, rotation=45, ha="right")
+        axis.set_xlabel("Year")
+
+    figure.suptitle(
+        f"Yearly Factor Summary Trends: {factor_name}",
+        fontsize=16,
+        fontweight="bold",
+    )
+    figure.tight_layout(rect=[0, 0, 1, 0.97])
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(output_path, dpi=dpi, bbox_inches="tight")
+    plt.close(figure)
+    return output_path
+
+
 class FactorPlotter:
     """绘制 ``eval()`` 返回的完整因子评估结果。"""
 

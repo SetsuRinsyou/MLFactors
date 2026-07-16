@@ -138,7 +138,7 @@ runner = Runner(
     end=None,
     constituents_path=None,
     data_columns=["close", "market_cap"],
-    forward_periods=(1, 5, 10, 21),
+    forward_periods=(5,),
     n_groups=5,
     output_dir="outputs/beta_all_2017_latest",
 )
@@ -173,16 +173,14 @@ beta_i = cov(stock_return_i, market_return) / var(market_return)
 
 ## 评估口径
 
-`Runner` 默认对 1、5、10、21 日周期分别评估：
+`Runner` 默认仅对 5 日周期评估：
 
-- Rank IC 均值、标准差、ICIR、t 统计量和 p 值
-- IC 为正的比例
-- 最高因子组换手率
-- 分层累计收益和各组年化收益
-- 最高组多头夏普和最大回撤
-- 最低组反向持有的最大回撤
-- 最高组相对各组等权基准的年化超额收益、最大回撤和 Calmar
-- IC 衰减曲线
+- Rank IC 均值、标准差、ICIR、t 统计量、p 值、IC 正率和 IC 半衰期
+- Timing IC 均值，以及以 IC_mean 方向为基准的五分组收益单调性
+- 最高 20% 因子组换手率
+- 顶部/底部 5%、10%、15%、20% 组合的非重叠调仓累计收益
+- 顶部/底部 20% 分组的年化收益、夏普比率、最大回撤和顶部相对底部胜率
+- 每日 IC、TimingIC，以及顶部/底部 5%、10%、15%、20%、25% 股票的平均未来收益
 
 前向收益按以下方式计算：
 
@@ -199,18 +197,35 @@ price[t + 1 + period] / price[t + 1] - 1
 ```text
 outputs/<factor>/
 ├── report.md                 # 配置、汇总表和图片链接
-├── factor_summary.csv        # 多周期汇总指标
-├── <factor>_1d.png           # 1 日评估图
+├── factor_summary.csv        # 全时段 5 日汇总指标
 ├── <factor>_5d.png           # 5 日评估图
-├── <factor>_10d.png          # 10 日评估图
-├── <factor>_21d.png          # 21 日评估图
-└── factor/
+├── daily_factor_metrics.csv  # 每日 IC、TimingIC 和顶部/底部 5%~25% 收益
+├── yearly_summary.csv        # 各自然年的 5 日汇总指标
+├── yearly_factor_summary_trends.png  # 8 项年度汇总指标的逐年变化图
+├── yearly/
+│   └── 2025/
+│       ├── factor_summary.csv
+│       ├── <factor>_5d.png
+│       └── report.md
+└── factors/
     ├── AAPL.csv              # date、因子名两列
     ├── MSFT.csv
     └── ...
 ```
 
-每张评估图包含 IC 时序、IC 分布、分层累计收益、IC 衰减、换手率和指标表。分层累计收益子图同时显示 SPY、QQQ 的累计收益。
+每张评估图包含 IC 时序、分层累计收益、换手率和指标表。若加载了基准数据，分层累计收益子图会同时显示基准累计收益。
+
+`IC_half_life` 使用日频 5 日前向收益 IC 的中心化 5 日均值。对每个平滑
+IC，找到未来首次连续两日低于其一半的位置并以交易日计数，再对所有可定义
+位置取均值；当 `IC_mean` 为负时会先将 IC 方向翻转，使其仍衡量有效性衰减。
+`quintile_monotonicity` 的范围为 `[-1, 1]`：`+1` 表示五组收益完全沿
+IC_mean 的方向单调，负值表示收益方向与 IC_mean 相反。
+
+可使用 `analyze_top20_selections.py` 对 `factor_results/<index>_factor_wide/`
+中的宽表复现 period=5 的每 5 个交易日调仓，并输出每个因子的 Top 20% 入选
+股票、重复入选次数及科技行业入选次数占比。科技行业必须通过
+`--technology-industries` 传入缓存 `industry_1` 中的精确行业名称，避免将
+`sector` 的板块标签误当作行业分类。
 
 当前工作区已经完成一次 2017 年起的全股票 Beta 回测，报告位于 `outputs/beta_all_2017_latest/report.md`。该目录属于本地输出，不随 Git 提交。
 

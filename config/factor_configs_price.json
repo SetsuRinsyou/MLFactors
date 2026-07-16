@@ -11,13 +11,13 @@
       "low"
     ]
   },
-  "max_daily_return_5d": {
-    "module": "factors.price.max_daily_return",
+  "max_daily_return_5": {
+    "module": "factors.price.max_daily_return_5",
     "params": {
       "top_n": 5,
       "min_obs": null,
       "lookback": 21,
-      "rebalance_step": 21
+      "rebalance_step": 1
     },
     "columns": [
       "close"

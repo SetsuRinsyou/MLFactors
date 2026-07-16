@@ -76,9 +76,22 @@ def aggregate_factor_outputs(
                 series_list.append(read_factor_series(factor_name, csv_path))
         if not series_list:
             continue
-        wide = pd.concat(series_list, axis=1).sort_index()
+        wide = pd.concat(series_list, axis=1)
+        output_path = output_dir / f"{symbol}.csv"
+        if output_path.exists():
+            existing = pd.read_csv(output_path)
+            if "date" not in existing.columns:
+                raise ValueError(f"{output_path} 缺少 date 列，无法增量聚合")
+            existing = existing.set_index("date")
+
+            # Preserve previously aggregated factors, replacing only columns
+            # produced by the current input directory.
+            existing = existing.drop(columns=wide.columns, errors="ignore")
+            wide = pd.concat([existing, wide], axis=1)
+
+        wide = wide.sort_index()
         wide.index.name = "date"
-        wide.to_csv(output_dir / f"{symbol}.csv", na_rep="")
+        wide.to_csv(output_path, na_rep="")
         saved_count += 1
 
     print(f"已聚合 {saved_count} 只股票到: {output_dir.resolve()}")
