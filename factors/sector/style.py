@@ -17,7 +17,7 @@ class IndustryMomentum(BaseFactor):
         self.period = period
 
     def generate_signals(self, data: pd.DataFrame, constituents: dict[str, set[str]] | None = None) -> pd.DataFrame:
-        close = data["close"].unstack("symbol").astype(float).sort_index()
+        close = data["adj_close"].unstack("symbol").astype(float).sort_index()
         sector = data["sector"].unstack("symbol")
         
         returns = close.pct_change(self.period, fill_method=None)
@@ -49,7 +49,7 @@ class StyleCategoryMomentum(BaseFactor):
         self.n_clusters = n_clusters # 研报中对标中信一级行业数量，设为 30
 
     def generate_signals(self, data: pd.DataFrame, constituents: dict[str, set[str]] | None = None) -> pd.DataFrame:
-        close = data["close"].unstack("symbol").astype(float).sort_index()
+        close = data["adj_close"].unstack("symbol").astype(float).sort_index()
         returns = close.pct_change(self.period, fill_method=None)
         
         # 提取用于聚类的特征矩阵 (市值、估值、流动性等)

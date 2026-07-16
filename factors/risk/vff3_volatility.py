@@ -155,12 +155,12 @@ class VFF3Volatility(BaseFactor):
         data: pd.DataFrame,
         constituents: dict[str, set[str]] | None = None,
     ) -> pd.DataFrame:
-        required = {"close", "volume", "market_cap", "pb_ratio"}
+        required = {"adj_close", "volume", "market_cap", "pb_ratio"}
         missing = required.difference(data.columns)
         if missing:
             raise KeyError(f"{self.name} 缺少字段: {sorted(missing)}")
 
-        close = data["close"].unstack("symbol").astype(float).sort_index()
+        close = data["adj_close"].unstack("symbol").astype(float).sort_index()
         volume = data["volume"].unstack("symbol").reindex_like(close).astype(float)
         market_cap = data["market_cap"].unstack("symbol").reindex_like(close).astype(float)
         pb_ratio = data["pb_ratio"].unstack("symbol").reindex_like(close).astype(float)

@@ -31,15 +31,15 @@ class DipRebound10(BaseFactor):
         constituents: dict[str, set[str]] | None = None,
     ) -> pd.DataFrame:
         """计算最近 window 个交易日 log(close / low) 的均值。"""
-        if "low" not in data.columns:
-            raise ValueError("字段 low 缺失")
+        if "adj_low" not in data.columns:
+            raise ValueError("字段 adj_low 缺失")
         if not isinstance(data.index, pd.MultiIndex) or data.index.names[:2] != ["date", "symbol"]:
             raise ValueError("因子输入必须使用 (date, symbol) MultiIndex")
-        if "close" not in data.columns:
-            raise ValueError("字段 close 缺失")
+        if "adj_close" not in data.columns:
+            raise ValueError("字段 adj_close 缺失")
 
-        low = data["low"].unstack("symbol").astype(float).sort_index()
-        close = data["close"].unstack("symbol").astype(float).sort_index()
+        low = data["adj_low"].unstack("symbol").astype(float).sort_index()
+        close = data["adj_close"].unstack("symbol").astype(float).sort_index()
         close = close.reindex(index=low.index, columns=low.columns)
         valid = (low > 0) & (close > 0) & (close >= low)
         daily_value = np.log(close.where(valid) / low.where(valid))

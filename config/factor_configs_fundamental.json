@@ -1,6 +1,7 @@
 {
   "cfp_1d": {
     "module": "factors.fundamental.cfp_1d",
+    "relay_class": "CfpFactor1D",
     "params": {},
     "columns": [
       "close",
@@ -11,6 +12,7 @@
   },
   "current_asset_growth_12m": {
     "module": "factors.fundamental.current_asset_growth_12m",
+    "relay_class": "CurrentAssetGrowth12m",
     "params": {},
     "columns": [
       "close",
@@ -19,6 +21,7 @@
   },
   "current_asset_growth_vol_24m": {
     "module": "factors.fundamental.current_asset_growth_vol_24m",
+    "relay_class": "CurrentAssetGrowthVol24m",
     "params": {},
     "columns": [
       "close",
@@ -27,6 +30,7 @@
   },
   "current_liability_ratio_1d": {
     "module": "factors.fundamental.current_liability_ratio_1d",
+    "relay_class": "CurrentLiabilityRatioFactor1D",
     "params": {},
     "columns": [
       "close",
@@ -37,6 +41,7 @@
   },
   "current_ratio_1d": {
     "module": "factors.fundamental.current_ratio_1d",
+    "relay_class": "CurrentRatioFactor1D",
     "params": {},
     "columns": [
       "close",
@@ -47,6 +52,7 @@
   },
   "debt_per_share_1d": {
     "module": "factors.fundamental.debt_per_share_1d",
+    "relay_class": "DebtPerShareFactor1D",
     "params": {},
     "columns": [
       "close",
@@ -57,6 +63,7 @@
   },
   "debt_to_asset_1d": {
     "module": "factors.fundamental.debt_to_asset_1d",
+    "relay_class": "DebtToAssetFactor1D",
     "params": {},
     "columns": [
       "close",
@@ -67,6 +74,7 @@
   },
   "debt_to_asset_change_12m": {
     "module": "factors.fundamental.debt_to_asset_change_12m",
+    "relay_class": "DebtToAssetChange12m",
     "params": {},
     "columns": [
       "close",
@@ -76,6 +84,7 @@
   },
   "dgmarq_12m": {
     "module": "factors.fundamental.dgmarq_12m",
+    "relay_class": "DGMARQ12M",
     "params": {
       "year_days": 252
     },
@@ -87,6 +96,7 @@
   },
   "dgpoaq_12m": {
     "module": "factors.fundamental.dgpoaq_12m",
+    "relay_class": "DGPOAQ12M",
     "params": {
       "year_days": 252
     },
@@ -99,6 +109,7 @@
   },
   "dividend_yield_1d": {
     "module": "factors.fundamental.dividend_yield_1d",
+    "relay_class": "DividendYieldFactor1D",
     "params": {},
     "columns": [
       "close",
@@ -109,6 +120,7 @@
   },
   "droaq_12m": {
     "module": "factors.fundamental.droaq_12m",
+    "relay_class": "DROAQ12M",
     "params": {
       "year_days": 252
     },
@@ -119,6 +131,7 @@
   },
   "eps_growth_12m": {
     "module": "factors.fundamental.eps_growth_12m",
+    "relay_class": "EPSGrowth12M",
     "params": {
       "year_days": 252
     },
@@ -129,6 +142,7 @@
   },
   "eps_growth_63d": {
     "module": "factors.fundamental.eps_growth_63d",
+    "relay_class": "EpsGrowthFactor63D",
     "params": {},
     "columns": [
       "close",
@@ -138,6 +152,7 @@
   },
   "eps_growth_accel_3m": {
     "module": "factors.fundamental.eps_growth_accel_3m",
+    "relay_class": "EPSGrowthAccel3M",
     "params": {
       "year_days": 252,
       "period_days": 63
@@ -149,17 +164,19 @@
   },
   "eps_growth_accel_price_adj_3m": {
     "module": "factors.fundamental.eps_growth_accel_price_adj_3m",
+    "relay_class": "EPSGrowthAccelPriceAdj3M",
     "params": {
       "year_days": 252,
       "period_days": 63
     },
     "columns": [
-      "close",
+      "adj_close",
       "eps"
     ]
   },
   "eps_growth_accel_vol_adj_3m": {
     "module": "factors.fundamental.eps_growth_accel_vol_adj_3m",
+    "relay_class": "EPSGrowthAccelVolAdj3M",
     "params": {
       "year_days": 252,
       "period_days": 63,
@@ -173,17 +190,19 @@
   },
   "eps_growth_price_adj_3m": {
     "module": "factors.fundamental.eps_growth_price_adj_3m",
+    "relay_class": "EPSGrowthPriceAdj3M",
     "params": {
       "year_days": 252,
       "period_days": 63
     },
     "columns": [
-      "close",
+      "adj_close",
       "eps"
     ]
   },
   "eps_growth_vol_adj_3m": {
     "module": "factors.fundamental.eps_growth_vol_adj_3m",
+    "relay_class": "EPSGrowthVolAdj3M",
     "params": {
       "year_days": 252,
       "quarter_days": 63,
@@ -196,6 +215,7 @@
   },
   "equity_growth_63d": {
     "module": "factors.fundamental.equity_growth_63d",
+    "relay_class": "EquityGrowthFactor63D",
     "params": {},
     "columns": [
       "close",
@@ -205,6 +225,7 @@
   },
   "equity_ratio_change_12m": {
     "module": "factors.fundamental.equity_ratio_change_12m",
+    "relay_class": "EquityRatioChange12m",
     "params": {},
     "columns": [
       "close",
@@ -214,6 +235,7 @@
   },
   "equity_to_fixed_asset_change_12m": {
     "module": "factors.fundamental.equity_to_fixed_asset_change_12m",
+    "relay_class": "EquityToFixedAssetChange12m",
     "params": {},
     "columns": [
       "close",
@@ -223,6 +245,7 @@
   },
   "financial_expense_ratio_1d": {
     "module": "factors.fundamental.financial_expense_ratio_1d",
+    "relay_class": "FinancialExpenseRatioFactor1D",
     "params": {},
     "columns": [
       "close",
@@ -233,6 +256,7 @@
   },
   "fixed_ratio_1d": {
     "module": "factors.fundamental.fixed_ratio_1d",
+    "relay_class": "FixedRatioFactor1D",
     "params": {},
     "columns": [
       "close",
@@ -243,6 +267,7 @@
   },
   "gpoaq_3m": {
     "module": "factors.fundamental.gpoaq_3m",
+    "relay_class": "GPOAQ3M",
     "params": {
       "quarter_days": 63
     },
@@ -255,6 +280,7 @@
   },
   "gross_margin_1d": {
     "module": "factors.fundamental.gross_margin_1d",
+    "relay_class": "GrossMarginFactor1D",
     "params": {},
     "columns": [
       "close",
@@ -265,6 +291,7 @@
   },
   "gross_profitability_growth_12m": {
     "module": "factors.fundamental.gross_profitability_growth_12m",
+    "relay_class": "GrossProfitabilityGrowth12m",
     "params": {},
     "columns": [
       "close",
@@ -274,6 +301,7 @@
   },
   "gross_profitability_trend_qoq_12m": {
     "module": "factors.fundamental.gross_profitability_trend_qoq_12m",
+    "relay_class": "GrossProfitabilityTrendQoq12m",
     "params": {},
     "columns": [
       "close",
@@ -283,6 +311,7 @@
   },
   "gross_profitability_trend_yoy_48m": {
     "module": "factors.fundamental.gross_profitability_trend_yoy_48m",
+    "relay_class": "GrossProfitabilityTrendYoy48m",
     "params": {},
     "columns": [
       "close",
@@ -292,6 +321,7 @@
   },
   "inventory_turnover_1d": {
     "module": "factors.fundamental.inventory_turnover_1d",
+    "relay_class": "InventoryTurnoverFactor1D",
     "params": {},
     "columns": [
       "close",
@@ -302,6 +332,7 @@
   },
   "long_term_debt_ratio_1d": {
     "module": "factors.fundamental.long_term_debt_ratio_1d",
+    "relay_class": "LongTermDebtRatioFactor1D",
     "params": {},
     "columns": [
       "close",
@@ -312,6 +343,7 @@
   },
   "long_term_debt_ratio_change_12m": {
     "module": "factors.fundamental.long_term_debt_ratio_change_12m",
+    "relay_class": "LongTermDebtRatioChange12m",
     "params": {},
     "columns": [
       "close",
@@ -321,6 +353,7 @@
   },
   "net_income_cash_ratio_1d": {
     "module": "factors.fundamental.net_income_cash_ratio_1d",
+    "relay_class": "NetIncomeCashRatioFactor1D",
     "params": {},
     "columns": [
       "close",
@@ -331,6 +364,7 @@
   },
   "net_income_growth_63d": {
     "module": "factors.fundamental.net_income_growth_63d",
+    "relay_class": "NetIncomeGrowthFactor63D",
     "params": {},
     "columns": [
       "close",
@@ -340,6 +374,7 @@
   },
   "net_profit_margin_1d": {
     "module": "factors.fundamental.net_profit_margin_1d",
+    "relay_class": "NetProfitMarginFactor1D",
     "params": {},
     "columns": [
       "close",
@@ -350,6 +385,7 @@
   },
   "non_current_asset_growth_12m": {
     "module": "factors.fundamental.non_current_asset_growth_12m",
+    "relay_class": "NonCurrentAssetGrowth12m",
     "params": {},
     "columns": [
       "close",
@@ -358,6 +394,7 @@
   },
   "non_current_asset_growth_vol_24m": {
     "module": "factors.fundamental.non_current_asset_growth_vol_24m",
+    "relay_class": "NonCurrentAssetGrowthVol24m",
     "params": {},
     "columns": [
       "close",
@@ -366,6 +403,7 @@
   },
   "operating_expense_ratio_1d": {
     "module": "factors.fundamental.operating_expense_ratio_1d",
+    "relay_class": "OperatingExpenseRatioFactor1D",
     "params": {},
     "columns": [
       "close",
@@ -376,6 +414,7 @@
   },
   "quick_ratio_1d": {
     "module": "factors.fundamental.quick_ratio_1d",
+    "relay_class": "QuickRatioFactor1D",
     "params": {},
     "columns": [
       "close",
@@ -387,6 +426,7 @@
   },
   "revenue_growth_63d": {
     "module": "factors.fundamental.revenue_growth_63d",
+    "relay_class": "RevenueGrowthFactor63D",
     "params": {},
     "columns": [
       "close",
@@ -396,6 +436,7 @@
   },
   "roe_growth_63d": {
     "module": "factors.fundamental.roe_growth_63d",
+    "relay_class": "RoeGrowthFactor63D",
     "params": {},
     "columns": [
       "close",
@@ -405,6 +446,7 @@
   },
   "sp_1d": {
     "module": "factors.fundamental.sp_1d",
+    "relay_class": "SpFactor1D",
     "params": {},
     "columns": [
       "close",
@@ -415,6 +457,7 @@
   },
   "total_asset_growth_63d": {
     "module": "factors.fundamental.total_asset_growth_63d",
+    "relay_class": "TotalAssetGrowthFactor63D",
     "params": {},
     "columns": [
       "close",
@@ -424,6 +467,7 @@
   },
   "total_asset_growth_vol_24m": {
     "module": "factors.fundamental.total_asset_growth_vol_24m",
+    "relay_class": "TotalAssetGrowthVol24m",
     "params": {},
     "columns": [
       "close",
@@ -432,6 +476,7 @@
   },
   "total_asset_turnover_1d": {
     "module": "factors.fundamental.total_asset_turnover_1d",
+    "relay_class": "TotalAssetTurnoverFactor1D",
     "params": {},
     "columns": [
       "close",

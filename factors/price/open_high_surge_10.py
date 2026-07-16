@@ -31,15 +31,15 @@ class OpenHighSurge10(BaseFactor):
         constituents: dict[str, set[str]] | None = None,
     ) -> pd.DataFrame:
         """计算最近 window 个交易日 log(high / open) 的均值。"""
-        if "open" not in data.columns:
-            raise ValueError("字段 open 缺失")
+        if "adj_open" not in data.columns:
+            raise ValueError("字段 adj_open 缺失")
         if not isinstance(data.index, pd.MultiIndex) or data.index.names[:2] != ["date", "symbol"]:
             raise ValueError("因子输入必须使用 (date, symbol) MultiIndex")
-        if "high" not in data.columns:
-            raise ValueError("字段 high 缺失")
+        if "adj_high" not in data.columns:
+            raise ValueError("字段 adj_high 缺失")
 
-        open_price = data["open"].unstack("symbol").astype(float).sort_index()
-        high = data["high"].unstack("symbol").astype(float).sort_index()
+        open_price = data["adj_open"].unstack("symbol").astype(float).sort_index()
+        high = data["adj_high"].unstack("symbol").astype(float).sort_index()
         high = high.reindex(index=open_price.index, columns=open_price.columns)
         valid = (open_price > 0) & (high > 0) & (high >= open_price)
         daily_value = np.log(high.where(valid) / open_price.where(valid))

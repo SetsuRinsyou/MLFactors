@@ -43,8 +43,8 @@ class MaxDailyReturn5(BaseFactor):
         data: pd.DataFrame,
         constituents: dict[str, set[str]] | None = None,
     ) -> pd.DataFrame:
-        if "close" not in data.columns:
-            raise ValueError("字段 close 缺失")
+        if "adj_close" not in data.columns:
+            raise ValueError("字段 adj_close 缺失")
         if not isinstance(data.index, pd.MultiIndex) or data.index.names[:2] != ["date", "symbol"]:
             raise ValueError("因子输入必须使用 (date, symbol) MultiIndex")
 
@@ -56,7 +56,7 @@ class MaxDailyReturn5(BaseFactor):
         if self.lookback <= 0:
             raise ValueError("lookback 必须为正整数")
 
-        close = data["close"].unstack("symbol").astype(float).sort_index()
+        close = data["adj_close"].unstack("symbol").astype(float).sort_index()
         returns = close.pct_change(fill_method=None)
         factor = returns.rolling(window=self.lookback, min_periods=min_obs).apply(
             lambda values: self._top_n_mean(values, top_n=self.top_n, min_obs=min_obs),

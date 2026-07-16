@@ -1,0 +1,1027 @@
+{
+  "CORD_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORD",
+      "window": 5
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CORD_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORD",
+      "window": 10
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CORD_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORD",
+      "window": 20
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CORD_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORD",
+      "window": 30
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CORD_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORD",
+      "window": 60
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CORR_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORR",
+      "window": 5
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CORR_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORR",
+      "window": 10
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CORR_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORR",
+      "window": 20
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CORR_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORR",
+      "window": 30
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "KLOW_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "KLOW"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "KLOW2_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "KLOW2"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "KMID_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "KMID"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "KMID2_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "KMID2"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "KSFT_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "KSFT"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "KSFT2_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "KSFT2"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "KUP_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "KUP"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "LOW0_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "LOW0"
+    },
+    "columns": [
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "OPEN0_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "OPEN0"
+    },
+    "columns": [
+      "adj_open",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VWAP0_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VWAP0"
+    },
+    "columns": [
+      "vwap",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "IMIN_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMIN",
+      "window": 5
+    },
+    "columns": [
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "IMIN_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMIN",
+      "window": 10
+    },
+    "columns": [
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "IMXD_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMXD",
+      "window": 5
+    },
+    "columns": [
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "IMXD_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMXD",
+      "window": 30
+    },
+    "columns": [
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "IMXD_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMXD",
+      "window": 60
+    },
+    "columns": [
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MAX_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MAX",
+      "window": 60
+    },
+    "columns": [
+      "adj_high",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MIN_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MIN",
+      "window": 5
+    },
+    "columns": [
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MIN_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MIN",
+      "window": 10
+    },
+    "columns": [
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MIN_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MIN",
+      "window": 20
+    },
+    "columns": [
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MIN_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MIN",
+      "window": 30
+    },
+    "columns": [
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MIN_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MIN",
+      "window": 60
+    },
+    "columns": [
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "QTLD_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLD",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "QTLD_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLD",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "QTLD_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLD",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "QTLD_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLD",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "QTLD_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLD",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "QTLU_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLU",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "QTLU_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLU",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "QTLU_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLU",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "QTLU_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLU",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "QTLU_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLU",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RANK_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RANK",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RANK_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RANK",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RANK_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RANK",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RANK_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RANK",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RANK_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RANK",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RSV_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RSV",
+      "window": 5
+    },
+    "columns": [
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RSV_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RSV",
+      "window": 60
+    },
+    "columns": [
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "BETA_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "BETA",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "BETA_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "BETA",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "BETA_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "BETA",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MA_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MA",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MA_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MA",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MA_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MA",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MA_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MA",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MA_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MA",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RESI_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RESI",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RESI_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RESI",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "ROC_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "ROC",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "ROC_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "ROC",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "ROC_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "ROC",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "ROC_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "ROC",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "ROC_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "ROC",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RSQR_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RSQR",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "SUMD_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMD",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "SUMD_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMD",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "SUMN_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMN",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "SUMN_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMN",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "SUMP_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMP",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "SUMP_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMP",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VMA_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VMA",
+      "window": 5
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VMA_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VMA",
+      "window": 10
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VMA_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VMA",
+      "window": 60
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMD_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMD",
+      "window": 20
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMD_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMD",
+      "window": 30
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMD_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMD",
+      "window": 60
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMN_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMN",
+      "window": 5
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMN_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMN",
+      "window": 10
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMN_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMN",
+      "window": 20
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMN_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMN",
+      "window": 30
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMN_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMN",
+      "window": 60
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMP_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMP",
+      "window": 20
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMP_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMP",
+      "window": 30
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMP_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMP",
+      "window": 60
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "KLEN_1d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "KLEN"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158RiskFactor"
+  },
+  "STD_30d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "STD",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158RiskFactor"
+  },
+  "STD_60d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "STD",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158RiskFactor"
+  },
+  "WVMA_20d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "WVMA",
+      "window": 20
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158RiskFactor"
+  },
+  "WVMA_30d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "WVMA",
+      "window": 30
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158RiskFactor"
+  },
+  "WVMA_60d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "WVMA",
+      "window": 60
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158RiskFactor"
+  }
+}

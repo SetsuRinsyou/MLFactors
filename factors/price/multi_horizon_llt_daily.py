@@ -86,7 +86,7 @@ class MultiHorizonLLTDaily(BaseFactor):
         data: pd.DataFrame,
         constituents: dict[str, set[str]] | None = None,
     ) -> pd.DataFrame:
-        close = data["close"].unstack("symbol").astype(float).sort_index()
+        close = data["adj_close"].unstack("symbol").astype(float).sort_index()
 
         # 计算多期限LLT趋势线
         llt_dict = {}

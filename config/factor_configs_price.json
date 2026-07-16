@@ -1,18 +1,20 @@
 {
   "dip_rebound_10d": {
     "module": "factors.price.dip_rebound",
+    "relay_class": "DipRebound10",
     "params": {
       "window": 10,
       "min_periods": 5,
       "shift_days": 0
     },
     "columns": [
-      "close",
-      "low"
+      "adj_close",
+      "adj_low"
     ]
   },
   "max_daily_return_5": {
     "module": "factors.price.max_daily_return_5",
+    "relay_class": "MaxDailyReturn5",
     "params": {
       "top_n": 5,
       "min_obs": null,
@@ -20,84 +22,93 @@
       "rebalance_step": 1
     },
     "columns": [
-      "close"
+      "adj_close"
     ]
   },
   "multi_horizon_llt_50d": {
     "module": "factors.price.multi_horizon_llt_daily",
+    "relay_class": "MultiHorizonLLTDaily",
     "params": {
       "periods": null,
       "lookback_days": 50
     },
     "columns": [
-      "close"
+      "adj_close"
     ]
   },
   "multi_horizon_ma_50d": {
     "module": "factors.price.multi_horizon_ma_daily",
+    "relay_class": "MultiHorizonMADaily",
     "params": {
       "periods": null,
       "lookback_days": 50
     },
     "columns": [
-      "close"
+      "adj_close"
     ]
   },
   "open_high_surge_10d": {
     "module": "factors.price.open_high_surge_10",
+    "relay_class": "OpenHighSurge10",
     "params": {
       "window": 10,
       "min_periods": 5,
       "shift_days": 0
     },
     "columns": [
-      "close",
-      "open",
-      "high"
+      "adj_close",
+      "adj_open",
+      "adj_high"
     ]
   },
   "pair_reversal_60d": {
     "module": "factors.price.pair_reversal",
+    "relay_class": "PairReversal",
     "params": {
       "formation_period": 60,
       "reversal_period": 5
     },
     "columns": [
-      "close"
+      "adj_close"
     ]
   },
   "reversal_1m": {
     "module": "factors.price.reversal",
+    "relay_class": "Reversal1M",
     "params": {},
     "columns": [
-      "close"
+      "adj_close"
     ]
   },
   "reversal_3m": {
     "module": "factors.price.reversal",
+    "relay_class": "Reversal3M",
     "params": {},
     "columns": [
-      "close"
+      "adj_close"
     ]
   },
   "reversal_6m": {
     "module": "factors.price.reversal",
+    "relay_class": "Reversal6M",
     "params": {},
     "columns": [
-      "close"
+      "adj_close"
     ]
   },
   "slp_reversal_20d": {
     "module": "factors.price.slp_reversal",
+    "relay_class": "SLPReversal",
     "params": {
       "window": 20
     },
     "columns": [
-      "close"
+      "adj_close"
     ]
   },
   "trading_amount_20d": {
     "module": "factors.price.reversal",
+    "relay_class": "TradingAmount",
     "params": {},
     "columns": [
       "close",
@@ -106,18 +117,20 @@
   },
   "turnover_cv_20d": {
     "module": "factors.price.turnover_cv",
+    "relay_class": "TurnoverCV",
     "params": {
       "window": 20,
       "min_periods": 15
     },
     "columns": [
-      "close",
+      "adj_close",
       "volume",
       "market_cap"
     ]
   },
   "volume_3m": {
     "module": "factors.price.reversal",
+    "relay_class": "Volume3M",
     "params": {},
     "columns": [
       "close",
@@ -126,11 +139,12 @@
   },
   "volume_price_corr_15d": {
     "module": "factors.price.volume_price_corr",
+    "relay_class": "VolumePriceCorr",
     "params": {
       "window": 10
     },
     "columns": [
-      "close",
+      "adj_close",
       "volume",
       "market_cap"
     ]

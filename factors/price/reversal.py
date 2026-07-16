@@ -10,7 +10,7 @@ class Reversal1M(BaseFactor):
     description = "一个月股价反转"
 
     def generate_signals(self, data: pd.DataFrame, constituents: dict[str, set[str]] | None = None) -> pd.DataFrame:
-        close = data["close"].unstack("symbol").astype(float).sort_index()
+        close = data["adj_close"].unstack("symbol").astype(float).sort_index()
         # 过去20日涨幅取负
         return -close.pct_change(20, fill_method=None)
 
@@ -20,7 +20,7 @@ class Reversal3M(BaseFactor):
     description = "三个月股价反转"
 
     def generate_signals(self, data: pd.DataFrame, constituents: dict[str, set[str]] | None = None) -> pd.DataFrame:
-        close = data["close"].unstack("symbol").astype(float).sort_index()
+        close = data["adj_close"].unstack("symbol").astype(float).sort_index()
         # 过去60日涨幅取负
         return -close.pct_change(60, fill_method=None)
 
@@ -30,7 +30,7 @@ class Reversal6M(BaseFactor):
     description = "六个月股价反转"
 
     def generate_signals(self, data: pd.DataFrame, constituents: dict[str, set[str]] | None = None) -> pd.DataFrame:
-        close = data["close"].unstack("symbol").astype(float).sort_index()
+        close = data["adj_close"].unstack("symbol").astype(float).sort_index()
         # 过去120日涨幅取负
         return -close.pct_change(120, fill_method=None)
 

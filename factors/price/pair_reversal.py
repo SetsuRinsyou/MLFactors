@@ -31,7 +31,7 @@ class PairReversal(BaseFactor):
         constituents: dict[str, set[str]] | None = None,
     ) -> pd.DataFrame:
         # 获取收盘价并转为矩阵格式
-        close = data["close"].unstack("symbol").astype(float).sort_index()
+        close = data["adj_close"].unstack("symbol").astype(float).sort_index()
         
         # 计算每日收益率（用于计算相关性）和短期反转收益率（用于计算价差偏离）
         daily_returns = close.pct_change(fill_method=None)

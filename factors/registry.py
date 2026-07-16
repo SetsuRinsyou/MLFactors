@@ -14,7 +14,10 @@ class FactorRegistry:
             raise TypeError("注册对象必须是 BaseFactor 子类")
         if not factor_class.name:
             raise ValueError(f"{factor_class.__name__} 必须定义非空的 name 属性")
-        cls._registry[factor_class.name] = factor_class
+        class_name = factor_class.__name__
+        if class_name in cls._registry:
+            raise ValueError(f"因子类重复注册: {class_name}")
+        cls._registry[class_name] = factor_class
         return factor_class
 
     @classmethod

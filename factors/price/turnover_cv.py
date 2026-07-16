@@ -35,7 +35,7 @@ class TurnoverCV(BaseFactor):
         data: pd.DataFrame,
         constituents: dict[str, set[str]] | None = None,
     ) -> pd.DataFrame:
-        close = data["close"].unstack("symbol").astype(float).sort_index()
+        close = data["adj_close"].unstack("symbol").astype(float).sort_index()
         volume = data["volume"].unstack("symbol").astype(float).sort_index()
         market_cap = data["market_cap"].unstack("symbol").astype(float).sort_index()
 

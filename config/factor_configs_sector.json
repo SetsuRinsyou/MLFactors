@@ -1,28 +1,31 @@
 {
   "industry_momentum_1d": {
     "module": "factors.sector.style",
+    "relay_class": "IndustryMomentum",
     "params": {
       "period": 1
     },
     "columns": [
-      "close",
+      "adj_close",
       "sector"
     ]
   },
   "style_category_momentum_1d": {
     "module": "factors.sector.style",
+    "relay_class": "StyleCategoryMomentum",
     "params": {
       "period": 1,
       "n_clusters": 30
     },
     "columns": [
-      "close",
+      "adj_close",
       "market_cap",
       "pe_ratio"
     ]
   },
   "industry_current_asset_growth_stability_24m": {
     "module": "factors.sector.industry_current_asset_growth_stability_24m",
+    "relay_class": "IndustryCurrentAssetGrowthStability24m",
     "params": {},
     "columns": [
       "close",

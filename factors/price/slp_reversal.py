@@ -25,7 +25,7 @@ class SLPReversal(BaseFactor):
         data: pd.DataFrame,
         constituents: dict[str, set[str]] | None = None,
     ) -> pd.DataFrame:
-        close = data["close"].unstack("symbol").astype(float).sort_index()
+        close = data["adj_close"].unstack("symbol").astype(float).sort_index()
 
         # 定义计算单列时间序列近期斜率的函数
         def calc_slp(arr: np.ndarray) -> float:
