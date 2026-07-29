@@ -8,19 +8,20 @@ from pathlib import Path
 import pandas as pd
 
 
-OUTPUTS_DIR = Path("outputs")
+OUTPUTS_DIR = Path("outputs/zz500/2026-07-22_wo_eval")
 WIDE_OUTPUT_DIR = OUTPUTS_DIR / "factor_wide"
+ADD_MARKET = True
+MARKET_DIR = Path("cache/zz500_csv")
 
 
-def iter_factor_files(outputs_dir: Path):
+def iter_factor_dirs(outputs_dir: Path):
     for factor_dir in sorted(path for path in outputs_dir.iterdir() if path.is_dir()):
         factor_values_dir = factor_dir / "factors"
         if not factor_values_dir.is_dir():
             factor_values_dir = factor_dir / "factor"
         if not factor_values_dir.is_dir():
             continue
-        for csv_path in sorted(factor_values_dir.glob("*.csv")):
-            yield factor_dir.name, csv_path.stem, csv_path
+        yield factor_dir.name, factor_values_dir
 
 
 def iter_factor_dirs(outputs_dir: Path):
@@ -60,6 +61,24 @@ def read_factor_series(factor_name: str, csv_path: Path) -> pd.Series:
     series = data.set_index(date_column)[value_columns[0]]
     series.index.name = "date"
     series.name = factor_name
+    return series
+
+
+def read_market_series(csv_path: Path) -> pd.Series:
+    columns = pd.read_csv(csv_path, nrows=0).columns
+    date_column = "date" if "date" in columns else "trade_date"
+    if date_column not in columns:
+        raise ValueError(f"{csv_path} 缺少 date 或 trade_date 列")
+    if "adj_close" not in columns:
+        raise ValueError(f"{csv_path} 缺少 adj_close 列")
+
+    data = pd.read_csv(
+        csv_path,
+        usecols=[date_column, "adj_close"],
+        dtype={date_column: str},
+    )
+    series = data.set_index(date_column)["adj_close"]
+    series.index = pd.to_datetime(series.index).strftime("%Y-%m-%d")
     return series
 
 

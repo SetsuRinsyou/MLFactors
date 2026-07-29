@@ -216,46 +216,6 @@ class Runner:
         ).sort_index()
         return evaluations, summary
 
-    @staticmethod
-    def _slice_market_data(
-        data: pd.DataFrame,
-        start: pd.Timestamp,
-        end: pd.Timestamp,
-    ) -> pd.DataFrame:
-        """按日期切片 ``(date, symbol)`` MultiIndex 行情数据。"""
-        if data.empty:
-            return data
-        dates = data.index.get_level_values("date")
-        return data.loc[(dates >= start) & (dates <= end)]
-
-    @staticmethod
-    def _slice_signals(
-        signals: pd.DataFrame,
-        start: pd.Timestamp,
-        end: pd.Timestamp,
-    ) -> pd.DataFrame:
-        """按日期切片 date × symbol 因子宽表。"""
-        if signals.empty:
-            return signals
-        dates = pd.DatetimeIndex(signals.index)
-        return signals.loc[(dates >= start) & (dates <= end)]
-
-    def _iter_yearly_windows(self) -> list[BacktestWindow]:
-        """生成覆盖已加载数据范围的自然年窗口。"""
-        if self.data.empty:
-            raise ValueError("尚未加载行情数据")
-        data_dates = pd.DatetimeIndex(
-            self.data.index.get_level_values("date").unique()
-        ).sort_values()
-        first_date, last_date = data_dates.min(), data_dates.max()
-        windows = []
-        for year in range(first_date.year, last_date.year + 1):
-            start = max(pd.Timestamp(year=year, month=1, day=1), first_date)
-            end = min(pd.Timestamp(year=year, month=12, day=31), last_date)
-            if start <= end:
-                windows.append(BacktestWindow(year=year, start=start, end=end))
-        return windows
-
     def _benchmark_cumulative(self, evaluation: FactorEvalResult, period: int) -> pd.DataFrame | None:
         """计算与分层收益日期对齐的基准累计收益。"""
         if self.benchmark.empty:
@@ -369,8 +329,19 @@ class Runner:
         window: BacktestWindow,
     ) -> tuple[Path, pd.DataFrame] | None:
         """在自然年边界内重新计算并保存 5 日评估报告。"""
-        window_data = self._slice_market_data(self.data, window.start, window.end)
-        window_signals = self._slice_signals(signals, window.start, window.end)
+        window_data = self.data
+        if not window_data.empty:
+            data_dates = window_data.index.get_level_values("date")
+            window_data = window_data.loc[
+                (data_dates >= window.start) & (data_dates <= window.end)
+            ]
+
+        window_signals = signals
+        if not window_signals.empty:
+            signal_dates = pd.DatetimeIndex(window_signals.index)
+            window_signals = window_signals.loc[
+                (signal_dates >= window.start) & (signal_dates <= window.end)
+            ]
         if window_data.empty or window_signals.dropna(how="all").empty:
             return None
 
@@ -396,9 +367,22 @@ class Runner:
         signals: pd.DataFrame,
     ) -> tuple[list[Path], Path | None]:
         """保存每自然年的 5 日报告、汇总 CSV 和年度指标趋势图。"""
+        if self.data.empty:
+            raise ValueError("尚未加载行情数据")
+        data_dates = pd.DatetimeIndex(
+            self.data.index.get_level_values("date").unique()
+        ).sort_values()
+        first_date, last_date = data_dates.min(), data_dates.max()
+        windows = []
+        for year in range(first_date.year, last_date.year + 1):
+            start = max(pd.Timestamp(year=year, month=1, day=1), first_date)
+            end = min(pd.Timestamp(year=year, month=12, day=31), last_date)
+            if start <= end:
+                windows.append(BacktestWindow(year=year, start=start, end=end))
+
         report_links: list[Path] = []
         summary_frames: list[pd.DataFrame] = []
-        for window in self._iter_yearly_windows():
+        for window in windows:
             saved = self._evaluate_and_save_yearly_window(signals, window)
             if saved is None:
                 continue
@@ -506,7 +490,7 @@ if __name__ == "__main__":
     for factor_name, config in tqdm(
         factor_configs.items(),
         total=len(factor_configs),
-        desc="自主因子回测",
+        desc="因子生成",
         unit="factor",
     ):
         importlib.import_module(config["module"])

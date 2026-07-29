@@ -45,6 +45,8 @@ def calculate_price_ratio_factor(data: pd.DataFrame, operation: str) -> pd.DataF
         value = to_wide(data, "adj_high")
     elif operation == "OPEN0":
         value = to_wide(data, "adj_open")
+    elif operation == "HIGH0":
+        value = to_wide(data, "adj_high")
     else:
         value = to_wide(data, "vwap")
     return value / close
@@ -181,6 +183,22 @@ def calculate_momentum_factor(
     return (gain - loss) / denominator
 
 
+def calculate_count_factor(
+    data: pd.DataFrame,
+    operation: str,
+    window: int,
+) -> pd.DataFrame:
+    close = to_wide(data, "adj_close")
+    change = close - close.shift(1)
+    increase_ratio = (change > 0).rolling(window, min_periods=1).mean()
+    decrease_ratio = (change < 0).rolling(window, min_periods=1).mean()
+    if operation == "CNTP":
+        return increase_ratio
+    if operation == "CNTN":
+        return decrease_ratio
+    return increase_ratio - decrease_ratio
+
+
 def calculate_correlation_factor(
     data: pd.DataFrame,
     operation: str,
@@ -245,23 +263,14 @@ class Alpha158PriceFactor(BaseFactor):
     name = "alpha158_price"
     description = "Alpha158价格类因子"
 
-    CANDLE_FACTORS = {
-        "KMID",
-        "KMID2",
-        "KUP",
-        "KUP2",
-        "KLOW",
-        "KLOW2",
-        "KSFT",
-        "KSFT2",
-    }
-    PRICE_RATIO_FACTORS = {"LOW0", "HIGH0", "OPEN0", "VWAP0"}
+    CANDLE_FACTORS = {"KMID", "KMID2", "KUP", "KUP2", "KLOW", "KLOW2", "KSFT", "KSFT2"}
+    PRICE_RATIO_FACTORS = {"LOW0", "OPEN0", "HIGH0", "VWAP0"}
     VOLUME_FACTORS = {"VMA", "VSUMP", "VSUMN", "VSUMD"}
     REGRESSION_FACTORS = {"BETA", "RSQR", "RESI"}
     PRICE_ROLLING_FACTORS = {"ROC", "MA", "MAX", "MIN", "QTLU", "QTLD", "RANK"}
     POSITION_FACTORS = {"RSV", "IMAX", "IMIN", "IMXD"}
-    COUNT_FACTORS = {"CNTP", "CNTN", "CNTD"}
     MOMENTUM_FACTORS = {"SUMP", "SUMN", "SUMD"}
+    COUNT_FACTORS = {"CNTP", "CNTN", "CNTD"}
     CORRELATION_FACTORS = {"CORR", "CORD"}
 
     FIXED_FACTORS = CANDLE_FACTORS | PRICE_RATIO_FACTORS
@@ -272,6 +281,7 @@ class Alpha158PriceFactor(BaseFactor):
         | POSITION_FACTORS
         | COUNT_FACTORS
         | MOMENTUM_FACTORS
+        | COUNT_FACTORS
         | CORRELATION_FACTORS
     )
 
@@ -312,6 +322,8 @@ class Alpha158PriceFactor(BaseFactor):
             result = calculate_count_factor(data, operation, window)
         elif operation in self.MOMENTUM_FACTORS:
             result = calculate_momentum_factor(data, operation, window)
+        elif operation in self.COUNT_FACTORS:
+            result = calculate_count_factor(data, operation, window)
         elif operation in self.CORRELATION_FACTORS:
             result = calculate_correlation_factor(data, operation, window)
         else:

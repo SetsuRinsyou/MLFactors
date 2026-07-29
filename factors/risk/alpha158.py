@@ -33,6 +33,9 @@ def calculate_volatility_factor(
         return close.rolling(window, min_periods=1).std() / close
 
     volume = to_wide(data, "volume")
+    if operation == "VSTD":
+        return volume.rolling(window, min_periods=1).std() / (volume + 1e-12)
+
     weighted_change = (close / close.shift(1) - 1).abs() * volume
     return weighted_change.rolling(window, min_periods=1).std() / (
         weighted_change.rolling(window, min_periods=1).mean() + 1e-12
