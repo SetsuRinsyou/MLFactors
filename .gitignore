@@ -79,3 +79,7 @@ scheme_outputs_report*/
 
 # Large local artifacts
 good_factors.zip
+
+# Local run artifacts
+factor_results_232/
+run_tmp.py

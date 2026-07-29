@@ -1,6 +1,8 @@
 """读取按股票拆分的数据、指数成分股和基准数据。"""
 
+import csv
 from datetime import date
+from functools import lru_cache
 from pathlib import Path
 import pandas as pd
 
@@ -46,9 +48,59 @@ BENCHMARK_COLUMNS = {
 
 NON_STOCK_CSV_FILES = {"constituents_daily.csv", "index_members_rebalance.csv"}
 
+# cache 中仍保留历史代码时可由 stock_basic_symbol 自动识别；以下映射覆盖
+# 只有现行代码文件、但成分股历史仍使用旧代码的情况。映射直接内置在现有
+# 加载器中，运行时不依赖临时数据目录或额外映射文件。
+SECURITY_CODE_ALIASES = {
+    "000022.SZ": "001872.SZ",
+    "000043.SZ": "001914.SZ",
+    "300114.SZ": "302132.SZ",
+    "601313.SH": "601360.SH",
+}
+
+
 def _read_header(csv_file: Path) -> set[str]:
     """读取 CSV 表头。"""
     return set(pd.read_csv(csv_file, nrows=0).columns)
+
+
+def _canonical_symbol(file_symbol: str, stock_basic_symbol: str) -> str:
+    """根据 cache 内的现行代码，把历史文件代码归一到同一证券。"""
+    current = stock_basic_symbol.strip()
+    if not current:
+        return file_symbol
+    if "." in current:
+        return current
+    suffix = file_symbol.rsplit(".", 1)[1] if "." in file_symbol else ""
+    return f"{current}.{suffix}" if suffix else current
+
+
+@lru_cache(maxsize=16)
+def _load_symbol_aliases_cached(directory: Path) -> tuple[tuple[str, str], ...]:
+    aliases: dict[str, str] = dict(SECURITY_CODE_ALIASES)
+    aliases.update({symbol: symbol for symbol in SECURITY_CODE_ALIASES.values()})
+    for csv_file in sorted(directory.glob("*.csv")):
+        if csv_file.name in NON_STOCK_CSV_FILES:
+            continue
+        canonical = csv_file.stem
+        with csv_file.open("r", encoding="utf-8-sig", newline="") as file:
+            reader = csv.reader(file)
+            header = next(reader, [])
+            if "stock_basic_symbol" in header:
+                first_row = next(reader, [])
+                column = header.index("stock_basic_symbol")
+                if column < len(first_row):
+                    canonical = _canonical_symbol(csv_file.stem, first_row[column])
+        canonical = SECURITY_CODE_ALIASES.get(csv_file.stem, canonical)
+        aliases[csv_file.stem] = canonical
+        aliases.setdefault(canonical, canonical)
+    return tuple(sorted(aliases.items()))
+
+
+def load_symbol_aliases(data_dir: str | Path) -> dict[str, str]:
+    """从股票宽表自身推导“历史代码→现行代码”，不依赖外部映射文件。"""
+    directory = Path(data_dir).expanduser().resolve()
+    return dict(_load_symbol_aliases_cached(directory))
 
 
 def resolve_date_column(columns: set[str], csv_file: Path) -> str:
@@ -179,16 +231,22 @@ def load_data(
 ) -> pd.DataFrame:
     """返回 (date, symbol) MultiIndex 数据"""
     data_dir = Path(data_dir).expanduser().resolve()
+    symbol_aliases = load_symbol_aliases(data_dir)
+    all_csv_files = sorted(
+        csv_file
+        for csv_file in data_dir.glob("*.csv")
+        if csv_file.name not in NON_STOCK_CSV_FILES
+    )
 
     if symbols is None:
-        csv_files = []
-        for csv_file in data_dir.glob("*.csv"):
-            if csv_file.name in NON_STOCK_CSV_FILES:
-                continue
-            csv_files.append(csv_file)
-        csv_files = sorted(csv_files)
+        csv_files = all_csv_files
     else:
-        csv_files = [data_dir / f"{symbol}.csv" for symbol in symbols]
+        requested = {symbol_aliases.get(symbol, symbol) for symbol in symbols}
+        csv_files = [
+            csv_file
+            for csv_file in all_csv_files
+            if symbol_aliases.get(csv_file.stem, csv_file.stem) in requested
+        ]
 
     if csv_files:
         available_columns = _read_header(csv_files[0])
@@ -204,7 +262,9 @@ def load_data(
     for csv_file in csv_files:
         frame = pd.read_csv(csv_file, usecols=usecols, parse_dates=[date_column])
         frame = normalize_fields(frame, columns)
-        frame["symbol"] = csv_file.stem
+        canonical = symbol_aliases.get(csv_file.stem, csv_file.stem)
+        frame["symbol"] = canonical
+        frame["_source_priority"] = int(csv_file.stem != canonical)
         if start is not None:
             frame = frame[frame["date"] >= pd.Timestamp(start)]
         if end is not None:
@@ -213,11 +273,17 @@ def load_data(
 
     if frames:
         data = pd.concat(frames, ignore_index=True)
+        data = (
+            data.sort_values(["date", "symbol", "_source_priority"])
+            .drop_duplicates(["date", "symbol"], keep="first")
+            .drop(columns="_source_priority")
+        )
         data = data.set_index(["date", "symbol"]).sort_index()
     else:
         index = pd.MultiIndex.from_arrays([[], []], names=["date", "symbol"])
         data = pd.DataFrame(index=index)
 
+    data.attrs["symbol_aliases"] = symbol_aliases
     return data
 
 
@@ -318,6 +384,8 @@ class DataLoader:
         self.benchmark = pd.DataFrame()
         self.constituents = pd.DataFrame()
         self.security_status = pd.DataFrame()
+        self.symbol_aliases: dict[str, str] = {}
+        self.trading_calendar = pd.DatetimeIndex([], name="date")
 
     def load_basic(self) -> pd.DataFrame:
         """加载基础行情数据和可选成分股。"""
@@ -328,10 +396,15 @@ class DataLoader:
             end=self.end,
             columns=self.columns,
         )
+        self.symbol_aliases = basic_data.attrs.get("symbol_aliases", {})
+        self.trading_calendar = pd.DatetimeIndex(
+            basic_data.index.get_level_values("date").unique(),
+            name="date",
+        ).sort_values()
         return basic_data
 
     def load_constituents(self) -> pd.DataFrame:
-        """加载成分股数据。"""
+        """加载 ``date,tickers`` 格式的逐日成分股数据。"""
 
         if self.constituents_path is None:
             return pd.DataFrame()
@@ -339,34 +412,48 @@ class DataLoader:
         if not constituents_path.exists():
             raise FileNotFoundError(f"成分股文件不存在: {constituents_path}")
 
-        constituents = pd.read_csv(
+        constituents_daily = pd.read_csv(
             constituents_path,
-            dtype={
-                "index_code": str,
-                "con_code": str,
-            },
-            usecols=["index_code", "con_code", "trade_date"],
-            parse_dates=["trade_date"],
+            dtype={"tickers": str},
+            usecols=["date", "tickers"],
+            parse_dates=["date"],
         )
-        # 仅保留指定指数的成分股
-        constituents = constituents[constituents["index_code"] == self.constituent_index]
-        # 仅保留回测结束日前的成分股；开始日前的最后一条记录用于对齐首个行情日。
-        if self.data.empty and self.start is not None:
-            constituents = constituents[constituents["trade_date"] >= pd.Timestamp(self.start)]
+        if self.start is not None:
+            constituents_daily = constituents_daily[
+                constituents_daily["date"] >= pd.Timestamp(self.start)
+            ]
         if self.end is not None:
-            constituents = constituents[constituents["trade_date"] <= pd.Timestamp(self.end)]
+            constituents_daily = constituents_daily[
+                constituents_daily["date"] <= pd.Timestamp(self.end)
+            ]
+        if constituents_daily.empty:
+            raise ValueError(
+                f"在 {self.start} 到 {self.end} 期间没有找到 "
+                f"{self.constituent_index} 的逐日成分股数据"
+            )
 
+        constituents = (
+            constituents_daily.assign(
+                symbol=constituents_daily["tickers"].fillna("").str.split(",")
+            )
+            .explode("symbol")[["date", "symbol"]]
+        )
+        constituents["symbol"] = constituents["symbol"].str.strip()
+        constituents = constituents[constituents["symbol"].ne("")]
+        constituents["symbol"] = constituents["symbol"].map(
+            lambda symbol: self.symbol_aliases.get(symbol, symbol)
+        )
         if constituents.empty:
-            raise ValueError(f"在 {self.start} 到 {self.end} 期间没有找到 {self.constituent_index} 的成分股数据")
+            raise ValueError(f"{constituents_path} 没有可用成分股数据")
 
-        constituents["is_member"] = 1
+        constituents["is_member"] = True
         constituents = (
             constituents.pivot_table(
-                index="trade_date",
-                columns="con_code",
+                index="date",
+                columns="symbol",
                 values="is_member",
                 aggfunc="last",
-                fill_value=0,
+                fill_value=False,
             )
             .astype(bool)
             .sort_index()
@@ -489,6 +576,9 @@ class DataLoader:
             usecols=columns,
             dtype=str,
         )
+        status["ticker"] = status["ticker"].map(
+            lambda symbol: self.symbol_aliases.get(symbol, symbol)
+        )
 
         data_symbols = pd.Index(self.data.index.get_level_values("symbol").unique())
         status = status[
@@ -523,7 +613,14 @@ class DataLoader:
         if self.data.empty:
             return pd.DataFrame()
         source_symbol = self.data.index.get_level_values("symbol")[0]
-        source_file = Path(self.data_dir).expanduser().resolve() / f"{source_symbol}.csv"
+        data_dir = Path(self.data_dir).expanduser().resolve()
+        source_file = data_dir / f"{source_symbol}.csv"
+        if not source_file.exists():
+            source_file = next(
+                data_dir / f"{alias}.csv"
+                for alias, canonical in self.symbol_aliases.items()
+                if canonical == source_symbol and (data_dir / f"{alias}.csv").exists()
+            )
         available_columns = _read_header(source_file)
         benchmark_columns = [
             column for column in BENCHMARK_COLUMNS

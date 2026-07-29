@@ -19,7 +19,7 @@ TIMING_WIN_HORIZON_WEIGHTS = {
 }
 
 
-TAIL_FRACTIONS = (0.05, 0.10, 0.15, 0.20, 0.25)
+TAIL_FRACTIONS = (0.05, 0.10, 0.15, 0.20, 0.25, 0.30)
 DAILY_METRIC_COLUMNS = (
     "IC",
     "TimingIC",
@@ -33,6 +33,8 @@ DAILY_METRIC_COLUMNS = (
     "bottom_20%_return",
     "top_25%_return",
     "bottom_25%_return",
+    "top_30%_return",
+    "bottom_30%_return",
 )
 
 
@@ -848,7 +850,7 @@ def eval(
     sampled_tail_group_returns = calc_tail_group_returns(
         sampled_factor,
         sampled_forward_returns,
-        fractions=(0.05, 0.10, 0.15),
+        fractions=(0.05, 0.10, 0.15, 0.25, 0.30),
     )
 
     t_stat, p_value = calc_t_stat(full_ic_series, period=forward_period)
@@ -862,6 +864,11 @@ def eval(
             return 0.0
         returns = sampled_tail_group_returns[column].dropna()
         return float((1.0 + returns).prod() - 1.0) if not returns.empty else 0.0
+
+    def tail_max_drawdown(column: str) -> float:
+        if column not in sampled_tail_group_returns:
+            return 0.0
+        return calc_max_drawdown(sampled_tail_group_returns[column])
 
     ic_mean = offset_ic_stats["IC_mean"]
     ic_half_life = calc_ic_half_life(full_ic_series, ic_mean)
@@ -915,12 +922,66 @@ def eval(
             final_cumulative_return(layered.bottom_cumulative_returns),
             4,
         ),
-        "top_20%_annual_return": round(layered.top_annual_return, 4),
-        "bottom_20%_annual_return": round(layered.bottom_annual_return, 4),
+        "top_25%_cumulative_return": round(
+            tail_cumulative_return("top_25%_return"),
+            4,
+        ),
+        "bottom_25%_cumulative_return": round(
+            tail_cumulative_return("bottom_25%_return"),
+            4,
+        ),
+        "top_30%_cumulative_return": round(
+            tail_cumulative_return("top_30%_return"),
+            4,
+        ),
+        "bottom_30%_cumulative_return": round(
+            tail_cumulative_return("bottom_30%_return"),
+            4,
+        ),
         "top_20%_sharpe_ratio": round(layered.top_sharpe_ratio, 4),
         "bottom_20%_sharpe_ratio": round(layered.bottom_sharpe_ratio, 4),
+        "top_5%_max_drawdown": round(
+            tail_max_drawdown("top_5%_return"),
+            4,
+        ),
+        "bottom_5%_max_drawdown": round(
+            tail_max_drawdown("bottom_5%_return"),
+            4,
+        ),
+        "top_10%_max_drawdown": round(
+            tail_max_drawdown("top_10%_return"),
+            4,
+        ),
+        "bottom_10%_max_drawdown": round(
+            tail_max_drawdown("bottom_10%_return"),
+            4,
+        ),
+        "top_15%_max_drawdown": round(
+            tail_max_drawdown("top_15%_return"),
+            4,
+        ),
+        "bottom_15%_max_drawdown": round(
+            tail_max_drawdown("bottom_15%_return"),
+            4,
+        ),
         "top_20%_max_drawdown": round(layered.top_max_drawdown, 4),
         "bottom_20%_max_drawdown": round(layered.bottom_max_drawdown, 4),
+        "top_25%_max_drawdown": round(
+            tail_max_drawdown("top_25%_return"),
+            4,
+        ),
+        "bottom_25%_max_drawdown": round(
+            tail_max_drawdown("bottom_25%_return"),
+            4,
+        ),
+        "top_30%_max_drawdown": round(
+            tail_max_drawdown("top_30%_return"),
+            4,
+        ),
+        "bottom_30%_max_drawdown": round(
+            tail_max_drawdown("bottom_30%_return"),
+            4,
+        ),
         "top_20%_bottom_20%_win_rate": round(layered.win_rate, 4),
     }])
     return FactorEvalResult(

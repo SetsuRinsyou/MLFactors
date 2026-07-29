@@ -24,6 +24,10 @@ def calculate_volatility_factor(
     operation: str,
     window: int,
 ) -> pd.DataFrame:
+    if operation == "VSTD":
+        volume = to_wide(data, "volume")
+        return volume.rolling(window, min_periods=1).std() / (volume + 1e-12)
+
     close = to_wide(data, "adj_close")
     if operation == "STD":
         return close.rolling(window, min_periods=1).std() / close
@@ -49,7 +53,7 @@ class Alpha158RiskFactor(BaseFactor):
     description = "Alpha158风险类因子"
 
     RANGE_FACTORS = {"KLEN"}
-    VOLATILITY_FACTORS = {"STD", "WVMA"}
+    VOLATILITY_FACTORS = {"STD", "VSTD", "WVMA"}
 
     FIXED_FACTORS = RANGE_FACTORS
     ROLLING_FACTORS = VOLATILITY_FACTORS

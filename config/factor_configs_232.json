@@ -1,0 +1,2629 @@
+{
+  "BETA_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "BETA",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "BETA_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "BETA",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "BETA_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "BETA",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "BETA_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "BETA",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "BETA_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "BETA",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CNTD_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CNTD",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CNTD_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CNTD",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CNTD_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CNTD",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CNTD_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CNTD",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CNTD_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CNTD",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CNTN_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CNTN",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CNTN_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CNTN",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CNTN_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CNTN",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CNTN_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CNTN",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CNTN_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CNTN",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CNTP_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CNTP",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CNTP_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CNTP",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CNTP_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CNTP",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CNTP_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CNTP",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CNTP_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CNTP",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CORD_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORD",
+      "window": 10
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CORD_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORD",
+      "window": 20
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CORD_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORD",
+      "window": 30
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CORD_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORD",
+      "window": 5
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CORD_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORD",
+      "window": 60
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CORR_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORR",
+      "window": 10
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CORR_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORR",
+      "window": 20
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CORR_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORR",
+      "window": 30
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CORR_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORR",
+      "window": 5
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "CORR_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "CORR",
+      "window": 60
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "HIGH0_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "HIGH0"
+    },
+    "columns": [
+      "adj_high",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "IMAX_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMAX",
+      "window": 10
+    },
+    "columns": [
+      "adj_high"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "IMAX_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMAX",
+      "window": 20
+    },
+    "columns": [
+      "adj_high"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "IMAX_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMAX",
+      "window": 30
+    },
+    "columns": [
+      "adj_high"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "IMAX_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMAX",
+      "window": 5
+    },
+    "columns": [
+      "adj_high"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "IMAX_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMAX",
+      "window": 60
+    },
+    "columns": [
+      "adj_high"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "IMIN_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMIN",
+      "window": 10
+    },
+    "columns": [
+      "adj_low"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "IMIN_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMIN",
+      "window": 20
+    },
+    "columns": [
+      "adj_low"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "IMIN_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMIN",
+      "window": 30
+    },
+    "columns": [
+      "adj_low"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "IMIN_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMIN",
+      "window": 5
+    },
+    "columns": [
+      "adj_low"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "IMIN_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMIN",
+      "window": 60
+    },
+    "columns": [
+      "adj_low"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "IMXD_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMXD",
+      "window": 10
+    },
+    "columns": [
+      "adj_high",
+      "adj_low"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "IMXD_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMXD",
+      "window": 20
+    },
+    "columns": [
+      "adj_high",
+      "adj_low"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "IMXD_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMXD",
+      "window": 30
+    },
+    "columns": [
+      "adj_high",
+      "adj_low"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "IMXD_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMXD",
+      "window": 5
+    },
+    "columns": [
+      "adj_high",
+      "adj_low"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "IMXD_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "IMXD",
+      "window": 60
+    },
+    "columns": [
+      "adj_high",
+      "adj_low"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "KLEN_1d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "KLEN"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low"
+    ],
+    "relay_class": "Alpha158RiskFactor"
+  },
+  "KLOW2_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "KLOW2"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "KLOW_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "KLOW"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "KMID2_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "KMID2"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "KMID_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "KMID"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "KSFT2_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "KSFT2"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "KSFT_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "KSFT"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "KUP2_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "KUP2"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "KUP_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "KUP"
+    },
+    "columns": [
+      "adj_open",
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "LOW0_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "LOW0"
+    },
+    "columns": [
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MAX_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MAX",
+      "window": 10
+    },
+    "columns": [
+      "adj_high",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MAX_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MAX",
+      "window": 20
+    },
+    "columns": [
+      "adj_high",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MAX_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MAX",
+      "window": 30
+    },
+    "columns": [
+      "adj_high",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MAX_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MAX",
+      "window": 5
+    },
+    "columns": [
+      "adj_high",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MAX_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MAX",
+      "window": 60
+    },
+    "columns": [
+      "adj_high",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MA_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MA",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MA_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MA",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MA_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MA",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MA_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MA",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MA_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MA",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MIN_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MIN",
+      "window": 10
+    },
+    "columns": [
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MIN_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MIN",
+      "window": 20
+    },
+    "columns": [
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MIN_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MIN",
+      "window": 30
+    },
+    "columns": [
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MIN_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MIN",
+      "window": 5
+    },
+    "columns": [
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "MIN_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "MIN",
+      "window": 60
+    },
+    "columns": [
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "OPEN0_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "OPEN0"
+    },
+    "columns": [
+      "adj_open",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "QTLD_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLD",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "QTLD_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLD",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "QTLD_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLD",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "QTLD_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLD",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "QTLD_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLD",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "QTLU_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLU",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "QTLU_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLU",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "QTLU_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLU",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "QTLU_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLU",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "QTLU_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "QTLU",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RANK_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RANK",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RANK_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RANK",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RANK_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RANK",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RANK_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RANK",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RANK_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RANK",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RESI_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RESI",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RESI_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RESI",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RESI_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RESI",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RESI_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RESI",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RESI_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RESI",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "ROC_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "ROC",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "ROC_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "ROC",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "ROC_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "ROC",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "ROC_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "ROC",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "ROC_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "ROC",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RSQR_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RSQR",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RSQR_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RSQR",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RSQR_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RSQR",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RSQR_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RSQR",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RSQR_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RSQR",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RSV_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RSV",
+      "window": 10
+    },
+    "columns": [
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RSV_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RSV",
+      "window": 20
+    },
+    "columns": [
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RSV_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RSV",
+      "window": 30
+    },
+    "columns": [
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RSV_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RSV",
+      "window": 5
+    },
+    "columns": [
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "RSV_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "RSV",
+      "window": 60
+    },
+    "columns": [
+      "adj_high",
+      "adj_low",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "STD_10d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "STD",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158RiskFactor"
+  },
+  "STD_20d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "STD",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158RiskFactor"
+  },
+  "STD_30d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "STD",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158RiskFactor"
+  },
+  "STD_5d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "STD",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158RiskFactor"
+  },
+  "STD_60d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "STD",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158RiskFactor"
+  },
+  "SUMD_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMD",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "SUMD_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMD",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "SUMD_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMD",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "SUMD_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMD",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "SUMD_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMD",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "SUMN_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMN",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "SUMN_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMN",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "SUMN_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMN",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "SUMN_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMN",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "SUMN_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMN",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "SUMP_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMP",
+      "window": 10
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "SUMP_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMP",
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "SUMP_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMP",
+      "window": 30
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "SUMP_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMP",
+      "window": 5
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "SUMP_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "SUMP",
+      "window": 60
+    },
+    "columns": [
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VMA_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VMA",
+      "window": 10
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VMA_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VMA",
+      "window": 20
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VMA_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VMA",
+      "window": 30
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VMA_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VMA",
+      "window": 5
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VMA_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VMA",
+      "window": 60
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSTD_10d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "VSTD",
+      "window": 10
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158RiskFactor"
+  },
+  "VSTD_20d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "VSTD",
+      "window": 20
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158RiskFactor"
+  },
+  "VSTD_30d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "VSTD",
+      "window": 30
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158RiskFactor"
+  },
+  "VSTD_5d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "VSTD",
+      "window": 5
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158RiskFactor"
+  },
+  "VSTD_60d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "VSTD",
+      "window": 60
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158RiskFactor"
+  },
+  "VSUMD_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMD",
+      "window": 10
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMD_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMD",
+      "window": 20
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMD_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMD",
+      "window": 30
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMD_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMD",
+      "window": 5
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMD_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMD",
+      "window": 60
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMN_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMN",
+      "window": 10
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMN_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMN",
+      "window": 20
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMN_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMN",
+      "window": 30
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMN_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMN",
+      "window": 5
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMN_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMN",
+      "window": 60
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMP_10d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMP",
+      "window": 10
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMP_20d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMP",
+      "window": 20
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMP_30d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMP",
+      "window": 30
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMP_5d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMP",
+      "window": 5
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VSUMP_60d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VSUMP",
+      "window": 60
+    },
+    "columns": [
+      "volume"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "VWAP0_1d": {
+    "module": "factors.price.alpha158",
+    "params": {
+      "operation": "VWAP0"
+    },
+    "columns": [
+      "vwap",
+      "adj_close"
+    ],
+    "relay_class": "Alpha158PriceFactor"
+  },
+  "WVMA_10d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "WVMA",
+      "window": 10
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158RiskFactor"
+  },
+  "WVMA_20d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "WVMA",
+      "window": 20
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158RiskFactor"
+  },
+  "WVMA_30d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "WVMA",
+      "window": 30
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158RiskFactor"
+  },
+  "WVMA_5d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "WVMA",
+      "window": 5
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158RiskFactor"
+  },
+  "WVMA_60d": {
+    "module": "factors.risk.alpha158",
+    "params": {
+      "operation": "WVMA",
+      "window": 60
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ],
+    "relay_class": "Alpha158RiskFactor"
+  },
+  "beta_252d": {
+    "module": "factors.risk.beta",
+    "relay_class": "Beta",
+    "params": {
+      "lookback": 252,
+      "min_obs": 120,
+      "clip": [
+        -3.0,
+        3.0
+      ]
+    },
+    "columns": [
+      "adj_close",
+      "market_cap"
+    ]
+  },
+  "beta_mn_252d": {
+    "module": "factors.risk.semi_beta",
+    "relay_class": "BetaMN",
+    "params": {
+      "window": 252,
+      "min_obs": 120,
+      "min_market_obs": 100
+    },
+    "columns": [
+      "adj_close",
+      "market_cap"
+    ]
+  },
+  "beta_mp_252d": {
+    "module": "factors.risk.semi_beta",
+    "relay_class": "BetaMP",
+    "params": {
+      "window": 252,
+      "min_obs": 120,
+      "min_market_obs": 100
+    },
+    "columns": [
+      "adj_close",
+      "market_cap"
+    ]
+  },
+  "beta_n_252d": {
+    "module": "factors.risk.semi_beta",
+    "relay_class": "BetaN",
+    "params": {
+      "window": 252,
+      "min_obs": 120,
+      "min_market_obs": 100
+    },
+    "columns": [
+      "adj_close",
+      "market_cap"
+    ]
+  },
+  "beta_p_252d": {
+    "module": "factors.risk.semi_beta",
+    "relay_class": "BetaP",
+    "params": {
+      "window": 252,
+      "min_obs": 120,
+      "min_market_obs": 100
+    },
+    "columns": [
+      "adj_close",
+      "market_cap"
+    ]
+  },
+  "cfp_1d": {
+    "module": "factors.fundamental.cfp_1d",
+    "relay_class": "CfpFactor1D",
+    "params": {},
+    "columns": [
+      "close",
+      "operating_cash_flow",
+      "market_cap",
+      "sector"
+    ]
+  },
+  "current_asset_growth_12m": {
+    "module": "factors.fundamental.current_asset_growth_12m",
+    "relay_class": "CurrentAssetGrowth12m",
+    "params": {},
+    "columns": [
+      "close",
+      "current_assets"
+    ]
+  },
+  "current_asset_growth_vol_24m": {
+    "module": "factors.fundamental.current_asset_growth_vol_24m",
+    "relay_class": "CurrentAssetGrowthVol24m",
+    "params": {},
+    "columns": [
+      "close",
+      "current_assets"
+    ]
+  },
+  "current_liability_ratio_1d": {
+    "module": "factors.fundamental.current_liability_ratio_1d",
+    "relay_class": "CurrentLiabilityRatioFactor1D",
+    "params": {},
+    "columns": [
+      "close",
+      "total_liabilities",
+      "current_liabilities",
+      "sector"
+    ]
+  },
+  "current_ratio_1d": {
+    "module": "factors.fundamental.current_ratio_1d",
+    "relay_class": "CurrentRatioFactor1D",
+    "params": {},
+    "columns": [
+      "close",
+      "current_assets",
+      "current_liabilities",
+      "sector"
+    ]
+  },
+  "debt_per_share_1d": {
+    "module": "factors.fundamental.debt_per_share_1d",
+    "relay_class": "DebtPerShareFactor1D",
+    "params": {},
+    "columns": [
+      "close",
+      "total_debt",
+      "shares_basic",
+      "sector"
+    ]
+  },
+  "debt_to_asset_1d": {
+    "module": "factors.fundamental.debt_to_asset_1d",
+    "relay_class": "DebtToAssetFactor1D",
+    "params": {},
+    "columns": [
+      "close",
+      "total_assets",
+      "total_liabilities",
+      "sector"
+    ]
+  },
+  "debt_to_asset_change_12m": {
+    "module": "factors.fundamental.debt_to_asset_change_12m",
+    "relay_class": "DebtToAssetChange12m",
+    "params": {},
+    "columns": [
+      "close",
+      "total_liabilities",
+      "total_assets"
+    ]
+  },
+  "dgmarq_12m": {
+    "module": "factors.fundamental.dgmarq_12m",
+    "relay_class": "DGMARQ12M",
+    "params": {
+      "year_days": 252
+    },
+    "columns": [
+      "close",
+      "revenue",
+      "cost_revenue"
+    ]
+  },
+  "dgpoaq_12m": {
+    "module": "factors.fundamental.dgpoaq_12m",
+    "relay_class": "DGPOAQ12M",
+    "params": {
+      "year_days": 252
+    },
+    "columns": [
+      "close",
+      "total_assets",
+      "revenue",
+      "cost_revenue"
+    ]
+  },
+  "dip_rebound_10d": {
+    "module": "factors.price.dip_rebound",
+    "relay_class": "DipRebound10",
+    "params": {
+      "window": 10,
+      "min_periods": 5,
+      "shift_days": 0
+    },
+    "columns": [
+      "adj_close",
+      "adj_low"
+    ]
+  },
+  "dividend_yield_1d": {
+    "module": "factors.fundamental.dividend_yield_1d",
+    "relay_class": "DividendYieldFactor1D",
+    "params": {},
+    "columns": [
+      "close",
+      "dividends_paid",
+      "market_cap",
+      "sector"
+    ]
+  },
+  "droaq_12m": {
+    "module": "factors.fundamental.droaq_12m",
+    "relay_class": "DROAQ12M",
+    "params": {
+      "year_days": 252
+    },
+    "columns": [
+      "close",
+      "roa"
+    ]
+  },
+  "eps_growth_12m": {
+    "module": "factors.fundamental.eps_growth_12m",
+    "relay_class": "EPSGrowth12M",
+    "params": {
+      "year_days": 252
+    },
+    "columns": [
+      "close",
+      "eps"
+    ]
+  },
+  "eps_growth_63d": {
+    "module": "factors.fundamental.eps_growth_63d",
+    "relay_class": "EpsGrowthFactor63D",
+    "params": {},
+    "columns": [
+      "close",
+      "eps",
+      "sector"
+    ]
+  },
+  "eps_growth_accel_3m": {
+    "module": "factors.fundamental.eps_growth_accel_3m",
+    "relay_class": "EPSGrowthAccel3M",
+    "params": {
+      "year_days": 252,
+      "period_days": 63
+    },
+    "columns": [
+      "close",
+      "eps"
+    ]
+  },
+  "eps_growth_accel_price_adj_3m": {
+    "module": "factors.fundamental.eps_growth_accel_price_adj_3m",
+    "relay_class": "EPSGrowthAccelPriceAdj3M",
+    "params": {
+      "year_days": 252,
+      "period_days": 63
+    },
+    "columns": [
+      "adj_close",
+      "eps"
+    ]
+  },
+  "eps_growth_accel_vol_adj_3m": {
+    "module": "factors.fundamental.eps_growth_accel_vol_adj_3m",
+    "relay_class": "EPSGrowthAccelVolAdj3M",
+    "params": {
+      "year_days": 252,
+      "period_days": 63,
+      "quarter_days": 63,
+      "n_quarters": 8
+    },
+    "columns": [
+      "close",
+      "eps"
+    ]
+  },
+  "eps_growth_price_adj_3m": {
+    "module": "factors.fundamental.eps_growth_price_adj_3m",
+    "relay_class": "EPSGrowthPriceAdj3M",
+    "params": {
+      "year_days": 252,
+      "period_days": 63
+    },
+    "columns": [
+      "adj_close",
+      "eps"
+    ]
+  },
+  "eps_growth_vol_adj_3m": {
+    "module": "factors.fundamental.eps_growth_vol_adj_3m",
+    "relay_class": "EPSGrowthVolAdj3M",
+    "params": {
+      "year_days": 252,
+      "quarter_days": 63,
+      "n_quarters": 8
+    },
+    "columns": [
+      "close",
+      "eps"
+    ]
+  },
+  "equity_growth_63d": {
+    "module": "factors.fundamental.equity_growth_63d",
+    "relay_class": "EquityGrowthFactor63D",
+    "params": {},
+    "columns": [
+      "close",
+      "shareholder_equity",
+      "sector"
+    ]
+  },
+  "equity_ratio_change_12m": {
+    "module": "factors.fundamental.equity_ratio_change_12m",
+    "relay_class": "EquityRatioChange12m",
+    "params": {},
+    "columns": [
+      "close",
+      "shareholder_equity",
+      "total_assets"
+    ]
+  },
+  "equity_to_fixed_asset_change_12m": {
+    "module": "factors.fundamental.equity_to_fixed_asset_change_12m",
+    "relay_class": "EquityToFixedAssetChange12m",
+    "params": {},
+    "columns": [
+      "close",
+      "shareholder_equity",
+      "ppe_net"
+    ]
+  },
+  "financial_expense_ratio_1d": {
+    "module": "factors.fundamental.financial_expense_ratio_1d",
+    "relay_class": "FinancialExpenseRatioFactor1D",
+    "params": {},
+    "columns": [
+      "close",
+      "revenue",
+      "interest_expense",
+      "sector"
+    ]
+  },
+  "fixed_ratio_1d": {
+    "module": "factors.fundamental.fixed_ratio_1d",
+    "relay_class": "FixedRatioFactor1D",
+    "params": {},
+    "columns": [
+      "close",
+      "total_assets",
+      "ppe_net",
+      "sector"
+    ]
+  },
+  "gpoaq_3m": {
+    "module": "factors.fundamental.gpoaq_3m",
+    "relay_class": "GPOAQ3M",
+    "params": {
+      "quarter_days": 63
+    },
+    "columns": [
+      "close",
+      "total_assets",
+      "revenue",
+      "cost_revenue"
+    ]
+  },
+  "gross_margin_1d": {
+    "module": "factors.fundamental.gross_margin_1d",
+    "relay_class": "GrossMarginFactor1D",
+    "params": {},
+    "columns": [
+      "close",
+      "revenue",
+      "gross_profit",
+      "sector"
+    ]
+  },
+  "gross_profitability_growth_12m": {
+    "module": "factors.fundamental.gross_profitability_growth_12m",
+    "relay_class": "GrossProfitabilityGrowth12m",
+    "params": {},
+    "columns": [
+      "close",
+      "gross_profit",
+      "total_assets"
+    ]
+  },
+  "gross_profitability_trend_qoq_12m": {
+    "module": "factors.fundamental.gross_profitability_trend_qoq_12m",
+    "relay_class": "GrossProfitabilityTrendQoq12m",
+    "params": {},
+    "columns": [
+      "close",
+      "gross_profit",
+      "total_assets"
+    ]
+  },
+  "gross_profitability_trend_yoy_48m": {
+    "module": "factors.fundamental.gross_profitability_trend_yoy_48m",
+    "relay_class": "GrossProfitabilityTrendYoy48m",
+    "params": {},
+    "columns": [
+      "close",
+      "gross_profit",
+      "total_assets"
+    ]
+  },
+  "high_r_std_84d": {
+    "module": "factors.risk.high_low_volatility",
+    "relay_class": "HighRStd84D",
+    "params": {
+      "lookback": 84,
+      "min_periods": null
+    },
+    "columns": [
+      "adj_close",
+      "adj_high",
+      "adj_low",
+      "volume"
+    ]
+  },
+  "hml_r_std_84d": {
+    "module": "factors.risk.high_low_volatility",
+    "relay_class": "HMLRStd84D",
+    "params": {
+      "lookback": 84,
+      "min_periods": null
+    },
+    "columns": [
+      "adj_close",
+      "adj_high",
+      "adj_low",
+      "volume"
+    ]
+  },
+  "industry_current_asset_growth_stability_24m": {
+    "module": "factors.sector.industry_current_asset_growth_stability_24m",
+    "relay_class": "IndustryCurrentAssetGrowthStability24m",
+    "params": {},
+    "columns": [
+      "close",
+      "current_assets",
+      "sector"
+    ]
+  },
+  "industry_momentum_1d": {
+    "module": "factors.sector.style",
+    "relay_class": "IndustryMomentum",
+    "params": {
+      "period": 1
+    },
+    "columns": [
+      "adj_close",
+      "sector"
+    ]
+  },
+  "inventory_turnover_1d": {
+    "module": "factors.fundamental.inventory_turnover_1d",
+    "relay_class": "InventoryTurnoverFactor1D",
+    "params": {},
+    "columns": [
+      "close",
+      "cost_revenue",
+      "inventory",
+      "sector"
+    ]
+  },
+  "long_term_debt_ratio_1d": {
+    "module": "factors.fundamental.long_term_debt_ratio_1d",
+    "relay_class": "LongTermDebtRatioFactor1D",
+    "params": {},
+    "columns": [
+      "close",
+      "total_assets",
+      "non_current_debt",
+      "sector"
+    ]
+  },
+  "long_term_debt_ratio_change_12m": {
+    "module": "factors.fundamental.long_term_debt_ratio_change_12m",
+    "relay_class": "LongTermDebtRatioChange12m",
+    "params": {},
+    "columns": [
+      "close",
+      "non_current_debt",
+      "total_assets"
+    ]
+  },
+  "max_daily_return_5d": {
+    "module": "factors.price.max_daily_return_5",
+    "relay_class": "MaxDailyReturn5",
+    "params": {
+      "top_n": 5,
+      "min_obs": null,
+      "lookback": 21,
+      "rebalance_step": 1
+    },
+    "columns": [
+      "adj_close"
+    ]
+  },
+  "net_income_cash_ratio_1d": {
+    "module": "factors.fundamental.net_income_cash_ratio_1d",
+    "relay_class": "NetIncomeCashRatioFactor1D",
+    "params": {},
+    "columns": [
+      "close",
+      "net_income",
+      "operating_cash_flow",
+      "sector"
+    ]
+  },
+  "net_income_growth_63d": {
+    "module": "factors.fundamental.net_income_growth_63d",
+    "relay_class": "NetIncomeGrowthFactor63D",
+    "params": {},
+    "columns": [
+      "close",
+      "net_income",
+      "sector"
+    ]
+  },
+  "net_profit_margin_1d": {
+    "module": "factors.fundamental.net_profit_margin_1d",
+    "relay_class": "NetProfitMarginFactor1D",
+    "params": {},
+    "columns": [
+      "close",
+      "net_income",
+      "revenue",
+      "sector"
+    ]
+  },
+  "non_current_asset_growth_12m": {
+    "module": "factors.fundamental.non_current_asset_growth_12m",
+    "relay_class": "NonCurrentAssetGrowth12m",
+    "params": {},
+    "columns": [
+      "close",
+      "non_current_assets"
+    ]
+  },
+  "non_current_asset_growth_vol_24m": {
+    "module": "factors.fundamental.non_current_asset_growth_vol_24m",
+    "relay_class": "NonCurrentAssetGrowthVol24m",
+    "params": {},
+    "columns": [
+      "close",
+      "non_current_assets"
+    ]
+  },
+  "open_high_surge_10d": {
+    "module": "factors.price.open_high_surge_10",
+    "relay_class": "OpenHighSurge10",
+    "params": {
+      "window": 10,
+      "min_periods": 5,
+      "shift_days": 0
+    },
+    "columns": [
+      "adj_close",
+      "adj_open",
+      "adj_high"
+    ]
+  },
+  "operating_expense_ratio_1d": {
+    "module": "factors.fundamental.operating_expense_ratio_1d",
+    "relay_class": "OperatingExpenseRatioFactor1D",
+    "params": {},
+    "columns": [
+      "close",
+      "operating_expense",
+      "revenue",
+      "sector"
+    ]
+  },
+  "pair_reversal_60d": {
+    "module": "factors.price.pair_reversal",
+    "relay_class": "PairReversal",
+    "params": {
+      "formation_period": 60,
+      "reversal_period": 5
+    },
+    "columns": [
+      "adj_close"
+    ]
+  },
+  "quick_ratio_1d": {
+    "module": "factors.fundamental.quick_ratio_1d",
+    "relay_class": "QuickRatioFactor1D",
+    "params": {},
+    "columns": [
+      "close",
+      "current_assets",
+      "current_liabilities",
+      "inventory",
+      "sector"
+    ]
+  },
+  "r_std_84d": {
+    "module": "factors.risk.r_std",
+    "relay_class": "RStd84D",
+    "params": {
+      "lookback": 84,
+      "min_periods": null
+    },
+    "columns": [
+      "adj_close",
+      "volume"
+    ]
+  },
+  "revenue_growth_63d": {
+    "module": "factors.fundamental.revenue_growth_63d",
+    "relay_class": "RevenueGrowthFactor63D",
+    "params": {},
+    "columns": [
+      "close",
+      "revenue",
+      "sector"
+    ]
+  },
+  "reversal_1m": {
+    "module": "factors.price.reversal",
+    "relay_class": "Reversal1M",
+    "params": {},
+    "columns": [
+      "adj_close"
+    ]
+  },
+  "reversal_3m": {
+    "module": "factors.price.reversal",
+    "relay_class": "Reversal3M",
+    "params": {},
+    "columns": [
+      "adj_close"
+    ]
+  },
+  "reversal_6m": {
+    "module": "factors.price.reversal",
+    "relay_class": "Reversal6M",
+    "params": {},
+    "columns": [
+      "adj_close"
+    ]
+  },
+  "roe_growth_63d": {
+    "module": "factors.fundamental.roe_growth_63d",
+    "relay_class": "RoeGrowthFactor63D",
+    "params": {},
+    "columns": [
+      "close",
+      "roe",
+      "sector"
+    ]
+  },
+  "size_factor_1d": {
+    "module": "factors.risk.size",
+    "relay_class": "SizeFactor",
+    "params": {},
+    "columns": [
+      "close",
+      "market_cap"
+    ]
+  },
+  "size_squared_1d": {
+    "module": "factors.risk.size",
+    "relay_class": "SizeSquaredFactor",
+    "params": {},
+    "columns": [
+      "close",
+      "market_cap"
+    ]
+  },
+  "slp_reversal_20d": {
+    "module": "factors.price.slp_reversal",
+    "relay_class": "SLPReversal",
+    "params": {
+      "window": 20
+    },
+    "columns": [
+      "adj_close"
+    ]
+  },
+  "smallcap_growth_1d": {
+    "module": "factors.risk.smallcap_growth",
+    "relay_class": "SmallCapGrowth",
+    "params": {
+      "lower": 0.01,
+      "upper": 0.99,
+      "use_rank": false
+    },
+    "columns": [
+      "close",
+      "market_cap"
+    ]
+  },
+  "sp_1d": {
+    "module": "factors.fundamental.sp_1d",
+    "relay_class": "SpFactor1D",
+    "params": {},
+    "columns": [
+      "close",
+      "market_cap",
+      "revenue",
+      "sector"
+    ]
+  },
+  "style_category_momentum_1d": {
+    "module": "factors.sector.style",
+    "relay_class": "StyleCategoryMomentum",
+    "params": {
+      "period": 1,
+      "n_clusters": 30
+    },
+    "columns": [
+      "adj_close",
+      "market_cap",
+      "pe_ratio"
+    ]
+  },
+  "total_asset_growth_63d": {
+    "module": "factors.fundamental.total_asset_growth_63d",
+    "relay_class": "TotalAssetGrowthFactor63D",
+    "params": {},
+    "columns": [
+      "close",
+      "total_assets",
+      "sector"
+    ]
+  },
+  "total_asset_growth_vol_24m": {
+    "module": "factors.fundamental.total_asset_growth_vol_24m",
+    "relay_class": "TotalAssetGrowthVol24m",
+    "params": {},
+    "columns": [
+      "close",
+      "total_assets"
+    ]
+  },
+  "total_asset_turnover_1d": {
+    "module": "factors.fundamental.total_asset_turnover_1d",
+    "relay_class": "TotalAssetTurnoverFactor1D",
+    "params": {},
+    "columns": [
+      "close",
+      "total_assets",
+      "revenue",
+      "sector"
+    ]
+  },
+  "trading_amount_20d": {
+    "module": "factors.price.reversal",
+    "relay_class": "TradingAmount",
+    "params": {},
+    "columns": [
+      "close",
+      "volume"
+    ]
+  },
+  "turnover_cv_20d": {
+    "module": "factors.price.turnover_cv",
+    "relay_class": "TurnoverCV",
+    "params": {
+      "window": 20,
+      "min_periods": 15
+    },
+    "columns": [
+      "adj_close",
+      "volume",
+      "market_cap"
+    ]
+  },
+  "vff3_63d": {
+    "module": "factors.risk.vff3_volatility",
+    "relay_class": "VFF363D",
+    "params": {
+      "lookback": 63,
+      "min_periods": 40,
+      "min_residuals": 10
+    },
+    "columns": [
+      "adj_close",
+      "volume",
+      "market_cap",
+      "pb_ratio"
+    ]
+  },
+  "vff3_up_63d": {
+    "module": "factors.risk.vff3_volatility",
+    "relay_class": "VFF3Up63D",
+    "params": {
+      "lookback": 63,
+      "min_periods": 40,
+      "min_residuals": 10
+    },
+    "columns": [
+      "adj_close",
+      "volume",
+      "market_cap",
+      "pb_ratio"
+    ]
+  },
+  "vff3_upd_63d": {
+    "module": "factors.risk.vff3_volatility",
+    "relay_class": "VFF3UpD63D",
+    "params": {
+      "lookback": 63,
+      "min_periods": 40,
+      "min_residuals": 10
+    },
+    "columns": [
+      "adj_close",
+      "volume",
+      "market_cap",
+      "pb_ratio"
+    ]
+  },
+  "volume_3m": {
+    "module": "factors.price.reversal",
+    "relay_class": "Volume3M",
+    "params": {},
+    "columns": [
+      "close",
+      "volume"
+    ]
+  },
+  "volume_price_corr_15d": {
+    "module": "factors.price.volume_price_corr",
+    "relay_class": "VolumePriceCorr",
+    "params": {
+      "window": 10
+    },
+    "columns": [
+      "adj_close",
+      "volume",
+      "market_cap"
+    ]
+  }
+}

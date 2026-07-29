@@ -13,7 +13,7 @@ from factors.registry import register_factor
 class MaxDailyReturn5(BaseFactor):
     """过去 21 日前 5 大单日收益均值，值越高表示博彩型极端上涨特征越强。"""
 
-    name = "max_daily_return_5"
+    name = "max_daily_return_5d"
     description = "海通15博彩型因子：过去21日前5大单日收益均值"
 
     def __init__(

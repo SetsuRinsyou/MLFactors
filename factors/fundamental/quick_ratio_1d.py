@@ -1,4 +1,4 @@
-﻿"""Quick ratio 1D factor."""
+"""Quick ratio 1D factor."""
 from __future__ import annotations
 
 import pandas as pd

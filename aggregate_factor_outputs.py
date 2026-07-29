@@ -41,14 +41,24 @@ def discover_symbols(factor_dirs: list[tuple[str, Path]]) -> list[str]:
 
 def read_factor_series(factor_name: str, csv_path: Path) -> pd.Series:
     data = pd.read_csv(csv_path)
-    if "date" not in data.columns:
-        raise ValueError(f"{csv_path} 缺少 date 列")
+    date_column = "signal_date" if "signal_date" in data.columns else "date"
+    if date_column not in data.columns:
+        raise ValueError(f"{csv_path} 缺少 signal_date/date 列")
 
-    value_columns = [column for column in data.columns if column != "date"]
+    metadata_columns = {
+        "date",
+        "signal_date",
+        "available_date",
+        "days_since_latest_report_publish_date",
+    }
+    value_columns = [
+        column for column in data.columns if column not in metadata_columns
+    ]
     if len(value_columns) != 1:
         raise ValueError(f"{csv_path} 必须只有一个因子值列")
 
-    series = data.set_index("date")[value_columns[0]]
+    series = data.set_index(date_column)[value_columns[0]]
+    series.index.name = "date"
     series.name = factor_name
     return series
 

@@ -1,4 +1,4 @@
-﻿"""Total asset turnover 1D factor."""
+"""Total asset turnover 1D factor."""
 from __future__ import annotations
 
 import pandas as pd

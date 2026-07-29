@@ -1,4 +1,4 @@
-﻿"""Debt per share 1D factor."""
+"""Debt per share 1D factor."""
 from __future__ import annotations
 
 import pandas as pd

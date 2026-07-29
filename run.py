@@ -1,5 +1,6 @@
 """加载 CSV 数据并计算注册因子。"""
 
+import argparse
 from dataclasses import dataclass
 import importlib
 import json
@@ -24,6 +25,11 @@ DEFAULT_SECURITY_STATUS_PATH = (
 
 
 DAILY_METRICS_PERIOD = 5
+REPORT_PUBLISH_DATE_COLUMN = "publish_date"
+DAYS_SINCE_REPORT_COLUMN = "days_since_latest_report_publish_date"
+DEFAULT_FINANCIAL_FACTOR_CONFIG = (
+    Path(__file__).resolve().parent / "config" / "financial_factors_232.json"
+)
 
 
 @dataclass(frozen=True)
@@ -58,8 +64,10 @@ class Runner:
         output_dir: str | Path | None = None,
         eval_price_col: str = "adj_close",
         security_status_path: str | Path | None = DEFAULT_SECURITY_STATUS_PATH,
+        is_financial_factor: bool = False,
     ) -> None:
         self.factor_name = factor_name
+        self.is_financial_factor = is_financial_factor
         self.forward_periods = forward_periods
         self.n_groups = n_groups
         self.ic_method = ic_method
@@ -78,6 +86,10 @@ class Runner:
             if data_columns is None
             else list(dict.fromkeys([*data_columns, eval_price_col]))
         )
+        if loader_columns is not None and self.is_financial_factor:
+            loader_columns = list(
+                dict.fromkeys([*loader_columns, REPORT_PUBLISH_DATE_COLUMN])
+            )
         self.data_loader = DataLoader(
             data_dir=data_dir,
             symbols=symbols,
@@ -102,20 +114,83 @@ class Runner:
         signals = self.factor.generate_signals(data, None)
         self.result = signals
         if save:
-            factor_dir = self.output_dir / "factors"
-            factor_dir.mkdir(parents=True, exist_ok=True)
-            symbols = data.index.get_level_values("symbol").unique()
-            factor_result = signals.reindex(columns=symbols)
-            for symbol in symbols:
-                dates = data.xs(symbol, level="symbol").index
-                factor_data = factor_result[symbol].reindex(dates).rename(self.factor_name)
-                factor_data.index = factor_data.index.strftime("%Y-%m-%d")
-                factor_data.index.name = "date"
-                factor_data.to_csv(
-                    factor_dir / f"{symbol}.csv",
-                    na_rep="",
-                )
+            self.save_signals(signals, combined_data=data)
         return signals
+
+    def save_signals(
+        self,
+        signals: pd.DataFrame,
+        combined_data: pd.DataFrame | None = None,
+    ) -> Path:
+        """按股票保存已有的 ``date × symbol`` 因子宽表。
+
+        该方法也可用于复用已落盘的因子值生成报告，避免重新调用
+        ``factor.generate_signals``。普通因子输出 signal_date、available_date
+        和因子值；财务类因子额外输出距最近财报发布日期的自然日天数。
+        """
+        data = self.data if combined_data is None else combined_data
+        if data is None or data.empty:
+            raise ValueError("没有可用于保存因子值的 combined_data")
+        if self.is_financial_factor and REPORT_PUBLISH_DATE_COLUMN not in data.columns:
+            raise ValueError(
+                f"财务类因子 {self.factor_name} 缺少字段: "
+                f"{REPORT_PUBLISH_DATE_COLUMN}"
+            )
+        if not isinstance(signals.index, pd.DatetimeIndex):
+            signals = signals.copy()
+            signals.index = pd.to_datetime(signals.index)
+
+        factor_dir = self.output_dir / "factors"
+        factor_dir.mkdir(parents=True, exist_ok=True)
+        symbols = data.index.get_level_values("symbol").unique()
+        factor_result = signals.reindex(columns=symbols)
+        trading_calendar = self.data_loader.trading_calendar
+        if trading_calendar.empty:
+            trading_calendar = pd.DatetimeIndex(
+                data.index.get_level_values("date").unique()
+            ).sort_values()
+        available_date_map = pd.Series(
+            trading_calendar[1:].to_numpy(),
+            index=trading_calendar[:-1],
+        )
+
+        for symbol in symbols:
+            symbol_data = data.xs(symbol, level="symbol").sort_index()
+            dates = pd.DatetimeIndex(symbol_data.index)
+            factor_data = pd.DataFrame(
+                {
+                    "signal_date": dates,
+                    "available_date": dates.map(available_date_map),
+                    self.factor_name: factor_result[symbol].reindex(dates).to_numpy(),
+                }
+            )
+            # 数据集最后一个交易日没有可验证的下一真实交易日，不输出该行。
+            factor_data = factor_data.dropna(subset=["available_date"])
+
+            if self.is_financial_factor:
+                publish_dates = pd.to_datetime(
+                    symbol_data[REPORT_PUBLISH_DATE_COLUMN],
+                    errors="coerce",
+                )
+                publish_dates = publish_dates.where(
+                    publish_dates.to_numpy() <= dates.to_numpy()
+                )
+                latest_publish_dates = publish_dates.ffill().cummax()
+                report_age = (
+                    pd.Series(dates, index=symbol_data.index)
+                    - latest_publish_dates
+                ).dt.days
+                factor_data[DAYS_SINCE_REPORT_COLUMN] = (
+                    report_age.reindex(factor_data["signal_date"]).to_numpy()
+                )
+
+            factor_data.to_csv(
+                factor_dir / f"{symbol}.csv",
+                index=False,
+                na_rep="",
+                date_format="%Y-%m-%d",
+            )
+        return factor_dir
 
     def evaluate(
         self,
@@ -386,9 +461,46 @@ class Runner:
 
 
 if __name__ == "__main__":
-    factor_config_path = "config/factor_configs.json"
-    with open(factor_config_path, "r", encoding="utf-8") as f:
+    parser = argparse.ArgumentParser(description="批量计算并评估配置文件中的因子。")
+    parser.add_argument(
+        "--factor-config",
+        type=Path,
+        default=Path("config/factor_configs.json"),
+        help="因子配置 JSON，默认使用 config/factor_configs.json。",
+    )
+    parser.add_argument(
+        "--save-factor",
+        action="store_true",
+        help="按股票保存逐日因子值；未指定时只保存评估结果。",
+    )
+    parser.add_argument(
+        "--factor",
+        default=None,
+        help="只运行配置中的指定因子；未指定时运行配置内全部因子。",
+    )
+    parser.add_argument(
+        "--financial-factor-config",
+        type=Path,
+        default=DEFAULT_FINANCIAL_FACTOR_CONFIG,
+        help=(
+            "财务类因子名单配置；默认使用 "
+            "config/financial_factors_232.json。"
+        ),
+    )
+    args = parser.parse_args()
+
+    factor_config_path = args.factor_config
+    with factor_config_path.open("r", encoding="utf-8") as f:
         factor_configs = json.load(f)
+    if args.factor is not None:
+        if args.factor not in factor_configs:
+            parser.error(
+                f"因子配置 {factor_config_path} 中不存在因子: {args.factor}"
+            )
+        factor_configs = {args.factor: factor_configs[args.factor]}
+    with args.financial_factor_config.open("r", encoding="utf-8") as f:
+        financial_factor_config = json.load(f)
+    financial_factor_names = set(financial_factor_config["factor_names"])
 
     data_dir = Path("cache/zz500_csv")
     for factor_name, config in tqdm(
@@ -406,8 +518,9 @@ if __name__ == "__main__":
             data_columns=[column for column in config["columns"]],
             data_dir=data_dir,
             factor_dir=None,
-            constituents_path=data_dir.parent / "zz500_index_members_rebalance.csv",
+            constituents_path=data_dir / "constituents_daily.csv",
             constituents="000905.SH",
             output_dir=Path("outputs/zz500/review") / factor_name,
+            is_financial_factor=factor_name in financial_factor_names,
         )
-        runner.run()
+        runner.run(save_factor=args.save_factor)

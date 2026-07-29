@@ -26,6 +26,8 @@ def calculate_candle_factor(data: pd.DataFrame, operation: str) -> pd.DataFrame:
         return (close - open_price) / spread
     if operation == "KUP":
         return (high - np.maximum(open_price, close)) / open_price
+    if operation == "KUP2":
+        return (high - np.maximum(open_price, close)) / spread
     if operation == "KLOW":
         return (np.minimum(open_price, close) - low) / open_price
     if operation == "KLOW2":
@@ -39,6 +41,8 @@ def calculate_price_ratio_factor(data: pd.DataFrame, operation: str) -> pd.DataF
     close = to_wide(data, "adj_close")
     if operation == "LOW0":
         value = to_wide(data, "adj_low")
+    elif operation == "HIGH0":
+        value = to_wide(data, "adj_high")
     elif operation == "OPEN0":
         value = to_wide(data, "adj_open")
     else:
@@ -118,6 +122,11 @@ def calculate_position_factor(
         ) / window
 
     high = to_wide(data, "adj_high")
+    if operation == "IMAX":
+        return high.rolling(window, min_periods=1).apply(
+            lambda values: values.argmax() + 1,
+            raw=True,
+        ) / window
     if operation == "RSV":
         close = to_wide(data, "adj_close")
         rolling_low = low.rolling(window, min_periods=1).min()
@@ -133,6 +142,26 @@ def calculate_position_factor(
         raw=True,
     )
     return (index_max - index_min) / window
+
+
+def calculate_count_factor(
+    data: pd.DataFrame,
+    operation: str,
+    window: int,
+) -> pd.DataFrame:
+    """计算过去窗口内上涨、下跌交易日占比及二者之差。"""
+    close = to_wide(data, "adj_close")
+    previous = close.shift(1)
+    valid = close.notna() & previous.notna()
+    up = close.gt(previous).where(valid).astype(float)
+    down = close.lt(previous).where(valid).astype(float)
+    up_ratio = up.rolling(window, min_periods=1).mean()
+    down_ratio = down.rolling(window, min_periods=1).mean()
+    if operation == "CNTP":
+        return up_ratio
+    if operation == "CNTN":
+        return down_ratio
+    return up_ratio - down_ratio
 
 
 def calculate_momentum_factor(
@@ -216,12 +245,22 @@ class Alpha158PriceFactor(BaseFactor):
     name = "alpha158_price"
     description = "Alpha158价格类因子"
 
-    CANDLE_FACTORS = {"KMID", "KMID2", "KUP", "KLOW", "KLOW2", "KSFT", "KSFT2"}
-    PRICE_RATIO_FACTORS = {"LOW0", "OPEN0", "VWAP0"}
+    CANDLE_FACTORS = {
+        "KMID",
+        "KMID2",
+        "KUP",
+        "KUP2",
+        "KLOW",
+        "KLOW2",
+        "KSFT",
+        "KSFT2",
+    }
+    PRICE_RATIO_FACTORS = {"LOW0", "HIGH0", "OPEN0", "VWAP0"}
     VOLUME_FACTORS = {"VMA", "VSUMP", "VSUMN", "VSUMD"}
     REGRESSION_FACTORS = {"BETA", "RSQR", "RESI"}
     PRICE_ROLLING_FACTORS = {"ROC", "MA", "MAX", "MIN", "QTLU", "QTLD", "RANK"}
-    POSITION_FACTORS = {"RSV", "IMIN", "IMXD"}
+    POSITION_FACTORS = {"RSV", "IMAX", "IMIN", "IMXD"}
+    COUNT_FACTORS = {"CNTP", "CNTN", "CNTD"}
     MOMENTUM_FACTORS = {"SUMP", "SUMN", "SUMD"}
     CORRELATION_FACTORS = {"CORR", "CORD"}
 
@@ -231,6 +270,7 @@ class Alpha158PriceFactor(BaseFactor):
         | REGRESSION_FACTORS
         | PRICE_ROLLING_FACTORS
         | POSITION_FACTORS
+        | COUNT_FACTORS
         | MOMENTUM_FACTORS
         | CORRELATION_FACTORS
     )
@@ -268,6 +308,8 @@ class Alpha158PriceFactor(BaseFactor):
             result = calculate_price_rolling_factor(data, operation, window)
         elif operation in self.POSITION_FACTORS:
             result = calculate_position_factor(data, operation, window)
+        elif operation in self.COUNT_FACTORS:
+            result = calculate_count_factor(data, operation, window)
         elif operation in self.MOMENTUM_FACTORS:
             result = calculate_momentum_factor(data, operation, window)
         elif operation in self.CORRELATION_FACTORS:

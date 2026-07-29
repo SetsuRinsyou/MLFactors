@@ -1,4 +1,4 @@
-﻿"""Current liability ratio 1D factor."""
+"""Current liability ratio 1D factor."""
 from __future__ import annotations
 
 import pandas as pd

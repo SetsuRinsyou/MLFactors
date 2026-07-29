@@ -1,4 +1,4 @@
-﻿"""Operating cash flow divided by net income 1D factor."""
+"""Operating cash flow divided by net income 1D factor."""
 from __future__ import annotations
 
 import pandas as pd
