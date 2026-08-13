@@ -81,5 +81,19 @@ scheme_outputs_report*/
 good_factors.zip
 
 # Local run artifacts
+.runtime/
 factor_results_232/
 run_tmp.py
+
+# Directories kept local only
+/cache/
+/good_factor/
+/good_factor_recent/
+/industry/
+/logs/
+/meta_data/
+/ml/
+/outputs/
+/tests/
+/tmp_analysis/
+/tmp_data/

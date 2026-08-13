@@ -24,6 +24,7 @@ YEARLY_SUMMARY_METRICS = (
     "bottom_20%_sharpe_ratio",
     "top_20%_bottom_20%_win_rate",
 )
+FACTOR_VERSIONS = ("raw", "neutralization")
 
 
 def save_yearly_summary_trends(
@@ -32,12 +33,19 @@ def save_yearly_summary_trends(
     factor_name: str,
     dpi: int = 150,
 ) -> Path:
-    """绘制年度 ``factor_summary.csv`` 指定指标的逐年变化。
+    """绘制内存年度汇总表中指定指标的逐年变化。
 
     输入表每行对应一个自然年和一个前向周期。绘图直接使用原始数值，
     不取绝对值，以保留指标的方向信息。
     """
-    required_columns = {"year", *YEARLY_SUMMARY_METRICS}
+    required_columns = {
+        "year",
+        *(
+            f"{metric}_{version}"
+            for metric in YEARLY_SUMMARY_METRICS
+            for version in FACTOR_VERSIONS
+        ),
+    }
     missing_columns = required_columns.difference(yearly_summary.columns)
     if missing_columns:
         missing = ", ".join(sorted(missing_columns))
@@ -48,19 +56,24 @@ def save_yearly_summary_trends(
     positions = np.arange(len(values))
     figure, axes = plt.subplots(4, 2, figsize=(16, 16), sharex=True)
 
+    version_colors = {"raw": "steelblue", "neutralization": "darkorange"}
     for axis, metric in zip(axes.flat, YEARLY_SUMMARY_METRICS):
-        metric_values = pd.to_numeric(values[metric], errors="coerce")
-        axis.plot(
-            positions,
-            metric_values,
-            marker="o",
-            linewidth=1.5,
-            color="steelblue",
-        )
+        for version in FACTOR_VERSIONS:
+            column = f"{metric}_{version}"
+            metric_values = pd.to_numeric(values[column], errors="coerce")
+            axis.plot(
+                positions,
+                metric_values,
+                marker="o",
+                linewidth=1.5,
+                color=version_colors[version],
+                label=version,
+            )
         axis.axhline(0, color="gray", linewidth=0.8, linestyle="--")
         axis.set_title(metric)
         axis.set_ylabel(metric)
         axis.grid(alpha=0.25)
+        axis.legend(fontsize=8)
 
     for axis in axes[-1, :]:
         axis.set_xticks(positions)
