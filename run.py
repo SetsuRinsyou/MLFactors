@@ -323,7 +323,7 @@ class Runner:
         evaluation.daily_metrics.to_csv(output_path, na_rep="")
         return output_path
 
-    def _evaluate_and_save_yearly_window(
+    def evaluate_and_save_yearly_window(
         self,
         signals: pd.DataFrame,
         window: BacktestWindow,
@@ -383,7 +383,7 @@ class Runner:
         report_links: list[Path] = []
         summary_frames: list[pd.DataFrame] = []
         for window in windows:
-            saved = self._evaluate_and_save_yearly_window(signals, window)
+            saved = self.evaluate_and_save_yearly_window(signals, window)
             if saved is None:
                 continue
             report_path, yearly_summary = saved

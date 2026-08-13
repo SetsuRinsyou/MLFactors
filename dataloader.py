@@ -10,19 +10,13 @@ import pandas as pd
 DATE_COLUMN_CANDIDATES = ("date", "trade_date")
 
 FIELD_ALIASES = {
-    "gross_margin": ("grossprofit_margin", "gross_margin_calc"),
+    "gross_margin": ("gross_margin_calc",),
     "operating_cash_flow": (
         "operating_cashflow",
         "n_cashflow_act",
         "im_net_cashflow_oper_act",
     ),
-    "share_factor": ("adj_factor",),
     "sector": ("industry_1", "stock_basic_industry"),
-    "SPY_close": ("hs300_close",),
-    "QQQ_close": ("zz500_close",),
-    "HS300_close": ("hs300_close",),
-    "ZZ500_close": ("zz500_close",),
-    "ZZ1000_close": ("zz1000_close",),
 }
 
 DERIVED_FIELD_SOURCES = {
@@ -42,8 +36,6 @@ BENCHMARK_COLUMNS = {
     "hs300_close": "HS300",
     "zz500_close": "ZZ500",
     "zz1000_close": "ZZ1000",
-    "SPY_close": "SPY",
-    "QQQ_close": "QQQ",
 }
 
 NON_STOCK_CSV_FILES = {"constituents_daily.csv", "index_members_rebalance.csv"}
@@ -64,17 +56,6 @@ def _read_header(csv_file: Path) -> set[str]:
     return set(pd.read_csv(csv_file, nrows=0).columns)
 
 
-def _canonical_symbol(file_symbol: str, stock_basic_symbol: str) -> str:
-    """根据 cache 内的现行代码，把历史文件代码归一到同一证券。"""
-    current = stock_basic_symbol.strip()
-    if not current:
-        return file_symbol
-    if "." in current:
-        return current
-    suffix = file_symbol.rsplit(".", 1)[1] if "." in file_symbol else ""
-    return f"{current}.{suffix}" if suffix else current
-
-
 @lru_cache(maxsize=16)
 def _load_symbol_aliases_cached(directory: Path) -> tuple[tuple[str, str], ...]:
     aliases: dict[str, str] = dict(SECURITY_CODE_ALIASES)
@@ -90,7 +71,17 @@ def _load_symbol_aliases_cached(directory: Path) -> tuple[tuple[str, str], ...]:
                 first_row = next(reader, [])
                 column = header.index("stock_basic_symbol")
                 if column < len(first_row):
-                    canonical = _canonical_symbol(csv_file.stem, first_row[column])
+                    current = first_row[column].strip()
+                    if current:
+                        if "." in current:
+                            canonical = current
+                        else:
+                            suffix = (
+                                csv_file.stem.rsplit(".", 1)[1]
+                                if "." in csv_file.stem
+                                else ""
+                            )
+                            canonical = f"{current}.{suffix}" if suffix else current
         canonical = SECURITY_CODE_ALIASES.get(csv_file.stem, canonical)
         aliases[csv_file.stem] = canonical
         aliases.setdefault(canonical, canonical)
@@ -101,37 +92,6 @@ def load_symbol_aliases(data_dir: str | Path) -> dict[str, str]:
     """从股票宽表自身推导“历史代码→现行代码”，不依赖外部映射文件。"""
     directory = Path(data_dir).expanduser().resolve()
     return dict(_load_symbol_aliases_cached(directory))
-
-
-def resolve_date_column(columns: set[str], csv_file: Path) -> str:
-    """返回数据文件实际使用的日期列名。"""
-    for column in DATE_COLUMN_CANDIDATES:
-        if column in columns:
-            return column
-    raise ValueError(f"{csv_file} 缺少日期列，支持字段: {DATE_COLUMN_CANDIDATES}")
-
-
-def get_source_columns_for_field(field: str, available: set[str]) -> list[str]:
-    """把统一字段名解析为当前 CSV 需要读取的源字段。"""
-    if field == "date":
-        return []
-
-    direct_fields = []
-    direct_fields.extend(FIELD_ALIASES.get(field, ()))
-    direct_fields.append(field)
-    for candidate in direct_fields:
-        if candidate in available:
-            return [candidate]
-
-    if field in DERIVED_FIELD_SOURCES:
-        sources = []
-        for column in DERIVED_FIELD_SOURCES[field]:
-            if column in available:
-                sources.append(column)
-        if sources:
-            return sources
-
-    return []
 
 
 def resolve_source_columns(
@@ -148,7 +108,28 @@ def resolve_source_columns(
     for field in dict.fromkeys(requested_columns):
         if field == "date":
             continue
-        resolved = get_source_columns_for_field(field, available)
+
+        resolved = []
+        direct_fields = [*FIELD_ALIASES.get(field, ()), field]
+        for candidate in direct_fields:
+            if candidate in available:
+                resolved = [candidate]
+                break
+
+        if not resolved and field in DERIVED_FIELD_SOURCES:
+            sources = DERIVED_FIELD_SOURCES[field]
+            if field in {"gross_profit", "vwap"}:
+                if set(sources).issubset(available):
+                    resolved = list(sources)
+            elif field == "gross_margin":
+                gross_profit_column, revenue_column, cost_column = sources
+                if {gross_profit_column, revenue_column}.issubset(available):
+                    resolved = [gross_profit_column, revenue_column]
+                elif {revenue_column, cost_column}.issubset(available):
+                    resolved = [revenue_column, cost_column]
+            elif field == "non_current_debt":
+                resolved = [column for column in sources if column in available]
+
         if not resolved:
             raise ValueError(f"{csv_file} 缺少字段: {field}")
         source_columns.extend(resolved)
@@ -173,6 +154,8 @@ def normalize_fields(frame: pd.DataFrame, requested_columns: list[str] | None) -
                 break
 
     for target, sources in DERIVED_FIELD_SOURCES.items():
+        if target_columns is not None and target not in target_columns:
+            continue
         if target in frame.columns:
             continue
 
@@ -182,12 +165,14 @@ def normalize_fields(frame: pd.DataFrame, requested_columns: list[str] | None) -
                 frame[target] = frame[revenue_column] - frame[cost_column]
 
         elif target == "gross_margin":
-            gross_profit_column = sources[0]
-            revenue_column = sources[1]
-            if {gross_profit_column, revenue_column}.issubset(frame.columns):
-                frame[target] = (
-                    frame[gross_profit_column] / frame[revenue_column].replace(0, pd.NA)
-                )
+            gross_profit_column, revenue_column, cost_column = sources
+            if revenue_column in frame.columns:
+                revenue = frame[revenue_column]
+                denominator = revenue.where(revenue != 0)
+                if gross_profit_column in frame.columns:
+                    frame[target] = frame[gross_profit_column] / denominator
+                elif cost_column in frame.columns:
+                    frame[target] = (revenue - frame[cost_column]) / denominator
 
         elif target == "vwap":
             amount_column, volume_column, close_column, adj_close_column = sources
@@ -250,7 +235,14 @@ def load_data(
 
     if csv_files:
         available_columns = _read_header(csv_files[0])
-        date_column = resolve_date_column(available_columns, csv_files[0])
+        for candidate in DATE_COLUMN_CANDIDATES:
+            if candidate in available_columns:
+                date_column = candidate
+                break
+        else:
+            raise ValueError(
+                f"{csv_files[0]} 缺少日期列，支持字段: {DATE_COLUMN_CANDIDATES}"
+            )
         usecols = resolve_source_columns(
             columns,
             available_columns,
