@@ -19,22 +19,53 @@ TIMING_WIN_HORIZON_WEIGHTS = {
 }
 
 
-TAIL_FRACTIONS = (0.05, 0.10, 0.15, 0.20, 0.25, 0.30)
+TAIL_FRACTIONS = (0.10, 0.20, 0.30)
 DAILY_METRIC_COLUMNS = (
     "IC",
     "TimingIC",
-    "top_5%_return",
-    "bottom_5%_return",
     "top_10%_return",
     "bottom_10%_return",
-    "top_15%_return",
-    "bottom_15%_return",
     "top_20%_return",
     "bottom_20%_return",
-    "top_25%_return",
-    "bottom_25%_return",
     "top_30%_return",
     "bottom_30%_return",
+)
+
+SUMMARY_METRIC_COLUMNS = (
+    "IC_mean",
+    "IC_std",
+    "ICIR",
+    "t_stat",
+    "p_value",
+    "timing_IC_mean",
+    "quintile_monotonicity",
+    "top_10%_cumulative_return",
+    "bottom_10%_cumulative_return",
+    "top_20%_cumulative_return",
+    "bottom_20%_cumulative_return",
+    "top_30%_cumulative_return",
+    "bottom_30%_cumulative_return",
+    "top_10%_excess_return",
+    "bottom_10%_excess_return",
+    "top_20%_excess_return",
+    "bottom_20%_excess_return",
+    "top_30%_excess_return",
+    "bottom_30%_excess_return",
+    "top_20%_sharpe_ratio",
+    "bottom_20%_sharpe_ratio",
+    "top_10%_max_drawdown",
+    "bottom_10%_max_drawdown",
+    "top_20%_max_drawdown",
+    "bottom_20%_max_drawdown",
+    "top_30%_max_drawdown",
+    "bottom_30%_max_drawdown",
+    "top_10%_excess_max_drawdown",
+    "bottom_10%_excess_max_drawdown",
+    "top_20%_excess_max_drawdown",
+    "bottom_20%_excess_max_drawdown",
+    "top_30%_excess_max_drawdown",
+    "bottom_30%_excess_max_drawdown",
+    "top_20%_bottom_20%_win_rate",
 )
 
 
@@ -99,6 +130,8 @@ class FactorEvalResult:
     sampled_ic_series: pd.Series
     turnover: pd.Series
     layered: LayeredResult
+    sampled_tail_group_returns: pd.DataFrame
+    sampled_benchmark_returns: pd.Series
 
 
 def calc_ic(
@@ -282,92 +315,6 @@ def calc_offset_ic_stats(
         "IC_std": float(np.mean(stds)) if stds else np.nan,
         "ICIR": float(np.mean(icirs)) if icirs else np.nan,
     }
-
-
-def calc_ic_half_life(
-    ic_series: pd.Series,
-    ic_mean: float,
-    smoothing_window: int = 5,
-) -> float:
-    """计算日频 IC 平滑序列的平均半衰期（交易日）。
-
-    先对每日 IC 计算中心化滑动平均
-    ``x_t = mean(IC[t-2], ..., IC[t+2])``。为使负向有效因子也能按同一
-    "有效性衰减"口径衡量，若全时段 ``IC_mean < 0``，会先将 IC 乘以 -1。
-    对每一个有效 ``x_t``，半衰期是第一个满足
-    ``x_(t+m) <= x_t / 2`` 且 ``x_(t+m+1) <= x_t / 2`` 的 ``m``；
-    已经不具正向有效性的 ``x_t <= 0`` 记为 0。样本末端尚未找到连续两日
-    衰减点的观测记为 ``NaN``，不参与平均值。
-
-    Parameters
-    ----------
-    ic_series
-        用指定前向收益周期计算得到的日频 IC 序列。
-    ic_mean
-        当前回测窗口的 IC 均值，用于确定因子有效方向。
-    smoothing_window
-        中心化滑动窗口长度；当前口径固定为 5。
-
-    Returns
-    -------
-    float
-        所有可定义局部半衰期的平均交易日数；没有可定义观测时返回 ``NaN``。
-    """
-    if smoothing_window != 5:
-        raise ValueError("当前 IC 半衰期口径固定使用 5 日中心化滑动窗口")
-    if not np.isfinite(ic_mean) or ic_mean == 0:
-        return np.nan
-
-    values = (
-        ic_series.sort_index()
-        .replace([np.inf, -np.inf], np.nan)
-        .astype(float)
-    )
-    if values.empty:
-        return np.nan
-
-    oriented_ic = values * np.sign(ic_mean)
-    smoothed = oriented_ic.rolling(
-        window=smoothing_window,
-        center=True,
-        min_periods=smoothing_window,
-    ).mean()
-    x_values = smoothed.to_numpy(dtype=float)
-    half_lives: list[float] = []
-
-    # 最后两个有效 x_t 不可能拥有一对连续的未来 x，因此不作为起点。
-    for position in range(len(x_values) - 2):
-        baseline = x_values[position]
-        if not np.isfinite(baseline):
-            continue
-        if baseline <= 0:
-            half_lives.append(0.0)
-            continue
-
-        threshold = baseline / 2.0
-        for future_position in range(position + 1, len(x_values) - 1):
-            first = x_values[future_position]
-            second = x_values[future_position + 1]
-            if (
-                np.isfinite(first)
-                and np.isfinite(second)
-                and first <= threshold
-                and second <= threshold
-            ):
-                half_lives.append(float(future_position - position))
-                break
-
-    return float(np.mean(half_lives)) if half_lives else np.nan
-
-
-def calc_ic_positive_rate(ic_series: pd.Series) -> float:
-    """计算有效日频 IC 中严格大于零的交易日占比。"""
-    values = (
-        ic_series.replace([np.inf, -np.inf], np.nan)
-        .dropna()
-        .astype(float)
-    )
-    return float((values > 0).mean()) if not values.empty else np.nan
 
 
 def calc_quintile_monotonicity(
@@ -750,6 +697,12 @@ def eval(
     n_groups: int = 5,
     ic_method: str = "rank",
     price_col: str = "adj_close",
+    forward_returns: pd.Series | None = None,
+    sampling_dates: pd.DatetimeIndex | None = None,
+    benchmark_prices: pd.Series | None = None,
+    benchmark_returns: pd.Series | None = None,
+    ic_only: bool = False,
+    portfolio_only: bool = False,
 ) -> FactorEvalResult:
     """汇总单个因子的 IC、换手率和分层回测指标。
 
@@ -775,8 +728,17 @@ def eval(
         每个日期截面的分组数量。
     ic_method : str, default "rank"
         ``"rank"`` 计算 Spearman RankIC；其他值计算 Pearson IC。
-    max_lag : int, default 20
-        IC 衰减曲线计算的最大滞后期。
+    forward_returns : pd.Series or None
+        可选的预计算未来收益。市场状态回测用它拼接各连续片段独立计算的
+        收益，避免跨越状态边界。
+    sampling_dates : pd.DatetimeIndex or None
+        可选的非重叠调仓日期；未提供时从行情交易日按持有期抽样。
+    ic_only : bool, default False
+        仅计算IC均值、标准差、ICIR及显著性。用于新版IC衰减的非5日持有期，
+        避免重复计算不展示的分组收益和换手率。
+    portfolio_only : bool, default False
+        计算IC、五分组、Top/Bottom 20%及换手率，但跳过TimingIC和10%/30%
+        日频尾部组合。用于统一报告的滞后和市值分层附加检验。
 
     Returns
     -------
@@ -795,44 +757,96 @@ def eval(
         raise ValueError("n_groups 必须为正整数")
 
     if isinstance(factor_values, pd.DataFrame):
-        factor = factor_values.stack().rename("factor")
+        normalized_factor_values = factor_values.copy()
+        normalized_factor_values.index.name = "date"
+        normalized_factor_values.columns.name = "symbol"
+        factor = normalized_factor_values.stack().rename("factor")
     else:
         factor = factor_values.rename("factor")
+        if isinstance(factor.index, pd.MultiIndex) and factor.index.nlevels >= 2:
+            factor.index = factor.index.set_names(["date", "symbol", *factor.index.names[2:]])
 
-    forward_returns = calc_forward_returns(
-        market_data,
-        forward_period,
-        price_col=price_col,
-    )
+    if forward_returns is None:
+        forward_returns = calc_forward_returns(
+            market_data,
+            forward_period,
+            price_col=price_col,
+        )
+    else:
+        forward_returns = forward_returns.rename(f"fwd_ret_{forward_period}")
     full_ic_series = calc_ic_series(factor, forward_returns, method=ic_method)
     offset_ic_stats = calc_offset_ic_stats(full_ic_series, period=forward_period)
-    timing_score = forward_returns.ge(0).astype(float)
-    full_timing_ic_series = calc_ic_series(
-        factor,
-        timing_score,
-        method="rank",
-    ).rename("TimingIC")
-    timing_ic_stats = calc_offset_ic_stats(
-        full_timing_ic_series,
-        period=forward_period,
-    )
-    tail_group_returns = calc_tail_group_returns(factor, forward_returns)
-    daily_metrics = pd.concat(
-        [
-            full_ic_series.rename("IC"),
-            full_timing_ic_series.rename("TimingIC"),
-            tail_group_returns,
-        ],
-        axis=1,
+    if ic_only:
+        t_stat, p_value = calc_t_stat(full_ic_series, period=forward_period)
+        summary_values = {column: np.nan for column in SUMMARY_METRIC_COLUMNS}
+        summary_values.update({
+            "IC_mean": round(offset_ic_stats["IC_mean"], 4),
+            "IC_std": round(offset_ic_stats["IC_std"], 4),
+            "ICIR": round(offset_ic_stats["ICIR"], 4),
+            "t_stat": round(t_stat, 4),
+            "p_value": round(p_value, 6),
+        })
+        empty_dates = pd.DatetimeIndex([], name="date")
+        return FactorEvalResult(
+            summary=pd.DataFrame([summary_values], index=pd.Index([forward_period], name="period")),
+            full_ic_series=full_ic_series,
+            daily_metrics=pd.DataFrame(columns=DAILY_METRIC_COLUMNS, index=empty_dates),
+            sampled_ic_series=pd.Series(dtype=float, index=empty_dates, name="IC"),
+            turnover=pd.Series(dtype=float, index=empty_dates, name="turnover"),
+            layered=LayeredResult(
+                group_returns=pd.DataFrame(index=empty_dates),
+                top_cumulative_returns=pd.Series(dtype=float, index=empty_dates),
+                bottom_cumulative_returns=pd.Series(dtype=float, index=empty_dates),
+                n_groups=n_groups,
+            ),
+            sampled_tail_group_returns=pd.DataFrame(index=empty_dates),
+            sampled_benchmark_returns=pd.Series(
+                dtype=float, index=empty_dates, name="benchmark_return"
+            ),
+        )
+    if portfolio_only:
+        full_timing_ic_series = pd.Series(
+            dtype=float, index=pd.DatetimeIndex([], name="date"), name="TimingIC"
+        )
+        timing_ic_stats = {"IC_mean": np.nan, "IC_std": np.nan, "ICIR": np.nan}
+        tail_group_returns = pd.DataFrame(
+            index=pd.DatetimeIndex([], name="date")
+        )
+    else:
+        timing_score = forward_returns.ge(0).astype(float)
+        full_timing_ic_series = calc_ic_series(
+            factor,
+            timing_score,
+            method="rank",
+        ).rename("TimingIC")
+        timing_ic_stats = calc_offset_ic_stats(
+            full_timing_ic_series,
+            period=forward_period,
+        )
+        tail_group_returns = calc_tail_group_returns(factor, forward_returns)
+    daily_metrics = (
+        full_ic_series.rename("IC").to_frame()
+        if portfolio_only
+        else pd.concat(
+            [
+                full_ic_series.rename("IC"),
+                full_timing_ic_series.rename("TimingIC"),
+                tail_group_returns,
+            ],
+            axis=1,
+        )
     ).reindex(columns=DAILY_METRIC_COLUMNS).sort_index()
     daily_metrics.index.name = "date"
 
     # sampled_dates 用于分层回测、尾部组合收益和换手率计算，确保每个调仓期的
     # 未来收益不重叠。
-    trading_dates = pd.DatetimeIndex(
-        market_data.index.get_level_values("date").unique()
-    ).sort_values()
-    sampled_dates = trading_dates[::forward_period]
+    if sampling_dates is None:
+        trading_dates = pd.DatetimeIndex(
+            market_data.index.get_level_values("date").unique()
+        ).sort_values()
+        sampled_dates = trading_dates[::forward_period]
+    else:
+        sampled_dates = pd.DatetimeIndex(sampling_dates).sort_values().unique()
     sampled_factor = factor[
         factor.index.get_level_values("date").isin(sampled_dates)
     ]
@@ -847,11 +861,33 @@ def eval(
         n_groups=n_groups,
         period=forward_period,
     )
-    sampled_tail_group_returns = calc_tail_group_returns(
-        sampled_factor,
-        sampled_forward_returns,
-        fractions=(0.05, 0.10, 0.15, 0.25, 0.30),
+    sampled_tail_group_returns = (
+        pd.DataFrame(index=pd.DatetimeIndex([], name="date"))
+        if portfolio_only
+        else calc_tail_group_returns(
+            sampled_factor,
+            sampled_forward_returns,
+            fractions=(0.10, 0.30),
+        )
     )
+
+    sampled_benchmark_returns = pd.Series(
+        dtype=float,
+        index=pd.DatetimeIndex([], name="date"),
+        name="benchmark_return",
+    )
+    if benchmark_returns is not None:
+        sampled_benchmark_returns = (
+            pd.to_numeric(benchmark_returns, errors="coerce")
+            .reindex(sampled_dates)
+            .dropna()
+            .rename("benchmark_return")
+        )
+    elif benchmark_prices is not None:
+        prices = pd.to_numeric(benchmark_prices, errors="coerce").sort_index()
+        sampled_benchmark_returns = (
+            prices.shift(-(1 + forward_period)) / prices.shift(-1) - 1
+        ).reindex(sampled_dates).dropna().rename("benchmark_return")
 
     t_stat, p_value = calc_t_stat(full_ic_series, period=forward_period)
 
@@ -861,18 +897,52 @@ def eval(
 
     def tail_cumulative_return(column: str) -> float:
         if column not in sampled_tail_group_returns:
-            return 0.0
+            return np.nan
         returns = sampled_tail_group_returns[column].dropna()
         return float((1.0 + returns).prod() - 1.0) if not returns.empty else 0.0
 
     def tail_max_drawdown(column: str) -> float:
         if column not in sampled_tail_group_returns:
-            return 0.0
+            return np.nan
         return calc_max_drawdown(sampled_tail_group_returns[column])
 
+    def relative_period_returns(returns: pd.Series) -> pd.Series:
+        aligned = pd.concat(
+            [returns.rename("portfolio"), sampled_benchmark_returns],
+            axis=1,
+            join="inner",
+        ).dropna()
+        if aligned.empty:
+            return pd.Series(dtype=float)
+        return (
+            (1.0 + aligned["portfolio"])
+            / (1.0 + aligned["benchmark_return"])
+            - 1.0
+        )
+
+    def tail_excess_return(column: str) -> float:
+        if column not in sampled_tail_group_returns:
+            return np.nan
+        relative = relative_period_returns(sampled_tail_group_returns[column])
+        return float((1.0 + relative).prod() - 1.0) if not relative.empty else np.nan
+
+    def tail_excess_max_drawdown(column: str) -> float:
+        if column not in sampled_tail_group_returns:
+            return np.nan
+        return calc_max_drawdown(
+            relative_period_returns(sampled_tail_group_returns[column])
+        )
+
+    def series_excess_return(returns: pd.Series) -> float:
+        relative = relative_period_returns(returns)
+        return float((1.0 + relative).prod() - 1.0) if not relative.empty else np.nan
+
+    def layered_group_returns(group: int) -> pd.Series:
+        if group not in layered.group_returns:
+            return pd.Series(dtype=float)
+        return layered.group_returns[group]
+
     ic_mean = offset_ic_stats["IC_mean"]
-    ic_half_life = calc_ic_half_life(full_ic_series, ic_mean)
-    ic_positive_rate = calc_ic_positive_rate(full_ic_series)
     quintile_monotonicity = calc_quintile_monotonicity(
         layered.group_returns,
         ic_mean,
@@ -887,31 +957,13 @@ def eval(
         "t_stat": round(t_stat, 4),
         "p_value": round(p_value, 6),
         "timing_IC_mean": round(timing_ic_stats["IC_mean"], 4),
-        "IC_half_life": round(ic_half_life, 4),
-        "IC_positive_rate": round(ic_positive_rate, 4),
         "quintile_monotonicity": round(quintile_monotonicity, 4),
-        "top_5%_cumulative_return": round(
-            tail_cumulative_return("top_5%_return"),
-            4,
-        ),
-        "bottom_5%_cumulative_return": round(
-            tail_cumulative_return("bottom_5%_return"),
-            4,
-        ),
         "top_10%_cumulative_return": round(
             tail_cumulative_return("top_10%_return"),
             4,
         ),
         "bottom_10%_cumulative_return": round(
             tail_cumulative_return("bottom_10%_return"),
-            4,
-        ),
-        "top_15%_cumulative_return": round(
-            tail_cumulative_return("top_15%_return"),
-            4,
-        ),
-        "bottom_15%_cumulative_return": round(
-            tail_cumulative_return("bottom_15%_return"),
             4,
         ),
         "top_20%_cumulative_return": round(
@@ -922,14 +974,6 @@ def eval(
             final_cumulative_return(layered.bottom_cumulative_returns),
             4,
         ),
-        "top_25%_cumulative_return": round(
-            tail_cumulative_return("top_25%_return"),
-            4,
-        ),
-        "bottom_25%_cumulative_return": round(
-            tail_cumulative_return("bottom_25%_return"),
-            4,
-        ),
         "top_30%_cumulative_return": round(
             tail_cumulative_return("top_30%_return"),
             4,
@@ -938,16 +982,20 @@ def eval(
             tail_cumulative_return("bottom_30%_return"),
             4,
         ),
+        "top_10%_excess_return": round(tail_excess_return("top_10%_return"), 4),
+        "bottom_10%_excess_return": round(tail_excess_return("bottom_10%_return"), 4),
+        "top_20%_excess_return": round(
+            series_excess_return(layered_group_returns(n_groups)),
+            4,
+        ),
+        "bottom_20%_excess_return": round(
+            series_excess_return(layered_group_returns(1)),
+            4,
+        ),
+        "top_30%_excess_return": round(tail_excess_return("top_30%_return"), 4),
+        "bottom_30%_excess_return": round(tail_excess_return("bottom_30%_return"), 4),
         "top_20%_sharpe_ratio": round(layered.top_sharpe_ratio, 4),
         "bottom_20%_sharpe_ratio": round(layered.bottom_sharpe_ratio, 4),
-        "top_5%_max_drawdown": round(
-            tail_max_drawdown("top_5%_return"),
-            4,
-        ),
-        "bottom_5%_max_drawdown": round(
-            tail_max_drawdown("bottom_5%_return"),
-            4,
-        ),
         "top_10%_max_drawdown": round(
             tail_max_drawdown("top_10%_return"),
             4,
@@ -956,24 +1004,8 @@ def eval(
             tail_max_drawdown("bottom_10%_return"),
             4,
         ),
-        "top_15%_max_drawdown": round(
-            tail_max_drawdown("top_15%_return"),
-            4,
-        ),
-        "bottom_15%_max_drawdown": round(
-            tail_max_drawdown("bottom_15%_return"),
-            4,
-        ),
         "top_20%_max_drawdown": round(layered.top_max_drawdown, 4),
         "bottom_20%_max_drawdown": round(layered.bottom_max_drawdown, 4),
-        "top_25%_max_drawdown": round(
-            tail_max_drawdown("top_25%_return"),
-            4,
-        ),
-        "bottom_25%_max_drawdown": round(
-            tail_max_drawdown("bottom_25%_return"),
-            4,
-        ),
         "top_30%_max_drawdown": round(
             tail_max_drawdown("top_30%_return"),
             4,
@@ -982,6 +1014,16 @@ def eval(
             tail_max_drawdown("bottom_30%_return"),
             4,
         ),
+        "top_10%_excess_max_drawdown": round(tail_excess_max_drawdown("top_10%_return"), 4),
+        "bottom_10%_excess_max_drawdown": round(tail_excess_max_drawdown("bottom_10%_return"), 4),
+        "top_20%_excess_max_drawdown": round(
+            calc_max_drawdown(relative_period_returns(layered_group_returns(n_groups))), 4
+        ),
+        "bottom_20%_excess_max_drawdown": round(
+            calc_max_drawdown(relative_period_returns(layered_group_returns(1))), 4
+        ),
+        "top_30%_excess_max_drawdown": round(tail_excess_max_drawdown("top_30%_return"), 4),
+        "bottom_30%_excess_max_drawdown": round(tail_excess_max_drawdown("bottom_30%_return"), 4),
         "top_20%_bottom_20%_win_rate": round(layered.win_rate, 4),
     }])
     return FactorEvalResult(
@@ -991,4 +1033,6 @@ def eval(
         sampled_ic_series=sampled_ic_series,
         turnover=turnover,
         layered=layered,
+        sampled_tail_group_returns=sampled_tail_group_returns,
+        sampled_benchmark_returns=sampled_benchmark_returns,
     )

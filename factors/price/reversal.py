@@ -25,16 +25,6 @@ class Reversal3M(BaseFactor):
         return -close.pct_change(60, fill_method=None)
 
 @register_factor
-class Reversal6M(BaseFactor):
-    name = "reversal_6m"
-    description = "六个月股价反转"
-
-    def generate_signals(self, data: pd.DataFrame, constituents: dict[str, set[str]] | None = None) -> pd.DataFrame:
-        close = data["adj_close"].unstack("symbol").astype(float).sort_index()
-        # 过去120日涨幅取负
-        return -close.pct_change(120, fill_method=None)
-
-@register_factor
 class Volume3M(BaseFactor):
     name = "volume_3m"
     description = "最近3月成交量均值"

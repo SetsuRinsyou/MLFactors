@@ -48,14 +48,21 @@ BENCHMARK_COLUMNS = {
 
 NON_STOCK_CSV_FILES = {"constituents_daily.csv", "index_members_rebalance.csv"}
 
-# cache 中仍保留历史代码时可由 stock_basic_symbol 自动识别；以下映射覆盖
-# 只有现行代码文件、但成分股历史仍使用旧代码的情况。映射直接内置在现有
-# 加载器中，运行时不依赖临时数据目录或额外映射文件。
+# 2015-06-30 至 2026-06-30 的沪深300、中证500、中证1000历史股票池中，
+# 经交易所/上市公司公告与 ticker_code_history_v1 交叉核对后共有以下四次
+# “同一上市证券直接更换代码”。吸收合并、换股退市和代码复用不属于别名，
+# 不得在这里映射，否则会把不同证券主体的行情错误拼接。
+# 元组字段为 (旧代码, 现行代码, 新代码启用日)。加载器按现行代码归一，
+# 启用日用于审计，运行时不依赖 tmp_data 或外部映射文件。
+SECURITY_CODE_CHANGE_RULES = (
+    ("000022.SZ", "001872.SZ", date(2018, 12, 26)),
+    ("601313.SH", "601360.SH", date(2018, 2, 28)),
+    ("000043.SZ", "001914.SZ", date(2019, 12, 16)),
+    ("300114.SZ", "302132.SZ", date(2025, 2, 17)),
+)
+
 SECURITY_CODE_ALIASES = {
-    "000022.SZ": "001872.SZ",
-    "000043.SZ": "001914.SZ",
-    "300114.SZ": "302132.SZ",
-    "601313.SH": "601360.SH",
+    legacy: current for legacy, current, _effective_date in SECURITY_CODE_CHANGE_RULES
 }
 
 

@@ -114,8 +114,8 @@ def calculate_position_factor(
     operation: str,
     window: int,
 ) -> pd.DataFrame:
-    low = to_wide(data, "adj_low")
     if operation == "IMIN":
+        low = to_wide(data, "adj_low")
         return low.rolling(window, min_periods=1).apply(
             lambda values: values.argmin() + 1,
             raw=True,
@@ -127,6 +127,8 @@ def calculate_position_factor(
             lambda values: values.argmax() + 1,
             raw=True,
         ) / window
+
+    low = to_wide(data, "adj_low")
     if operation == "RSV":
         close = to_wide(data, "adj_close")
         rolling_low = low.rolling(window, min_periods=1).min()
