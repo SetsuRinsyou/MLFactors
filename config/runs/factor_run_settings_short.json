@@ -1,0 +1,79 @@
+{
+  "paths": {
+    "data_dir": "cache/zz500_csv",
+    "output_root": "outputs/zz500_199_short_20250701",
+    "runtime_root": ".runtime",
+    "factor_config": "config/factors/factor_configs_199.json",
+    "factor_category_config": "config/factors/factor_categories_5947.json",
+    "constituents_path": "cache/zz500_csv/constituents_daily.csv",
+    "security_status_path": "cache/tushare_security_status_missing_tables_20100104_20260623_20260706.csv",
+    "market_state_path": "zz500_lightgbm_prediction_4class_signals.csv"
+  },
+  "data": {
+    "report_publish_date_column": "publish_date",
+    "days_since_report_column": "days_since_latest_report_publish_date",
+    "market_cap_column": "market_cap",
+    "industry_column": "industry_SW_1",
+    "constituent_index": "000905.SH",
+    "evaluation_price_column": "adj_close"
+  },
+  "evaluation": {
+    "ic_decay_periods": [5, 10, 15, 20, 40, 60],
+    "n_groups": 5,
+    "ic_method": "rank",
+    "tail_percentages": [10, 20, 30],
+    "timing_win_horizon_weights": {
+      "5": 0.6,
+      "10": 0.3,
+      "21": 0.1
+    }
+  },
+  "report": {
+    "daily_metrics_period": 5,
+    "factor_versions": ["raw", "neutralization"],
+    "version_names": {
+      "raw": "原始因子值",
+      "neutralization": "中性化因子值"
+    },
+    "core_tail_percentage": 20,
+    "report_lags": [0, 1, 2, 3],
+    "size_bucket_quantiles": [0.3333333333333333, 0.6666666666666666],
+    "weekly_ic_frequency": "W-FRI",
+    "preferred_benchmark_column": "ZZ500",
+    "market_state_eras": {
+      "2014-2019": ["2014-01-02", "2019-12-31"],
+      "2020-2026": ["2020-01-01", "2026-12-31"]
+    },
+    "minimum_market_state_segment_days": 7,
+    "market_state_names": {
+      "0": "全面牛市",
+      "1": "结构性牛市",
+      "2": "非趋势",
+      "3": "熊市"
+    }
+  },
+  "pipeline": {
+    "window_parameter_keys": ["window", "lookback", "period"],
+    "hardcoded_window_factors": [
+      "eps_growth_63d",
+      "equity_growth_63d",
+      "net_income_growth_63d",
+      "revenue_growth_63d",
+      "reversal_1m",
+      "reversal_3m",
+      "roe_growth_63d",
+      "total_asset_growth_63d",
+      "trading_amount_20d",
+      "volume_3m"
+    ],
+    "base_matrix_worker_limit": 32
+  },
+  "runtime": {
+    "mode": "factor",
+    "start": "2025-07-01",
+    "workers": 1,
+    "resume": false,
+    "save_factor": true,
+    "factor": null
+  }
+}

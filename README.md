@@ -13,7 +13,11 @@ MLFactors 是中证500日频横截面因子计算与单因子评估框架。当�
 
 ## 一、正式全流程
 
-正式全量入口只有 `run.py --pipeline`：
+正式全量入口只接受一份完整运行配置：
+
+```bash
+./.venv/bin/python run.py --config config/runs/pipeline_run_settings.json
+```
 
 ```text
 cache/zz500_csv
@@ -36,23 +40,23 @@ cache/zz500_csv
 
 ## 二、运行环境与输入文件
 
-推荐工作目录：
+推荐在项目根目录运行：
 
 ```bash
-cd /data_all/duyj/MLFactors
+cd /home/setsu/workspace/MLFactors
 ```
 
-当前正式命令使用以下Python解释器：
+优先使用项目本地Python解释器：
 
 ```text
-/data_all/duyj/miniconda3/envs/tmp/bin/python
+./.venv/bin/python
 ```
 
 核心Python依赖包括 `numpy`、`pandas`、`scipy`、`statsmodels` 和 `tqdm`。
 可先检查环境：
 
 ```bash
-/data_all/duyj/miniconda3/envs/tmp/bin/python -c \
+./.venv/bin/python -c \
 'import numpy, pandas, scipy, statsmodels, tqdm; print("环境检查通过")'
 ```
 
@@ -64,27 +68,30 @@ cd /data_all/duyj/MLFactors
 | `cache/zz500_csv/constituents_daily.csv` | 每日中证500历史成分股 |
 | `cache/tushare_security_status_missing_tables_20100104_20260623_20260706.csv` | ST和停牌过滤 |
 | `zz500_lightgbm_prediction_4class_signals.csv` | 报告中的四类市场状态 |
-| `config/factor_configs_5947.json` | 5,947个因子的完整计算定义 |
-| `config/factor_categories_5947.json` | 5,947个因子的固定类别 |
-| `config/financial_factors_in_199.json` | 21个基础财务因子名单及财报日期字段口径 |
+| `config/factors/factor_configs_5947.json` | 5,947个因子的完整计算定义 |
+| `config/factors/factor_categories_5947.json` | 5,947个因子的固定类别 |
 
-`--start` 只控制起始日。正式CLI没有单独的 `--end` 参数，结束日取输入缓存中
-可用的最后交易日；未来收益有效区间会因 `T+1` 至 `T+6` 收益窗口自然提前结束。
+起始日由完整配置中的 `runtime.start` 控制。结束日取输入缓存中可用的最后交易日；
+未来收益有效区间会因 `T+1` 至 `T+6` 收益窗口自然提前结束。
+
+`run.py` 的CLI只负责通过 `--config` 选择一份完整JSON。`settings.py` 负责读取、
+校验并转换为唯一只读入口 `SETTINGS`；路径、数据字段、评估、报告、流水线规则和
+本次运行参数都只能从这份配置进入。因子配置、行情、交易日和股票列表等运行状态
+由 `PipelineContext` 持有。父进程在创建各阶段的 `fork` 进程池前，将当前上下文
+设置为唯一的进程级 `_WORKER_CONTEXT`，任务结束后立即清空。仅导入模块不会读取
+任何JSON、加载行情或创建 `.runtime` 目录。
 
 ## 三、从零全量运行
 
-从零运行时不要添加 `--resume`。建议使用空的输出目录，避免目录中混入不属于
-当前5,947因子配置的历史文件。程序不会主动删除输出根目录中的未知因子目录。
+从零运行时使用 `config/runs/pipeline_run_settings.json` 中的 `"resume": false`。建议
+使用空的输出目录，避免目录中混入不属于当前5,947因子配置的历史文件。程序不会
+主动删除输出根目录中的未知因子目录。
 
 前台运行：
 
 ```bash
-/data_all/duyj/miniconda3/envs/tmp/bin/python -u run.py \
-  --pipeline \
-  --full-factor-config config/factor_configs_5947.json \
-  --start 2014-01-02 \
-  --output-root outputs/zz500 \
-  --workers 40
+./.venv/bin/python -u run.py \
+  --config config/runs/pipeline_run_settings.json
 ```
 
 tmux后台运行：
@@ -94,12 +101,8 @@ mkdir -p logs
 
 tmux new-session -d -s mlfactors_full \
 'cd /data_all/duyj/MLFactors && exec \
-  /data_all/duyj/miniconda3/envs/tmp/bin/python -u run.py \
-    --pipeline \
-    --full-factor-config config/factor_configs_5947.json \
-    --start 2014-01-02 \
-    --output-root outputs/zz500 \
-    --workers 40 \
+  ./.venv/bin/python -u run.py \
+    --config config/runs/pipeline_run_settings.json \
   > logs/run_full_pipeline.log 2>&1'
 ```
 
@@ -126,31 +129,46 @@ REPORT_START / REPORT_DONE
 
 ### 中断后续跑
 
-原命令增加 `--resume` 即可续跑：
+将完整配置中的 `runtime.resume` 改为 `true` 后，仍使用同一命令续跑：
 
 ```bash
-/data_all/duyj/miniconda3/envs/tmp/bin/python -u run.py \
-  --pipeline \
-  --full-factor-config config/factor_configs_5947.json \
-  --start 2014-01-02 \
-  --output-root outputs/zz500 \
-  --workers 40 \
-  --resume
+./.venv/bin/python -u run.py \
+  --config config/runs/pipeline_run_settings.json
 ```
 
-`--resume` 的检查口径是：因子目录至少存在一个CSV，且抽查的第一个CSV包含该
+`runtime.resume` 的检查口径是：因子目录至少存在一个CSV，且抽查的第一个CSV包含该
 因子的 Raw 和 Neutralized 标准列。它是中断续跑的轻量检查，不会逐股票、逐日期
 验证完整性。若怀疑某因子只写入了一部分文件，应删除或移走该因子输出目录后再
-续跑，不能仅依赖 `--resume`。
+续跑，不能仅依赖 `runtime.resume`。
 
 续跑即使跳过已有因子值，仍会从199个基础因子输出重建派生计算所需的临时矩阵，
 之后统一执行回填，并重新生成全部5,947份Markdown报告。
 
 ## 四、配置和派生公式
 
+### 完整运行配置
+
+配置目录按职责分开：
+
+```text
+config/
+├── factors/  # 因子定义和分类
+└── runs/     # 可直接传给 run.py --config 的完整运行配置
+```
+
+仓库提供两份可直接选择的完整配置：
+
+- `config/runs/factor_run_settings.json`：普通基础因子生成和回测；
+- `config/runs/pipeline_run_settings.json`：5,947因子正式流水线。
+
+每次执行只加载 `--config` 指定的那一份文件，因此本次运行不存在CLI字段、Python
+默认值和配置文件相互覆盖的优先级。需要切换日期、输出目录、因子、并发数或续跑
+状态时，复制并修改一份完整配置，再通过 `--config` 选择它即可。`settings.py` 只
+保留配置结构、校验和只读访问逻辑，不再保存具体业务默认值。
+
 ### 完整因子配置
 
-`config/factor_configs_5947.json` 是正式全流程唯一的因子计算定义源。程序依据
+`config/factors/factor_configs_5947.json` 是正式全流程唯一的因子计算定义源。程序依据
 `params.expansion_kind` 自动拆分：
 
 - 不含 `expansion_kind`：199个基础因子；
@@ -165,11 +183,11 @@ REPORT_START / REPORT_DONE
 - `transformation` 或 `combination`：变换或组合编号；
 - `description`，组合因子还可包含 `rule`。
 
-单因子变换由 `transformation=T01...T12` 选择 `run.py` 中对应的通用数学实现，
+单因子变换由 `transformation=T01...T12` 选择 `factor_pipeline.py` 中对应的通用数学实现，
 `formula` 保存与该实现一致的公式。组合因子的 `formula` 由受限算术解析器直接
 执行，只允许已声明基础因子的加、减、乘、除和括号，不执行任意Python代码。
 
-因此，JSON已经完整保存全部派生因子的输入和公式定义，但仍需要 `run.py` 中的
+因此，JSON已经完整保存全部派生因子的输入和公式定义，但仍需要 `factor_pipeline.py` 中的
 通用执行器，以及 `factors/` 中199个基础因子的实现；JSON本身不是可独立运行的
 程序。
 
@@ -189,13 +207,13 @@ Neutralized结果在公式计算后，再按对数市值和申万一级行业做
 
 ### 辅助配置
 
-`config/factor_categories_5947.json` 是固定分类源，六类为动量、反转、量价、低波、
+`config/factors/factor_categories_5947.json` 是固定分类源，六类为动量、反转、量价、低波、
 质量和成长。报告只读取已有分类，不在回测时重新推导。
 
-`config/financial_factors_in_199.json` 标记21个直接依赖财报字段的基础因子。使用
-这些基础因子的派生因子同样按财务因子处理，并输出距最近财报发布日期的天数。
+位于 `factors.fundamental.*` 模块的21个基础因子会被自动识别为财务因子。使用这些
+基础因子的派生因子同样按财务因子处理，并输出距最近财报发布日期的天数。
 
-`config/factor_configs_199.json` 只服务于“单独运行一个基础因子”的兼容入口，
+`config/factors/factor_configs_199.json` 只服务于“单独运行一个基础因子”的兼容入口，
 不是正式全量流水线的依赖。
 
 ## 五、数据过滤、中性化和缺失值回填
@@ -269,23 +287,31 @@ Markdown。
 
 ## 七、单个基础因子兼容入口
 
-调试基础因子时仍可单独运行：
+调试基础因子时，复制或修改 `config/runs/factor_run_settings.json`：
+
+```json
+"runtime": {
+  "mode": "factor",
+  "start": "2014-01-02",
+  "workers": 40,
+  "resume": false,
+  "save_factor": true,
+  "factor": "BETA_5d"
+}
+```
+
+然后运行：
 
 ```bash
-/data_all/duyj/miniconda3/envs/tmp/bin/python run.py \
-  --factor-config config/factor_configs_199.json \
-  --factor BETA_5d \
-  --start 2014-01-02 \
-  --save-factor \
-  --output-root outputs/zz500
+./.venv/bin/python run.py --config config/runs/factor_run_settings.json
 ```
 
 该兼容入口会在单因子计算后立即评估，不经过正式全流程的“全部因子生成→统一
 回填→统一报告”顺序，并可能生成日频或行业CSV、年度图片等兼容输出。因此它适合
 开发调试，不应作为正式全量报告的生成方式。
 
-派生因子不是注册表（Registry）中的普通基础因子，不能通过 `--factor` 单独运行，
-必须使用 `--pipeline`。
+派生因子不是注册表（Registry）中的普通基础因子，不能在 `mode=factor` 下单独运行，
+必须使用 `mode=pipeline` 的完整配置。
 
 ## 八、可选宽表聚合
 
@@ -313,7 +339,7 @@ Markdown。
 
 ## 九、不属于正式全流程的文件和目录
 
-以下内容不会被 `run.py --pipeline` 读取：
+以下内容不会被 `mode=pipeline` 的正式入口读取：
 
 | 文件或目录 | 当前定位 |
 |---|---|
@@ -324,37 +350,41 @@ Markdown。
 | `plot.py` | 仅供兼容或其他绘图流程使用，正式Markdown流水线不调用 |
 
 `temporary_backtest_factor_expansions.py` 和 `generate_factor_categories.py` 已删除。
-派生计算逻辑已经进入 `run.py`，因子类别已经固化在
-`config/factor_categories_5947.json`。
+派生计算逻辑位于 `factor_pipeline.py`，因子类别已经固化在
+`config/factors/factor_categories_5947.json`。
 
 ## 十、核心模块职责
 
 | 文件 | 职责 |
 |---|---|
-| `run.py` | 基础因子Runner、派生公式执行、回填和5,947因子正式流水线 |
+| `run.py` | 基础因子Runner和命令行入口 |
+| `settings.py` | 完整JSON的加载、校验、类型转换和唯一只读SETTINGS入口 |
+| `config/runs/*_run_settings.json` | 一次运行的全部静态配置和具体执行参数 |
+| `factor_pipeline.py` | PipelineContext及5,947因子正式流水线 |
 | `dataloader.py` | 行情读取、证券代码归一、历史成分股及ST/停牌过滤 |
 | `factors/` | 199个基础因子实现和注册表 |
 | `neutralization.py` | 对数市值＋申万一级行业OLS残差中性化 |
 | `factors_eval.py` | Rank IC、ICIR、收益分组、换手率和回撤等指标计算 |
-| `factor_report.py` | 公式展示、类别读取和最终Markdown报告排版 |
+| `report_calculate.py` | 日频、市场状态、行业和年度报告指标计算 |
+| `report_render.py` | 公式展示、类别读取和最终Markdown报告排版 |
 | `aggregate_factor_outputs.py` | 可选的纯宽表聚合工具，不参与正式全流程 |
 
 ## 十一、代码验证
 
-推荐工作目录仍为 `/data_all/duyj/MLFactors`。
+推荐工作目录仍为项目根目录。
 
 运行当前单元测试：
 
 ```bash
-/data_all/duyj/miniconda3/envs/tmp/bin/python -m unittest discover \
+./.venv/bin/python -m unittest discover \
   -s tests -p 'test_*.py'
 ```
 
 检查正式入口参数：
 
 ```bash
-/data_all/duyj/miniconda3/envs/tmp/bin/python run.py --help
+./.venv/bin/python run.py --help
 ```
 
-这些测试覆盖因子分类完整性、派生配置自包含性、自然周IC胜率、IC衰减和主要
-评估字段结构；不等同于重新运行5,947个因子的全量数值回归测试。
+这些轻量测试覆盖完整配置加载与只读性、CLI单入口、5,947因子配置契约、流水线
+上下文生命周期和导入无副作用；不等同于重新运行5,947个因子的全量数值回归测试。

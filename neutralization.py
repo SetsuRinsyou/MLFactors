@@ -5,9 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-
-DEFAULT_MARKET_CAP_COLUMN = "market_cap"
-DEFAULT_INDUSTRY_COLUMN = "industry_SW_1"
+from settings import SETTINGS
 
 
 def neutralize_cross_section(
@@ -74,14 +72,17 @@ def neutralize_cross_section(
 def neutralize_factor_values(
     signals: pd.DataFrame,
     market_data: pd.DataFrame,
-    market_cap_column: str = DEFAULT_MARKET_CAP_COLUMN,
-    industry_column: str = DEFAULT_INDUSTRY_COLUMN,
+    market_cap_column: str | None = None,
+    industry_column: str | None = None,
 ) -> pd.DataFrame:
     """Neutralize a ``date x symbol`` factor table date by date.
 
     ``market_data`` must use a ``(date, symbol)`` MultiIndex.  The returned
     frame has exactly the same index and columns as ``signals``.
     """
+    market_cap_column = market_cap_column or SETTINGS.data.market_cap_column
+    industry_column = industry_column or SETTINGS.data.industry_column
+
     if not isinstance(signals, pd.DataFrame):
         raise TypeError("signals 必须是 date × symbol DataFrame")
     if not isinstance(market_data.index, pd.MultiIndex):

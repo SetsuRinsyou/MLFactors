@@ -1,6 +1,7 @@
 """因子 IC、换手率和分层收益等基础评估指标。"""
 
 from dataclasses import dataclass
+from typing import ClassVar
 import warnings
 
 import numpy as np
@@ -8,18 +9,11 @@ import pandas as pd
 from scipy import stats
 import statsmodels.api as sm
 
+from settings import SETTINGS
+
 
 warnings.filterwarnings("ignore", category=stats.ConstantInputWarning)
 
-
-TIMING_WIN_HORIZON_WEIGHTS = {
-    5: 0.6,
-    10: 0.3,
-    21: 0.1,
-}
-
-
-TAIL_FRACTIONS = (0.10, 0.20, 0.30)
 DAILY_METRIC_COLUMNS = (
     "IC",
     "TimingIC",
@@ -124,6 +118,8 @@ class FactorEvalResult:
         分层收益和风险指标。
     """
 
+    SUMMARY_METRIC_COLUMNS: ClassVar[tuple[str, ...]] = SUMMARY_METRIC_COLUMNS
+
     summary: pd.DataFrame
     full_ic_series: pd.Series
     daily_metrics: pd.DataFrame
@@ -215,7 +211,7 @@ def calc_ic_series(
 def calc_tail_group_returns(
     factor: pd.DataFrame | pd.Series,
     returns: pd.DataFrame | pd.Series,
-    fractions: tuple[float, ...] = TAIL_FRACTIONS,
+    fractions: tuple[float, ...] | None = None,
 ) -> pd.DataFrame:
     """计算每日因子顶部/底部指定比例股票的等权平均未来收益。
 
@@ -237,6 +233,9 @@ def calc_tail_group_returns(
         ``bottom_<比例>_return`` 成对排列。每个值均为当日形成组合的
         等权平均未来收益，而非累计收益。
     """
+    if fractions is None:
+        fractions = SETTINGS.evaluation.tail_fractions
+
     if isinstance(factor, pd.DataFrame):
         factor = factor.iloc[:, 0]
     if isinstance(returns, pd.DataFrame):
@@ -480,7 +479,7 @@ def calc_turnover(
 def calc_forward_returns(
     market_data: pd.DataFrame,
     period: int,
-    price_col: str = "adj_close",
+    price_col: str | None = None,
 ) -> pd.Series:
     """根据价格面板计算指定周期的未来持有收益。
 
@@ -494,7 +493,7 @@ def calc_forward_returns(
         索引为 ``(date, symbol)`` 的行情数据。
     period : int
         未来持有交易日数量，必须为正整数。
-    price_col : str, default "adj_close"
+    price_col : str or None
         用于计算收益的价格列。
 
     Returns
@@ -508,6 +507,7 @@ def calc_forward_returns(
     ValueError
         ``period`` 不是正整数，或缺少指定价格列时抛出。
     """
+    price_col = price_col or SETTINGS.data.evaluation_price_column
     if period <= 0:
         raise ValueError("period 必须为正整数")
     if price_col not in market_data.columns:
@@ -522,7 +522,9 @@ def _timing_horizon_weights(
     horizon_weights: dict[int, float] | None = None,
 ) -> tuple[dict[int, float], float]:
     """校验并返回择时胜率周期权重。"""
-    weights = horizon_weights or TIMING_WIN_HORIZON_WEIGHTS
+    weights = dict(
+        horizon_weights or SETTINGS.evaluation.timing_win_horizon_weights
+    )
     if not weights or any(horizon <= 0 for horizon in weights):
         raise ValueError("horizon_weights 必须包含正整数周期")
     total_weight = float(sum(weights.values()))
@@ -694,9 +696,9 @@ def eval(
     factor_values: pd.DataFrame | pd.Series,
     market_data: pd.DataFrame,
     forward_period: int = 1,
-    n_groups: int = 5,
-    ic_method: str = "rank",
-    price_col: str = "adj_close",
+    n_groups: int | None = None,
+    ic_method: str | None = None,
+    price_col: str | None = None,
     forward_returns: pd.Series | None = None,
     sampling_dates: pd.DatetimeIndex | None = None,
     benchmark_prices: pd.Series | None = None,
@@ -720,13 +722,13 @@ def eval(
         索引为 ``(date, symbol)``。
     market_data : pd.DataFrame
         ``(date, symbol)`` MultiIndex 行情数据，至少包含 ``price_col`` 列，
-        默认是 ``adj_close``。
+        未提供时使用完整运行配置中的价格字段。
     forward_period : int, default 1
         未来收益持有周期和调仓间隔。函数每隔该数量的交易日选择一次
         因子截面，同时用于 IC offset 汇总和分层收益年化频率修正。
-    n_groups : int, default 5
+    n_groups : int or None
         每个日期截面的分组数量。
-    ic_method : str, default "rank"
+    ic_method : str or None
         ``"rank"`` 计算 Spearman RankIC；其他值计算 Pearson IC。
     forward_returns : pd.Series or None
         可选的预计算未来收益。市场状态回测用它拼接各连续片段独立计算的
@@ -751,6 +753,12 @@ def eval(
     ValueError
         ``forward_period`` 或 ``n_groups`` 不是正整数时抛出。
     """
+    if n_groups is None:
+        n_groups = SETTINGS.evaluation.n_groups
+    if ic_method is None:
+        ic_method = SETTINGS.evaluation.ic_method
+    if price_col is None:
+        price_col = SETTINGS.data.evaluation_price_column
     if forward_period <= 0:
         raise ValueError("forward_period 必须为正整数")
     if n_groups <= 0:

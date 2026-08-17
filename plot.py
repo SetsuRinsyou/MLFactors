@@ -12,19 +12,7 @@ import numpy as np
 import pandas as pd
 
 from factors_eval import FactorEvalResult
-
-
-YEARLY_SUMMARY_METRICS = (
-    "IC_mean",
-    "ICIR",
-    "timing_IC_mean",
-    "top_20%_cumulative_return",
-    "bottom_20%_cumulative_return",
-    "top_20%_sharpe_ratio",
-    "bottom_20%_sharpe_ratio",
-    "top_20%_bottom_20%_win_rate",
-)
-FACTOR_VERSIONS = ("raw", "neutralization")
+from settings import SETTINGS
 
 
 def save_yearly_summary_trends(
@@ -38,12 +26,23 @@ def save_yearly_summary_trends(
     输入表每行对应一个自然年和一个前向周期。绘图直接使用原始数值，
     不取绝对值，以保留指标的方向信息。
     """
+    tail = SETTINGS.report.core_tail_percentage
+    metrics = (
+        "IC_mean",
+        "ICIR",
+        "timing_IC_mean",
+        f"top_{tail}%_cumulative_return",
+        f"bottom_{tail}%_cumulative_return",
+        f"top_{tail}%_sharpe_ratio",
+        f"bottom_{tail}%_sharpe_ratio",
+        f"top_{tail}%_bottom_{tail}%_win_rate",
+    )
     required_columns = {
         "year",
         *(
             f"{metric}_{version}"
-            for metric in YEARLY_SUMMARY_METRICS
-            for version in FACTOR_VERSIONS
+            for metric in metrics
+            for version in SETTINGS.report.factor_versions
         ),
     }
     missing_columns = required_columns.difference(yearly_summary.columns)
@@ -57,8 +56,8 @@ def save_yearly_summary_trends(
     figure, axes = plt.subplots(4, 2, figsize=(16, 16), sharex=True)
 
     version_colors = {"raw": "steelblue", "neutralization": "darkorange"}
-    for axis, metric in zip(axes.flat, YEARLY_SUMMARY_METRICS):
-        for version in FACTOR_VERSIONS:
+    for axis, metric in zip(axes.flat, metrics):
+        for version in SETTINGS.report.factor_versions:
             column = f"{metric}_{version}"
             metric_values = pd.to_numeric(values[column], errors="coerce")
             axis.plot(
